@@ -12,7 +12,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"]
+      "js": ["lib/xlsx.full.min.js","content.js"]
     }
   ]
 }

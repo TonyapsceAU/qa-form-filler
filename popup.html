@@ -26,11 +26,27 @@
 <body>
 
     <h3>QA Form Filler</h3>
-
     <button id="scanBtn">
         Scan Form
     </button>
-
+    <button id="highlightModeBtn">
+        Highlight
+    </button>
+    <button id="clearhighlightBtn">
+        Clear Highlight
+    </button>
+    <button id="exportBtn">
+        Export Excel
+    </button>
+    <button id="importBtn">
+    Import Excel
+    </button>
+    <input
+        type="file"
+        id="importFile"
+        accept=".xlsx,.xls"
+        style="display:none"
+    />
     <pre id="result"></pre>
 
     <script src="popup.js"></script>
