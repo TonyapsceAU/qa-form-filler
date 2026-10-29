@@ -491,11 +491,7 @@ async function importExcel(bufferArray){
         for(let pass=0;pass<passes+2;pass++){//Expansion Passes + Stabilization + Sync 
             console.log("Import pass ",pass+1)
             fillAllVisibleFields(rows);
-            console.log(
-                pass
-                // getIndexedFields().length,
-                // document.activeElement
-            );
+            // console.log(pass,getIndexedFields().length,document.activeElement); 
         }
         await new Promise(resolve =>setTimeout(resolve,50));
         alert(`Excel Import Complete (${rows.length} rows)`);
@@ -554,23 +550,11 @@ function fillAllVisibleFields(rows)
             }
 
             // Checkbox
-            if (
-                el.type === "checkbox"
-            )
-            {
-                el.checked =
-                    value === true ||
-                    value === "true" ||
-                    value === "TRUE";
-
-                el.dispatchEvent(
-                    new Event(
-                        "change",
-                        { bubbles:true }
-                    )
-                );
-
-                // return;
+            if (el.type === "checkbox"){
+                const shouldCheck = ((value === true) || (value === "true") || (value === "TRUE"));
+                if (shouldCheck !== el.checked){
+                    (el.closest(".ant-checkbox") || el ).click();
+                }
                 continue;
             }
 
