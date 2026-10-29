@@ -291,49 +291,69 @@ function findFieldLabel(el){
         );
     }
 
+    const headerLabel  = findFieldLabelFromHeader(el);
+    if (headerLabel ){
+        return headerLabel ;
+    }
+    
+    const nameLabel = findFieldLabelFromName(el);
+    if (nameLabel ){
+        return nameLabel ;
+    }
+
     // APWMS Business Field
     if (el.id && el.id.startsWith("nsfcJrcApplicationInput")){
         return beautifyFieldId(el.id);
     }
 
+    return "";
+}
+
+function findFieldLabelFromName(el){
+    const name = el.name || el.id || "";
+    const field =
+        name.split(".")
+            .pop()
+            .replace(/^\d+_/, "");
+    const map = {
+        orcid: "ORCID iD",
+        surname: "Surname (with title)",
+        other_name: "Other Name",
+        chinese_name: "Chinese Name (with title)",
+        post: "Post",
+        org: "Unit / Department / University"
+    };
+
+    return (map[field]|| field);
+}
+
+function findFieldLabelFromHeader(el){
+
     const fieldCol = el.closest(".ant-col");
+
     if (!fieldCol){
         return "";
     }
 
     const row = fieldCol.closest(".ant-row");
-
     if (!row){
         return "";
     }
 
-    let headerRow =row.previousElementSibling;
-
+    let headerRow = row.previousElementSibling;
     while (headerRow){
-        const headers =[...headerRow.querySelectorAll(".ant-col")]
-            .map(x => x.innerText?.trim())
+        const headers = 
+            [...headerRow.querySelectorAll( ".ant-col strong" )]
+            .map( x => x.innerText.trim() )
             .filter(Boolean);
 
         if (headers.length){
-            const dataCols =[...row.querySelectorAll(".ant-col")];
+            const dataCols = [...row.querySelectorAll( ".ant-col" )];
             const dataIndex = dataCols.indexOf(fieldCol);
-
-            // 第一欄係 PI / Co-I
             if (dataIndex > 0){
-                return (
-                    headers[
-                        dataIndex - 1
-                    ]
-                    ?.replace(
-                        /^\*/,
-                        ""
-                    )
-                    ?.trim()
-                    || ""
-                );
+                return (headers[dataIndex - 1]|| "");
             }
         }
-
         headerRow = headerRow.previousElementSibling;
     }
     return "";
@@ -558,184 +578,91 @@ function hideImportOverlay(){
 }
 
 function getRepeatInfo(name)
-{
-    const match =
-        (name || "").match(
-            /\.([a-zA-Z0-9_]+)\.(\d+)_/
-        );
+{    const match = (name || "").match(/\.([a-zA-Z0-9_]+)\.(\d+)_/);
 
-    if (!match)
-    {
-        return {
-            RepeatGroup: "",
-            RepeatIndex: ""
-        };
+    if (!match){
+        return {RepeatGroup: "",RepeatIndex: ""};
     }
 
     return {
         RepeatGroup: match[1],
-        RepeatIndex:
-            Number(match[2]) + 1
+        RepeatIndex: Number(match[2]) + 1
     };
 }
 
-function getRepeatRequirements(rows)
-{
+function getRepeatRequirements(rows){
     const groups = {};
-
     rows.forEach(row => {
-
-        const group =
-            row.RepeatGroup;
-
-        if (!group)
-        {
+        const group = row.RepeatGroup;
+        if (!group){
             return;
         }
-
-        const index =
-            Number(
-                row.RepeatIndex
-            );
-
-        groups[group] =
-            Math.max(
-                groups[group] || 0,
-                index
-            );
+        const index = Number(row.RepeatIndex);
+        groups[group] = Math.max(groups[group] || 0,index);
     });
     console.log("groups : ",groups)
     return groups;
 }
 
-function getCurrentRepeatCounts()
-{
+function getCurrentRepeatCounts(){
     const counts = {};
 
     getIndexedFields()
         .forEach(el => {
+            const info = getRepeatInfo(el.name);
 
-            const info =
-                getRepeatInfo(
-                    el.name
-                );
-
-            if (
-                !info.RepeatGroup
-            )
-            {
-                return;
+            if (!info.RepeatGroup){
+            return;
             }
 
-            counts[
-                info.RepeatGroup
-            ] =
-                Math.max(
-                    counts[
-                        info.RepeatGroup
-                    ] || 0,
-                    info.RepeatIndex
-                );
+            counts[info.RepeatGroup] = 
+            Math.max(counts[info.RepeatGroup] || 0,info.RepeatIndex);
         });
 
     return counts;
 }
 
-function findAddButton(
-    repeatGroup
-)
-{
-    const field =
-        document.querySelector(
-            `[name*="${repeatGroup}.0_"]`
-        );
+function findAddButton(repeatGroup){
+    const field = document.querySelector(`[name*="${repeatGroup}.0_"]`);
 
-    if (!field)
-    {
+    if (!field){
+    return null;
+    }
+
+    const block = field.closest("div[style*='margin-bottom']");
+
+    if (!block){
         return null;
     }
 
-    const block =
-        field.closest(
-            "div[style*='margin-bottom']"
-        );
-
-    if (!block)
-    {
-        return null;
-    }
-
-    return [
-        ...block.querySelectorAll(
-            "button"
-        )
-    ]
-    .find(
-        btn =>
-            btn.textContent
-                .trim() === "+"
-    );
+    return [...block.querySelectorAll("button")]
+        .find(btn => btn.textContent.trim() === "+");
 }
 
-function expandRepeatSections(
-    rows
-)
-{
-    const required =
-        getRepeatRequirements(
-            rows
-        );
+function expandRepeatSections(rows){
+    const required = getRepeatRequirements(rows);
+    const current = getCurrentRepeatCounts();
 
-    const current =
-        getCurrentRepeatCounts();
+    Object.entries(required).forEach(([group, maxIndex]) => {
+        const currentCount = current[group] || 0;
+        const missing = maxIndex - currentCount;
 
-    Object.entries(
-        required
-    )
-    .forEach(
-        ([group, maxIndex]) => {
-
-            const currentCount =
-                current[group] || 0;
-
-            const missing =
-                maxIndex -
-                currentCount;
-
-            if (
-                missing <= 0
-            )
-            {
-                return;
-            }
-
-            const addBtn =
-                findAddButton(
-                    group
-                );
-
-            if (!addBtn)
-            {
-                console.warn(
-                    "Cannot find add button:",
-                    group
-                );
-
-                return;
-            }
-
-            for (
-                let i = 0;
-                i < missing;
-                i++
-            )
-            {
-                addBtn.click();
-            }
-
-            console.log(
-                `Expanded ${group} by ${missing}`
-            );
+        if (missing <= 0){
+            return;
         }
+
+        const addBtn = findAddButton(group);
+
+        if (!addBtn){
+            console.warn("Cannot find add button:",group);
+            return;
+        }
+
+        for (let i = 0;i < missing;i++){
+            addBtn.click();
+        }
+
+        console.log(`Expanded ${group} by ${missing}`);
+    }
     );
 }
