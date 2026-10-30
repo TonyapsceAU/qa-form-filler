@@ -85,3 +85,44 @@ function expandRepeatSections(importRows){
     }
     );
 }
+
+
+function findRemoveButton(repeatGroup){
+    const fieldElement = document.querySelector(`[name*="${repeatGroup}.0_"]`);
+    if (!fieldElement){
+        return null;
+    }
+
+    const containerElement = fieldElement.closest("div[style*='margin-bottom']");
+    if (!containerElement){
+        return null;
+    }
+
+    return [...containerElement.querySelectorAll("button")]
+        .find(buttonElement =>buttonElement.textContent.trim()=== "X");
+}
+
+async function removeExtraRepeatSections(importRows){
+    const requiredRepeatCounts = getRepeatRequirements(importRows);
+    const currentRepeatCounts = getCurrentRepeatCounts();
+
+    for (const [repeatGroup, currentCount] of Object.entries(currentRepeatCounts)){
+        const requiredCount = requiredRepeatCounts[repeatGroup] || 0;
+        const extraCount = currentCount - requiredCount;
+
+        if (extraCount <= 0){
+            continue;
+        }
+
+        for (let index = 0; index < extraCount; index++){
+            const removeButton = findRemoveButton(repeatGroup);
+            if (!removeButton){
+                break;
+            }
+            removeButton.click();
+            await new Promise(resolve =>setTimeout(resolve, 50));
+        }
+
+        console.log(`Removed ${extraCount} from ${repeatGroup}`);
+    }
+}

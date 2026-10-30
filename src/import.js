@@ -8,8 +8,15 @@ async function importExcel(bufferArray){
         const importRows = XLSX.utils.sheet_to_json(worksheet);
         updateImportProgress(0,1,"Expanding Repeat Sections...");
         expandRepeatSections(importRows);
+        await new Promise(resolve =>setTimeout(resolve,50));
+
+        updateImportProgress(0,1,"Removing Repeat Sections...");
+        await removeExtraRepeatSections(importRows);
+        await new Promise(resolve =>setTimeout(resolve,50));
+
         updateImportProgress(0,importRows.length,"Preparing Field Import...");
         await fillAllVisibleFields(importRows);
+
         const initialFieldCount = getIndexedFields().length;
         const fillPasses = Math.max(0,importRows.length - initialFieldCount);
         console.log("Import:",{importRows: importRows.length,fields: initialFieldCount,fillPasses});
