@@ -1,18 +1,30 @@
 {
-  "manifest_version": 3,
-  "name": "QA Form Filler",
-  "version": "0.1.0",
-  "permissions": [
-    "activeTab",
-    "tabs"
-  ],
-  "action": {
-    "default_popup": "popup.html"
-  },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["lib/xlsx.full.min.js","content.js"]
-    }
-  ]
+    "manifest_version": 3,
+    "name": "QA Form Filler",
+    "version": "1.0.2",
+    "permissions": [
+        "activeTab",
+        "tabs"
+    ],
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": [
+                "lib/xlsx.full.min.js",
+                "src/constants.js",
+                "src/utils.js",
+                "src/labels.js",
+                "src/repeat.js",
+                "src/scan.js",
+                "src/highlight.js",
+                "src/export.js",
+                "src/overlay.js",
+                "src/import.js",
+                "src/content.js"
+            ]
+        }
+    ]
 }
