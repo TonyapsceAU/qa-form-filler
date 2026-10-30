@@ -6,14 +6,16 @@ async function importExcel(bufferArray){
         const workbook = XLSX.read(buffer);
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         const importRows = XLSX.utils.sheet_to_json(worksheet);
+        updateImportProgress(0,1,"Expanding Repeat Sections...");
         expandRepeatSections(importRows);
-        fillAllVisibleFields(importRows);
+        updateImportProgress(0,importRows.length,"Preparing Field Import...");
+        await fillAllVisibleFields(importRows);
         const initialFieldCount = getIndexedFields().length;
         const fillPasses = Math.max(0,importRows.length - initialFieldCount);
         console.log("Import:",{importRows: importRows.length,fields: initialFieldCount,fillPasses});
         for(let passIndex=0;passIndex<fillPasses+2;passIndex++){//Expansion Passes + Stabilization + Sync 
             console.log("Import pass ",passIndex+1)
-            fillAllVisibleFields(importRows);
+            await fillAllVisibleFields(importRows);
         }
         await new Promise(resolve =>setTimeout(resolve,50));
         alert(`Excel Import Complete (${importRows.length} import Rows)`);
@@ -23,11 +25,12 @@ async function importExcel(bufferArray){
 
 }
 
-function fillAllVisibleFields(importRows){
+async function fillAllVisibleFields(importRows){
     const fieldElements = getIndexedFields();
 
-    for(const importRow of importRows){
+    for(let rowIndex = 0; rowIndex < importRows.length; rowIndex++){
         try{
+            const importRow = importRows[rowIndex];
             const fieldIndex = Number(importRow[EXPORT_COLUMNS.NO]);
             if (Number.isNaN(fieldIndex)){
                 continue;
@@ -75,6 +78,11 @@ function fillAllVisibleFields(importRows){
             fieldElement.dispatchEvent(new Event("input",{ bubbles:true }));
             fieldElement.dispatchEvent(new Event("change",{ bubbles:true }));
             fieldElement.dispatchEvent(new Event("blur",{ bubbles:true }));
+
+            if ((rowIndex % 10 === 0) ||(rowIndex === importRows.length - 1)){
+                updateImportProgress(rowIndex + 1,importRows.length,"Filling Form Fields...");
+                await new Promise(resolve => setTimeout(resolve, 0));
+            }
         }catch(error){
             console.error("Import Error:",importRow,error);
         }
