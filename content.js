@@ -1,97 +1,96 @@
 console.log("QA Form Filler Loaded");
+const ACTIONS = {
+    SCAN_FORM: "scanForm",
+    HIGHLIGHT_FORM: "highlightForm",
+    EXPORT_EXCEL: "exportExcel",
+    IMPORT_EXCEL: "importExcel",
+    CLEAR_HIGHLIGHT: "clearHighlight"
+};
 chrome.runtime.onMessage.addListener(
     (request,sender,sendResponse) => {
-        if (request.action === "scanForm"){
+        if (request.action === ACTIONS.SCAN_FORM){
             sendResponse(scanForm());
         }
-        if (request.action === "highlight"){
-            highlightMode();
+        if (request.action === ACTIONS.HIGHLIGHT_FORM){
+            enableHighlightMode();
             sendResponse({success: true});
         }
-        if (request.action === "exportScan"){
+        if (request.action === ACTIONS.EXPORT_EXCEL){
             exportToExcel();
             sendResponse({success: true});
         }
-        if (request.action === "importExcel"){
+        if (request.action === ACTIONS.IMPORT_EXCEL){
             importExcel(request.buffer);
             sendResponse({success: true});
         }
-        if (request.action === "Clearhighlight"){
-            clearHighlightMode();
+        if (request.action === ACTIONS.CLEAR_HIGHLIGHT){
+            disableHighlightMode();
             sendResponse({success: true});
         }
     }
 );
 
 function scanForm(){
-    const fields = [];
+    const fieldInfos = [];
     document
         .querySelectorAll('input[type="text"]')
-        .forEach(el => {
-            console.log(el);
-            fields.push(createFieldInfo(el,fields.length + 1));
+        .forEach(fieldElement => {
+            console.log(fieldElement);
+            fieldInfos.push(createFieldInfo(fieldElement,fieldInfos.length + 1));
         });
-    return fields;
+    return fieldInfos;
 }
 
-function createFieldInfo(el, fieldId){
+function createFieldInfo(fieldElement, fieldId){
     return {
         fieldId,
-        tag: el.tagName,
-        attributes: getAttributes(el),
+        tagName: fieldElement.tagName,
+        attributes: getAttributes(fieldElement),
         computed: {
-            hidden: isHidden(el),
-            value: getFieldValue(el)
+            hidden: isHidden(fieldElement),
+            value: getFieldValue(fieldElement)
         },
-        parentHtml:el.parentElement?.outerHTML.substring(0, 500)
+        parentHtml:fieldElement.parentElement?.outerHTML.substring(0, 500)
     };
 }
 
-function getAttributes(el){
-    const attrs = {};
-    for (const attr of el.attributes){
-        attrs[attr.name] = attr.value;
+function getAttributes(fieldElement){
+    const attributes = {};
+    for (const attribute of fieldElement.attributes){
+        attributes[attribute.name] = attribute.value;
     }
-    return attrs;
+    return attributes;
 }
 
-function isHidden(el){
-    const style = window.getComputedStyle(el);
+function isHidden(fieldElement){
+    const style = window.getComputedStyle(fieldElement);
     return (
-        el.type === "hidden" ||
+        fieldElement.type === "hidden" ||
         style.display === "none" ||
         style.visibility === "hidden"
     );
 }
 
-function shouldSkipElement(el){
-    const name = el.name || "";
-    const id = el.id || "";
-    return (
-        el.closest(".ql-toolbar") ||
-        el.closest(".note-toolbar")
-    );
+
+function getFieldValue(fieldElement){
+    if (fieldElement.type === "radio"){
+        return fieldElement.checked;
+    }
+
+    if (fieldElement.type === "checkbox"){
+        return fieldElement.checked;
+    }
+
+    if (fieldElement.getAttribute("contenteditable") === "true"){
+        return fieldElement.innerText.trim();
+    }
+
+    return fieldElement.value || "";
 }
 
-function getFieldValue(el){
-    if (el.type === "radio"){
-        return el.checked;
-    }
-
-    if (el.type === "checkbox"){
-        return el.checked;
-    }
-
-    if (el.getAttribute("contenteditable") === "true"){
-        return el.innerText.trim();
-    }
-
-    return el.value || "";
-}
-
-function highlightMode(){ 
-    clearHighlightMode();
-    const typeColors = {
+function enableHighlightMode(){ 
+    disableHighlightMode();
+    const TYPE_COLORS = {
         "INPUT(text)": "#00aa00",
         "INPUT(radio)": "#888800",
         "INPUT(search)": "#00cccc",
@@ -102,14 +101,14 @@ function highlightMode(){
     };
     
     getIndexedFields()
-        .forEach((el,index) => {
-            console.log(`element:${index}`,"QuestionLabel:",getDisplayLabel(el),"valuse:",el.value);
+        .forEach((fieldElement,index) => {
+            console.log(`element:${index}`,"QuestionLabel:",getDisplayLabel(fieldElement),"value:",fieldElement.value);
+            const elementType = `${fieldElement.tagName}${fieldElement.type ? `(${fieldElement.type})` : ''}`;
+            const color = TYPE_COLORS[elementType] || "#cccccc";
+            fieldElement.style.outline = `3px solid ${color}`;
+            fieldElement.style.backgroundColor = `${color}22`;
 
-            const color = typeColors[`${el.tagName}${el.type ? `(${el.type})` : ''}`] || "#cccccc";
-            el.style.outline = `3px solid ${color}`;
-            el.style.backgroundColor = `${color}22`;
-
-            const Label = getDisplayLabel(el);
+            const label = getDisplayLabel(fieldElement);
 
             const marker = document.createElement("span");
             marker.textContent = `[${index + 1}]`;
@@ -121,16 +120,16 @@ function highlightMode(){
             marker.style.borderRadius = "3px";
             marker.style.fontWeight = "bold";
             marker.className = "qa-highlight-marker";
-            el.parentNode?.insertBefore(marker,el);
-            marker.textContent = `[${index}] ${el.tagName}, ${Label}`;
-            el.setAttribute(
+            fieldElement.parentNode?.insertBefore(marker,fieldElement);
+            marker.textContent = `[${index}] ${fieldElement.tagName}, ${label}`;
+            fieldElement.setAttribute(
                 "placeholder",
                 `[${index + 1}]`
             );
         });
 }
 
-function clearHighlightMode(){
+function disableHighlightMode(){
     // Remove markers
     document
         .querySelectorAll(".qa-highlight-marker")
@@ -141,19 +140,19 @@ function clearHighlightMode(){
         .querySelectorAll(
             'input, textarea, select, [contenteditable="true"]'
         )
-        .forEach(el => {
-            el.style.outline = "";
-            el.style.backgroundColor = "";
+        .forEach(fieldElement => {
+            fieldElement.style.outline = "";
+            fieldElement.style.backgroundColor = "";
         });
 }
 
-function findNearbyLabel(el){
-    let parent = el.parentElement;
+function findNearbyLabel(fieldElement){
+    let parentElement = fieldElement.parentElement;
 
-    while (parent){
-        const texts =
+    while (parentElement){
+        const labelTexts =
             Array
-                .from(parent.childNodes)
+                .from(parentElement.childNodes)
                 .filter(
                     node => node.nodeType === Node.TEXT_NODE
                 )
@@ -164,22 +163,22 @@ function findNearbyLabel(el){
                     text => text.length > 0
                 );
 
-        if (texts.length > 0) {
+        if (labelTexts.length > 0) {
             return texts[0];
         }
 
-        parent = parent.parentElement;
+        parentElement = parentElement.parentElement;
     }
 
     return "";
 }
 
-function extractElementData(el){
-    const result = {};
+function extractElementData(fieldElement){
+    const elementData  = {};
 
-    for (const key in el){
+    for (const key in fieldElement){
         try{
-            const value = el[key];
+            const value = fieldElement[key];
             if (value === null || value === undefined ){
                 continue;
             }
@@ -197,125 +196,126 @@ function extractElementData(el){
                 typeof value === "number" ||
                 typeof value === "boolean"
             ){
-                result[key] = value;
+                elementData[key] = value;
             }
         }catch{
             //
         }
     }
-    result.outerHTML = el.outerHTML;
-    return result;
+    elementData.outerHTML = fieldElement.outerHTML;
+    return elementData;
 }
 
+//unused
 function generateScanReport(){
-    const elements =
+    const fieldElements =
         document.querySelectorAll(
             'input, textarea, select, [contenteditable="true"]'
         );
 
-    let output = "";
-    elements.forEach((el, index) => {
-        output +=
+    let reportText = "";
+    fieldElements.forEach((fieldElement, index) => {
+        reportText +=
 `==================================================
 Field ${index + 1}
 ==================================================`;
-        const data =
-            extractElementData(el);
-        for (const [key, value] of Object.entries(data)){
-            output += `${key}:${value}`;
+        const elementData = extractElementData(fieldElement);
+        for (const [key, value] of Object.entries(elementData)){
+            reportText += `${key}:${value}`;
         }
-        output += "\n";
+        reportText += "\n";
     });
-    return output;
+    return reportText;
 }
 
+// unused
 function downloadReport(){
-    const report = generateScanReport();
-    const blob = new Blob([report],{ type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "scan-report.txt";
-    a.click();
-    URL.revokeObjectURL(url);
+    const reportText = generateScanReport();
+    const blob = new Blob([reportText],{ type: "text/plain" });
+    const objectUrl = URL.createObjectURL(blob);
+    const downloadLink = document.createElement("a");
+    downloadLink.href = objectUrl;
+    downloadLink.download = "scan-report.txt";
+    downloadLink.click();
+    URL.revokeObjectURL(objectUrl);
 }
 
-function getDisplayLabel(el){
+function getDisplayLabel(fieldElement){
     return [
-        findGroupLabel(el),
-        findSubGroupLabel(el),
-        findFieldLabel(el)
+        getGroupLabel(fieldElement),
+        getSubGroupLabel(fieldElement),
+        getFieldLabel(fieldElement)
     ].join(" - ");
 }
 
-function findGroupLabel(el){
-    const group  = el.closest(".webform-main-question");
-    if (!group ) {
+function getGroupLabel(fieldElement){
+    const groupElement  = fieldElement.closest(".webform-main-question");
+    if (!groupElement ) {
         return "";
     }
 
-    const candidates =
-        Array
-            .from(group .querySelectorAll("*"))
-            .map(x => x.innerText?.trim())
-            .filter(Boolean);
+    const labelCandidates  = Array
+        .from(groupElement.querySelectorAll("*"))
+        .map(element => element.innerText?.trim())
+        .filter(Boolean);
 
-    return candidates.find(text => /^[0-9a-zA-Z(). ]+/.test(text) && !text.includes("\n")) || "";
+    return labelCandidates .find(text => /^[0-9a-zA-Z(). ]+/.test(text) && !text.includes("\n")) || "";
 }
 
-function findSubGroupLabel(el){
-    const row = el.closest(".ant-row");
-    if (!row){
+function getSubGroupLabel(fieldElement){
+    const rowElement = fieldElement.closest(".ant-row");
+    if (!rowElement){
         return "";
     }
 
     const lines =
-        row.innerText
+        rowElement.innerText
             .split("\n")
-            .map(x => x.trim())
+            .map(line => line.trim())
             .filter(Boolean);
 
-    return lines.find( line => !line.startsWith("[")) || "";
+    return (lines.find(line => !line.startsWith("[")) || "");
 }
 
-function findFieldLabel(el){
+const APWMS_FIELD_PREFIX = "nsfcJrcApplicationInput";
+function getFieldLabel(fieldElement){
     // Radio Button
-    if (el.type === "radio"){
+    if (fieldElement.type === "radio"){
         return (
-            el.closest(".ant-radio-wrapper")
+            fieldElement.closest(".ant-radio-wrapper")
                 ?.querySelector(".ant-radio-label")
                 ?.innerText
                 ?.trim()
-            || el.value
+            || fieldElement.value
             || ""
         );
     }
 
-    const headerLabel  = findFieldLabelFromHeader(el);
-    if (headerLabel ){
-        return headerLabel ;
+    const headerLabel  = getFieldLabelFromHeader(fieldElement);
+    if (headerLabel){
+        return headerLabel;
     }
     
-    const nameLabel = findFieldLabelFromName(el);
-    if (nameLabel ){
-        return nameLabel ;
+    const nameLabel = getFieldLabelFromName(fieldElement);
+    if (nameLabel){
+        return nameLabel;
     }
 
     // APWMS Business Field
-    if (el.id && el.id.startsWith("nsfcJrcApplicationInput")){
-        return beautifyFieldId(el.id);
+    if (fieldElement.id && fieldElement.id.startsWith(APWMS_FIELD_PREFIX)){
+        return beautifyFieldId(fieldElement.id);
     }
 
     return "";
 }
 
-function findFieldLabelFromName(el){
-    const name = el.name || el.id || "";
+function getFieldLabelFromName(fieldElement){
+    const name = fieldElement.name || fieldElement.id || "";
     const field =
         name.split(".")
             .pop()
             .replace(/^\d+_/, "");
-    const map = {
+    const FIELD_LABEL_MAP = {
         orcid: "ORCID iD",
         surname: "Surname (with title)",
         other_name: "Other Name",
@@ -324,77 +324,86 @@ function findFieldLabelFromName(el){
         org: "Unit / Department / University"
     };
 
-    return (map[field]|| field);
+    return (FIELD_LABEL_MAP[field]|| field);
 }
 
-function findFieldLabelFromHeader(el){
-
-    const fieldCol = el.closest(".ant-col");
-
-    if (!fieldCol){
+function getFieldLabelFromHeader(fieldElement){
+    const columnElement = fieldElement.closest(".ant-col");
+    if (!columnElement){
+        return "";
+    }
+    const rowElement = columnElement.closest(".ant-row");
+    if (!rowElement){
         return "";
     }
 
-    const row = fieldCol.closest(".ant-row");
-    if (!row){
-        return "";
-    }
-
-    let headerRow = row.previousElementSibling;
-    while (headerRow){
-        const headers = 
-            [...headerRow.querySelectorAll( ".ant-col strong" )]
+    let headerRowElement = rowElement.previousElementSibling;
+    while (headerRowElement){
+        const headerLabels = 
+            [...headerRowElement.querySelectorAll( ".ant-col strong" )]
             .map( x => x.innerText.trim() )
             .filter(Boolean);
 
-        if (headers.length){
-            const dataCols = [...row.querySelectorAll( ".ant-col" )];
-            const dataIndex = dataCols.indexOf(fieldCol);
+        if (headerLabels.length){
+            const dataColumns = [...rowElement.querySelectorAll( ".ant-col" )];
+            const dataIndex = dataColumns.indexOf(columnElement);
             if (dataIndex > 0){
-                return (headers[dataIndex - 1]|| "");
+                return (headerLabels[dataIndex - 1]|| "");
             }
         }
-        headerRow = headerRow.previousElementSibling;
+        headerRowElement = headerRowElement.previousElementSibling;
     }
     return "";
 }
 
-function beautifyFieldId(id){
-    return id
-        .replace(/^nsfcJrcApplicationInput_/,"")
-        .replace(/^prelim_part1_/,"")
+const PRELIM_PART_PREFIX = "prelim_part1_";
+function beautifyFieldId(fieldId){
+    return fieldId
+        .replace(new RegExp(`^${APWMS_FIELD_PREFIX}`),"")
+        .replace(new RegExp(`^${PRELIM_PART_PREFIX}`),"")
         .replaceAll("_"," ")
-        .replace(/\b\w/g,x => x.toUpperCase());
+        .replace(/\b\w/g,character => character.toUpperCase());
 }
 
+const EXPORT_COLUMNS = {
+    NO: "No",
+    SECTION: "Section",
+    GROUP: "Group",
+    REPEAT_GROUP: "RepeatGroup",
+    REPEAT_INDEX: "RepeatIndex",
+    FIELD: "Field",
+    VALUE: "Value",
+    FIELD_ID: "Field ID",
+    FIELD_NAME: "Field Name",
+    TYPE: "Type"
+};
 function exportToExcel(){
-    const results = collectFormData();
-    // detectRepeatGroups(results)
-    const rows = results.map(item => {
+    const formData = collectFormData();
+    const exportRows = formData.map(item => {
         const repeatInfo = getRepeatInfo(item.name);
         return {
-        No: item.questionNo,
-        Section: item.Section,
-        Group: item.Row,
-        RepeatGroup:repeatInfo.RepeatGroup || "",
-        RepeatIndex:repeatInfo.RepeatIndex || "",
-        Field: item.Field,
-        Value: item.value,
-        "Field ID": item.id,
-        "Field Name": item.name,
-        Type: item.tag
+            [EXPORT_COLUMNS.NO]:item.questionNo,
+            [EXPORT_COLUMNS.SECTION]:item.section,
+            [EXPORT_COLUMNS.GROUP]:item.group,
+            [EXPORT_COLUMNS.REPEAT_GROUP]:repeatInfo.repeatGroup || "",
+            [EXPORT_COLUMNS.REPEAT_INDEX]:repeatInfo.repeatIndex || "",
+            [EXPORT_COLUMNS.FIELD]:item.field,
+            [EXPORT_COLUMNS.VALUE]:item.value,
+            [EXPORT_COLUMNS.FIELD_ID]:item.fieldId,
+            [EXPORT_COLUMNS.FIELD_NAME]:item.fieldName,
+            [EXPORT_COLUMNS.TYPE]:item.fieldType
         };
     });
 
-    const ws = XLSX.utils.json_to_sheet(rows);
+    const worksheet = XLSX.utils.json_to_sheet(exportRows);
 
     // Initial column widths
-    ws["!cols"] = [
+    worksheet["!cols"] = [
         { width: 8 },    // No
-        { width: 10 },   // Section
+        { width: 10 },   // section
         { width: 10 },   // Group
-        { width: 10 },  // RepeatGroup
-        { width: 7 },  // RepeatIndex
+        { width: 10 },  // repeatGroup
+        { width: 7 },  // repeatIndex
         { width: 10 },   // Field
         { width: 30 },   // Value
         { width: 30 },   // Field ID
@@ -402,43 +411,43 @@ function exportToExcel(){
         { width: 12 }    // Type
     ];
 
-    const wb = XLSX.utils.book_new();
+    const workbook = XLSX.utils.book_new();
 
-    XLSX.utils.book_append_sheet(wb, ws, "QA Export");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "QA Export");
 
-    if (!wb.Workbook) {
-        wb.Workbook = {};
+    if (!workbook.Workbook) {
+        workbook.Workbook = {};
     }
 
-    if (!wb.Workbook.Views) {
-        wb.Workbook.Views = [{}];
+    if (!workbook.Workbook.Views) {
+        workbook.Workbook.Views = [{}];
     }
 
-    wb.Workbook.Views[0] = {xSplit: 4,ySplit: 1};
+    workbook.Workbook.Views[0] = {xSplit: 4,ySplit: 1};
 
     XLSX.writeFile(
-        wb,
+        workbook,
         `QA_Export_${new Date().toISOString().slice(0, 10)}.xlsx`
     );
 }
 
 function collectFormData() {
-    const results = [];
+    const formData = [];
     getIndexedFields()
-        .forEach((el,index) => {
-            results.push({
+        .forEach((fieldElement,index) => {
+            formData.push({
                 questionNo: index,
-                Section: findGroupLabel(el),
-                Row: findSubGroupLabel(el),
-                Field: findFieldLabel(el),
-                value: getFieldValue(el),
-                id: el.id || "",
-                name: el.name || "",
-                tag: el.tagName
+                section: getGroupLabel(fieldElement),
+                group: getSubGroupLabel(fieldElement),
+                field: getFieldLabel(fieldElement),
+                value: getFieldValue(fieldElement),
+                fieldId: fieldElement.id || "",
+                fieldName: fieldElement.name || "",
+                fieldType: fieldElement.tagName
             });
         });
 
-    return results;
+    return formData;
 }
 
 async function importExcel(bufferArray){
@@ -446,106 +455,102 @@ async function importExcel(bufferArray){
     await new Promise(resolve =>setTimeout(resolve,50));
     try{
         const buffer = new Uint8Array(bufferArray).buffer;
-        const wb = XLSX.read(buffer);
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(ws);
-        expandRepeatSections(rows);
-        fillAllVisibleFields(rows);
+        const workbook = XLSX.read(buffer);
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const importRows = XLSX.utils.sheet_to_json(worksheet);
+        expandRepeatSections(importRows);
+        fillAllVisibleFields(importRows);
         const initialFieldCount = getIndexedFields().length;
-        const passes = Math.max(0,rows.length - initialFieldCount);
-        console.log("Import:",{rows: rows.length,fields: initialFieldCount,passes});
-        for(let pass=0;pass<passes+2;pass++){//Expansion Passes + Stabilization + Sync 
-            console.log("Import pass ",pass+1)
-            fillAllVisibleFields(rows);
+        const fillPasses = Math.max(0,importRows.length - initialFieldCount);
+        console.log("Import:",{importRows: importRows.length,fields: initialFieldCount,fillPasses});
+        for(let passIndex=0;passIndex<fillPasses+2;passIndex++){//Expansion Passes + Stabilization + Sync 
+            console.log("Import pass ",passIndex+1)
+            fillAllVisibleFields(importRows);
         }
         await new Promise(resolve =>setTimeout(resolve,50));
-        alert(`Excel Import Complete (${rows.length} rows)`);
+        alert(`Excel Import Complete (${importRows.length} import Rows)`);
     }finally{
         hideImportOverlay();
     }
 
 }
 
-function fillAllVisibleFields(rows){
-    const fields = getIndexedFields();
+function fillAllVisibleFields(importRows){
+    const fieldElements = getIndexedFields();
 
-    for(const row of rows){
+    for(const importRow of importRows){
         try{
-            const idx = Number(row["No"]);
-            if (Number.isNaN(idx)){
+            const fieldIndex = Number(importRow[EXPORT_COLUMNS.NO]);
+            if (Number.isNaN(fieldIndex)){
                 continue;
             }
 
-            const el = fields[idx];
-            if (!el){
-                console.log("Hidden field encountered at ",idx);
+            const fieldElement = fieldElements[fieldIndex];
+            if (!fieldElement){
+                console.log("Hidden field encountered at ",fieldIndex);
                 break;
             }
 
-            const value = row["Value"] ?? "";
+            const value = importRow[EXPORT_COLUMNS.VALUE] ?? "";
             // File upload cannot be imported
-            if (el.type === "file"){
+            if (fieldElement.type === "file"){
                 continue;
             }
 
             // Checkbox
-            if (el.type === "checkbox"){
+            if (fieldElement.type === "checkbox"){
                 const shouldCheck = ((value === true) || (value === "true") || (value === "TRUE"));
-                if (shouldCheck !== el.checked){
-                    (el.closest(".ant-checkbox") || el ).click();
+                if (shouldCheck !== fieldElement.checked){
+                    (fieldElement.closest(".ant-checkbox") || fieldElement ).click();
                 }
                 continue;
             }
 
             // Radio
-            if (el.type === "radio"){
-                const checked = ((value === true) || (value === "true") || (value === "TRUE"));
-                if (checked && !el.checked){
-                    el.click();
+            if (fieldElement.type === "radio"){
+                const shouldCheck = ((value === true) || (value === "true") || (value === "TRUE"));
+                if (shouldCheck && !fieldElement.checked){
+                    fieldElement.click();
                 }
                 continue;
             }
 
             // Content Editable
-            if (el.getAttribute("contenteditable") === "true"){
-                el.innerText = value;
-            }else if (el.tagName === "TEXTAREA"){           // Textarea
-                el.value = value;
+            if (fieldElement.getAttribute("contenteditable") === "true"){
+                fieldElement.innerText = value;
+            }else if (fieldElement.tagName === "TEXTAREA"){           // Textarea
+                fieldElement.value = value;
             }else{                                          // Normal Input
-                el.value = value;
+                fieldElement.value = value;
             }
 
-            el.dispatchEvent(new Event("input",{ bubbles:true }));
-            el.dispatchEvent(new Event("change",{ bubbles:true }));
-            el.dispatchEvent(new Event("blur",{ bubbles:true }));
+            fieldElement.dispatchEvent(new Event("input",{ bubbles:true }));
+            fieldElement.dispatchEvent(new Event("change",{ bubbles:true }));
+            fieldElement.dispatchEvent(new Event("blur",{ bubbles:true }));
         }catch(error){
             console.error("Import Error:",row,error);
         }
     }
 }
 
-function getIndexedFields()
-{
-    return [
-        ...document.querySelectorAll(
-            'input, textarea, [contenteditable="true"]'
-        )
-    ];
-    // .filter(el => isRealField(el))
-    // .map((el,index) => ({
+function getIndexedFields(){
+    return [...document.querySelectorAll('input, textarea, [contenteditable="true"]')];
+    // .filter(fieldElement => isRealField(fieldElement))
+    // .map((fieldElement,index) => ({
     //     index,
-    //     el
+    //     fieldElement
     // }));
 }
 
+const IMPORT_OVERLAY_ID = "qa-import-overlay";
 function showImportOverlay(){
-    if (document.getElementById("qa-import-overlay")){
+    if (document.getElementById(IMPORT_OVERLAY_ID)){
         return;
     }
 
-    const overlay = document.createElement("div");
-    overlay.id = "qa-import-overlay";
-    overlay.innerHTML = `
+    const overlayElement = document.createElement("div");
+    overlayElement.id = IMPORT_OVERLAY_ID;
+    overlayElement.innerHTML = `
         <div style="
             background:white;
             padding:20px 40px;
@@ -558,7 +563,7 @@ function showImportOverlay(){
         </div>
     `;
 
-    overlay.style.cssText = `
+    overlayElement.style.cssText = `
         position:fixed;
         inset:0;
         background:rgba(0,0,0,.35);
@@ -568,101 +573,99 @@ function showImportOverlay(){
         z-index:2147483647;
     `;
 
-    document.body.appendChild(overlay);
+    document.body.appendChild(overlayElement);
 }
 
 function hideImportOverlay(){
     document
-        .getElementById("qa-import-overlay")
+        .getElementById(IMPORT_OVERLAY_ID)
         ?.remove();
 }
 
-function getRepeatInfo(name)
-{    const match = (name || "").match(/\.([a-zA-Z0-9_]+)\.(\d+)_/);
+function getRepeatInfo(fieldName){
+    const match = (fieldName || "").match(/\.([a-zA-Z0-9_]+)\.(\d+)_/);
 
     if (!match){
-        return {RepeatGroup: "",RepeatIndex: ""};
+        return {repeatGroup: "",repeatIndex: ""};
     }
 
     return {
-        RepeatGroup: match[1],
-        RepeatIndex: Number(match[2]) + 1
+        repeatGroup: match[1],
+        repeatIndex: Number(match[2]) + 1
     };
 }
 
-function getRepeatRequirements(rows){
-    const groups = {};
-    rows.forEach(row => {
-        const group = row.RepeatGroup;
-        if (!group){
+function getRepeatRequirements(importRows){
+    // console.log(importRows);
+    const repeatGroups = {};
+    importRows.forEach(importRow => {
+        const repeatGroup = importRow.repeatGroup;
+        if (!repeatGroup){
             return;
         }
-        const index = Number(row.RepeatIndex);
-        groups[group] = Math.max(groups[group] || 0,index);
+        const repeatIndex = Number(importRow.repeatIndex);
+        repeatGroups[repeatGroup] = Math.max(repeatGroups[repeatGroup] || 0,repeatIndex);
     });
-    console.log("groups : ",groups)
-    return groups;
+    console.log("Repeat Groups : ",repeatGroups)
+    return repeatGroups;
 }
 
 function getCurrentRepeatCounts(){
-    const counts = {};
-
+    const repeatCounts = {};
     getIndexedFields()
-        .forEach(el => {
-            const info = getRepeatInfo(el.name);
+        .forEach(fieldElement => {
+            const repeatInfo = getRepeatInfo(fieldElement.name);
 
-            if (!info.RepeatGroup){
+            if (!repeatInfo.repeatGroup){
             return;
             }
 
-            counts[info.RepeatGroup] = 
-            Math.max(counts[info.RepeatGroup] || 0,info.RepeatIndex);
+            repeatCounts[repeatInfo.repeatGroup] = 
+            Math.max(repeatCounts[repeatInfo.repeatGroup] || 0,repeatInfo.repeatIndex);
         });
 
-    return counts;
+    return repeatCounts;
 }
 
 function findAddButton(repeatGroup){
-    const field = document.querySelector(`[name*="${repeatGroup}.0_"]`);
-
-    if (!field){
-    return null;
-    }
-
-    const block = field.closest("div[style*='margin-bottom']");
-
-    if (!block){
+    const fieldElement = document.querySelector(`[name*="${repeatGroup}.0_"]`);
+    if (!fieldElement){
         return null;
     }
 
-    return [...block.querySelectorAll("button")]
-        .find(btn => btn.textContent.trim() === "+");
+    const containerElement = fieldElement.closest("div[style*='margin-bottom']");
+    if (!containerElement){
+        return null;
+    }
+
+    return [...containerElement.querySelectorAll("button")]
+        .find(buttonElement => buttonElement.textContent.trim() === "+");
 }
 
-function expandRepeatSections(rows){
-    const required = getRepeatRequirements(rows);
-    const current = getCurrentRepeatCounts();
+function expandRepeatSections(importRows){
+    const requiredRepeatCounts = getRepeatRequirements(importRows);
+    const currentRepeatCounts = getCurrentRepeatCounts();
 
-    Object.entries(required).forEach(([group, maxIndex]) => {
-        const currentCount = current[group] || 0;
-        const missing = maxIndex - currentCount;
+    Object.entries(requiredRepeatCounts).forEach(([repeatGroup, maxRepeatIndex]) => {
+        const currentRepeatCount = currentRepeatCounts[repeatGroup] || 0;
+        const missingRepeatCount = maxRepeatIndex - currentRepeatCount;
 
-        if (missing <= 0){
+        if (missingRepeatCount <= 0){
             return;
         }
 
-        const addBtn = findAddButton(group);
+        const addButton = findAddButton(repeatGroup);
 
-        if (!addBtn){
-            console.warn("Cannot find add button:",group);
+        if (!addButton){
+            console.warn("Cannot find add button:",repeatGroup);
             return;
         }
 
-        for (let i = 0;i < missing;i++){
-            addBtn.click();
+        for (let repeatIndex = 0;repeatIndex < missingRepeatCount;repeatIndex++){
+            addButton.click();
         }
 
-        console.log(`Expanded ${group} by ${missing}`);
+        console.log(`Expanded ${repeatGroup} by ${missingRepeatCount}`);
     }
     );
 }
