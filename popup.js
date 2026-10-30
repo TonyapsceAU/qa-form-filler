@@ -1,26 +1,39 @@
+const ACTIONS = {
+    SCAN_FORM: "scanForm",
+    HIGHLIGHT_FORM: "highlightForm",
+    CLEAR_HIGHLIGHT: "clearHighlight",
+    EXPORT_EXCEL: "exportExcel",
+    IMPORT_EXCEL: "importExcel"
+};
+
+const ELEMENT_IDS = {
+    SCAN_BUTTON: "scanBtn",
+    RESULT_CONTAINER: "resultContainer",
+    HIGHLIGHT_BUTTON: "highlightModeBtn",
+    CLEAR_HIGHLIGHT_BUTTON: "clearhighlightBtn",
+    EXPORT_BUTTON: "exportBtn",
+    IMPORT_BUTTON: "importBtn",
+    IMPORT_FILE_INPUT: "importFile"
+};
+
 document.addEventListener(
     "DOMContentLoaded",
     () => {
-        const scanBtn = document.getElementById("scanBtn");
-        const resultContainer = document.getElementById("resultContainer");
-        const highlightModeBtn = document.getElementById("highlightModeBtn");
-        const clearHighlightBtn = document.getElementById("clearhighlightBtn");
-        const exportBtn = document.getElementById("exportBtn");
-        const importBtn = document.getElementById("importBtn");
-        const importFileInput = document.getElementById("importFile");
-        const ACTIONS = {
-            SCAN_FORM: "scanForm",
-            HIGHLIGHT_FORM: "highlightForm",
-            CLEAR_HIGHLIGHT: "clearHighlight",
-            EXPORT_EXCEL: "exportExcel",
-            IMPORT_EXCEL: "importExcel"
-        };
+        const scanBtn = document.getElementById(ELEMENT_IDS.SCAN_BUTTON);
+        const highlightModeBtn = document.getElementById(ELEMENT_IDS.HIGHLIGHT_BUTTON);
+        const clearHighlightBtn = document.getElementById(ELEMENT_IDS.CLEAR_HIGHLIGHT_BUTTON);
+        const exportBtn = document.getElementById(ELEMENT_IDS.EXPORT_BUTTON);
+        const importBtn = document.getElementById(ELEMENT_IDS.IMPORT_BUTTON);
+
+        const resultContainer = document.getElementById(ELEMENT_IDS.RESULT_CONTAINER);
+        const importFileInput = document.getElementById(ELEMENT_IDS.IMPORT_FILE_INPUT);
+
         scanBtn.addEventListener(
             "click",
             async () => {
                 try {
                     const [tab] = await chrome.tabs.query({active: true,currentWindow: true});
-                    const scanResults = await chrome.tabs.sendMessage(tab.id,{action: "scanForm"});
+                    const scanResults = await chrome.tabs.sendMessage(tab.id,{action: ACTIONS.SCAN_FORM});
                     resultContainer.innerHTML = "";
                     scanResults.forEach(fieldInfo => {
                         const resultRow = document.createElement("div");

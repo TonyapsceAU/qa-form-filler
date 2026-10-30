@@ -7,26 +7,32 @@ const ACTIONS = {
     CLEAR_HIGHLIGHT: "clearHighlight"
 };
 chrome.runtime.onMessage.addListener(
-    (request,sender,sendResponse) => {
-        if (request.action === ACTIONS.SCAN_FORM){
-            sendResponse(scanForm());
+    (request,_sender,sendResponse) => {
+        switch (request.action) {
+            case ACTIONS.SCAN_FORM:
+                sendResponse(scanForm());
+                break;
+            case ACTIONS.HIGHLIGHT_FORM:
+                enableHighlightMode();
+                sendResponse({success: true});
+                break;
+            case ACTIONS.EXPORT_EXCEL:
+                exportToExcel();
+                sendResponse({success: true});
+                break;
+            case ACTIONS.IMPORT_EXCEL:
+                importExcel(request.buffer);
+                sendResponse({success: true});
+                break;
+            case ACTIONS.CLEAR_HIGHLIGHT:
+                disableHighlightMode();
+                sendResponse({success: true});
+                break;
+            default:
+                console.warn("Unknown action:",request.action);
+                break;
         }
-        if (request.action === ACTIONS.HIGHLIGHT_FORM){
-            enableHighlightMode();
-            sendResponse({success: true});
-        }
-        if (request.action === ACTIONS.EXPORT_EXCEL){
-            exportToExcel();
-            sendResponse({success: true});
-        }
-        if (request.action === ACTIONS.IMPORT_EXCEL){
-            importExcel(request.buffer);
-            sendResponse({success: true});
-        }
-        if (request.action === ACTIONS.CLEAR_HIGHLIGHT){
-            disableHighlightMode();
-            sendResponse({success: true});
-        }
+        return true;
     }
 );
 
@@ -88,18 +94,18 @@ function getFieldValue(fieldElement){
     return fieldElement.value || "";
 }
 
+
+const TYPE_COLORS = {
+    "INPUT(text)": "#00aa00",
+    "INPUT(radio)": "#888800",
+    "INPUT(search)": "#00cccc",
+    "TEXTAREA": "#0066ff",
+    "SELECT": "#ff8800",
+    "RICHTEXT": "#cc00cc",
+    "INPUT(email)": "#ff00aa"
+};
 function enableHighlightMode(){ 
     disableHighlightMode();
-    const TYPE_COLORS = {
-        "INPUT(text)": "#00aa00",
-        "INPUT(radio)": "#888800",
-        "INPUT(search)": "#00cccc",
-        "TEXTAREA": "#0066ff",
-        "SELECT": "#ff8800",
-        "RICHTEXT": "#cc00cc",
-        "INPUT(email)": "#ff00aa"
-    };
-    
     getIndexedFields()
         .forEach((fieldElement,index) => {
             console.log(`element:${index}`,"QuestionLabel:",getDisplayLabel(fieldElement),"value:",fieldElement.value);
@@ -164,7 +170,7 @@ function findNearbyLabel(fieldElement){
                 );
 
         if (labelTexts.length > 0) {
-            return texts[0];
+            return labelTexts[0];
         }
 
         parentElement = parentElement.parentElement;
@@ -309,21 +315,21 @@ function getFieldLabel(fieldElement){
     return "";
 }
 
+
+const FIELD_LABEL_MAP = {
+    orcid: "ORCID iD",
+    surname: "Surname (with title)",
+    other_name: "Other Name",
+    chinese_name: "Chinese Name (with title)",
+    post: "Post",
+    org: "Unit / Department / University"
+};
 function getFieldLabelFromName(fieldElement){
     const name = fieldElement.name || fieldElement.id || "";
     const field =
         name.split(".")
             .pop()
             .replace(/^\d+_/, "");
-    const FIELD_LABEL_MAP = {
-        orcid: "ORCID iD",
-        surname: "Surname (with title)",
-        other_name: "Other Name",
-        chinese_name: "Chinese Name (with title)",
-        post: "Post",
-        org: "Unit / Department / University"
-    };
-
     return (FIELD_LABEL_MAP[field]|| field);
 }
 
@@ -341,7 +347,7 @@ function getFieldLabelFromHeader(fieldElement){
     while (headerRowElement){
         const headerLabels = 
             [...headerRowElement.querySelectorAll( ".ant-col strong" )]
-            .map( x => x.innerText.trim() )
+            .map(element  => element .innerText.trim() )
             .filter(Boolean);
 
         if (headerLabels.length){
@@ -377,21 +383,22 @@ const EXPORT_COLUMNS = {
     FIELD_NAME: "Field Name",
     TYPE: "Type"
 };
+const EXPORT_SHEET_NAME = "QA Export";
 function exportToExcel(){
     const formData = collectFormData();
-    const exportRows = formData.map(item => {
-        const repeatInfo = getRepeatInfo(item.name);
+    const exportRows = formData.map(fieldData => {
+        const repeatInfo = getRepeatInfo(fieldData.fieldName);
         return {
-            [EXPORT_COLUMNS.NO]:item.questionNo,
-            [EXPORT_COLUMNS.SECTION]:item.section,
-            [EXPORT_COLUMNS.GROUP]:item.group,
+            [EXPORT_COLUMNS.NO]:fieldData.questionNo,
+            [EXPORT_COLUMNS.SECTION]:fieldData.section,
+            [EXPORT_COLUMNS.GROUP]:fieldData.group,
             [EXPORT_COLUMNS.REPEAT_GROUP]:repeatInfo.repeatGroup || "",
             [EXPORT_COLUMNS.REPEAT_INDEX]:repeatInfo.repeatIndex || "",
-            [EXPORT_COLUMNS.FIELD]:item.field,
-            [EXPORT_COLUMNS.VALUE]:item.value,
-            [EXPORT_COLUMNS.FIELD_ID]:item.fieldId,
-            [EXPORT_COLUMNS.FIELD_NAME]:item.fieldName,
-            [EXPORT_COLUMNS.TYPE]:item.fieldType
+            [EXPORT_COLUMNS.FIELD]:fieldData.field,
+            [EXPORT_COLUMNS.VALUE]:fieldData.value,
+            [EXPORT_COLUMNS.FIELD_ID]:fieldData.fieldId,
+            [EXPORT_COLUMNS.FIELD_NAME]:fieldData.fieldName,
+            [EXPORT_COLUMNS.TYPE]:fieldData.fieldType
         };
     });
 
@@ -412,8 +419,7 @@ function exportToExcel(){
     ];
 
     const workbook = XLSX.utils.book_new();
-
-    XLSX.utils.book_append_sheet(workbook, worksheet, "QA Export");
+    XLSX.utils.book_append_sheet(workbook, worksheet, EXPORT_SHEET_NAME);
 
     if (!workbook.Workbook) {
         workbook.Workbook = {};
@@ -528,7 +534,7 @@ function fillAllVisibleFields(importRows){
             fieldElement.dispatchEvent(new Event("change",{ bubbles:true }));
             fieldElement.dispatchEvent(new Event("blur",{ bubbles:true }));
         }catch(error){
-            console.error("Import Error:",row,error);
+            console.error("Import Error:",importRow,error);
         }
     }
 }
