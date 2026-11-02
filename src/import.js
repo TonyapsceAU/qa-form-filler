@@ -18,12 +18,14 @@ async function importExcel(bufferArray){
         await fillAllVisibleFields(importRows);
 
         const initialFieldCount = getIndexedFields().length;
-        const fillPasses = Math.max(0,importRows.length - initialFieldCount);
-        console.log("Import:",{importRows: importRows.length,fields: initialFieldCount,fillPasses});
-        // for(let passIndex=0;passIndex<Math.max(0,importRows.length - getIndexedFields().length)+2;passIndex++){//Expansion Passes + Stabilization + Sync 
-        for(let passIndex=0;passIndex<fillPasses+2;passIndex++){//Expansion Passes + Stabilization + Sync 
-            console.log("Import pass ",passIndex+1)
+        const maxfillPasses = Math.max(0,importRows.length - initialFieldCount);
+        console.log("Import:",{importRows: importRows.length,fields: initialFieldCount,maxfillPasses});
+        let passIndex=0;
+        while(passIndex<Math.max(0,importRows.length - getIndexedFields().length)+2){//Expansion Passes + Stabilization + Sync 
+        // for(let passIndex=0;passIndex<maxfillPasses+2;passIndex++){//Expansion Passes + Stabilization + Sync 
+            console.log("Import pass ",passIndex+1,{importRows: importRows.length,fields: initialFieldCount,maxfillPasses})
             await fillAllVisibleFields(importRows);
+            passIndex++
         }
         await new Promise(resolve =>setTimeout(resolve,50));
         alert(`Excel Import Complete (${importRows.length} import Rows)`);

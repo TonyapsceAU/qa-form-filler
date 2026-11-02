@@ -1,0 +1,52 @@
+body{
+    width:320px;
+    padding:16px;
+    margin:0;
+    font-family:"Segoe UI",sans-serif;
+    background:#f8fafc;
+}
+
+h3{
+    margin:0 0 16px;
+    text-align:center;
+    color:#1e293b;
+}
+
+button{
+    border:none;
+    border-radius:8px;
+    background:#475569;
+    color:white;
+    font-weight:600;
+    cursor:pointer;
+    transition:all .15s ease;
+}
+
+button:hover{
+    background:#334155;
+}
+
+button:active{
+    transform:scale(.98);
+}
+
+pre{
+    background:white;
+    border:1px solid #e2e8f0;
+    border-radius:8px;
+    padding:10px;
+    max-height:250px;
+    overflow:auto;
+    font-size:12px;
+    margin-top:12px;
+}
+.toolRow{
+    display:flex;
+    gap:8px;
+    margin-bottom:12px;
+}
+
+.toolRow button{
+    flex:1;
+    margin-bottom:0;
+}
