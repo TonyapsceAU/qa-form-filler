@@ -1,15 +1,9 @@
 function getIndexedFields(){
-    return [...document.querySelectorAll('input, textarea, [contenteditable="true"]')];
-    // .filter(fieldElement => isRealField(fieldElement))
-    // .map((fieldElement,index) => ({
-    //     index,
-    //     fieldElement
-    // }));
+    return [...document.querySelectorAll('input, textarea, [contenteditable="true"]')]
 }
 
 function extractElementData(fieldElement){
     const elementData  = {};
-
     for (const key in fieldElement){
         try{
             const value = fieldElement[key];

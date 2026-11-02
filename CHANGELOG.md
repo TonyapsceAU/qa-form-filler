@@ -2,18 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
-## v1.2.0
+## v1.2.1
 
-### Features
-- Added import progress overlay
-- Added repeat section cleanup during import
-- Added repeat section synchronization during import
-- Added support for keyword repeat sections
+### Fixes
+
+- Fixed repeat section expansion failing after form rerender
+- Fixed keyword repeat section synchronization
+- Fixed incomplete expansion when multiple additions were required
+- Improved reliability of dynamic repeat section handling during import
 
 ### Improvements
-- Improved repeat count detection
-- Improved dynamic form import workflow
-- Reduced manual form preparation before import
+
+- Improved import stability for forms containing repeat sections
+
+### Features
 - Optimized import pass calculation
 - Improved popup UI layout
 
@@ -32,6 +34,21 @@ All notable changes to this project will be documented in this file.
 - Split content script into feature modules
 - Centralized constants and simplified action handling
 - Standardized naming conventions
+
+
+## v1.2.0
+
+### Features
+- Added import progress overlay
+- Added repeat section cleanup during import
+- Added repeat section synchronization during import
+- Added support for keyword repeat sections
+
+### Improvements
+- Improved repeat count detection
+- Improved dynamic form import workflow
+- Reduced manual form preparation before import
+
 ---
 
 ## v1.1.0

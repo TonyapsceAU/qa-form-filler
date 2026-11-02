@@ -1,4 +1,5 @@
 function collectFormData() {
+    console.group("[EXPORT] Collect Form Data");
     const formData = [];
     getIndexedFields()
         .forEach((fieldElement,index) => {
@@ -14,12 +15,22 @@ function collectFormData() {
                 fieldElement
             });
         });
-
+    console.log("Fields Collected:",formData.length);
+    console.groupEnd();
     return formData;
 }
 
 function exportToExcel(){
+    console.group("[EXPORT] Started");
     const formData = collectFormData();
+    console.log("Fields Found:",formData.length);
+    console.log("[EXPORT] Processing Repeat Sections");
+    // console.table(
+    //     formData.filter(
+    //         x => x.questionNo >= 10 &&
+    //             x.questionNo <= 20
+    //     )
+    // );
     const exportRows = formData.map(fieldData => {
         let repeatInfo = getRepeatInfo(fieldData.fieldName);
         if (!repeatInfo.repeatGroup){
@@ -38,9 +49,18 @@ function exportToExcel(){
             [EXPORT_COLUMNS.TYPE]:fieldData.fieldType
         };
     });
-
+    const repeatSummary = {};
+    exportRows.forEach(row => {
+        const repeatGroup = row[EXPORT_COLUMNS.REPEAT_GROUP];
+        if (!repeatGroup){
+            return;
+        }
+        repeatSummary[repeatGroup] = Math.max(repeatSummary[repeatGroup] || 0,
+            Number(row[EXPORT_COLUMNS.REPEAT_INDEX]));
+    });
+    console.log("Repeat Groups:",repeatSummary);
+    console.log("[EXPORT] Generating Worksheet");
     const worksheet = XLSX.utils.json_to_sheet(exportRows);
-
     // Initial column widths
     worksheet["!cols"] = [
         { width: 8 },    // No
@@ -67,11 +87,15 @@ function exportToExcel(){
     }
 
     workbook.Workbook.Views[0] = {xSplit: 4,ySplit: 1};
-
+    console.log("Rows:",exportRows.length);
+    
+    console.log("[EXPORT] Saving Workbook");
     XLSX.writeFile(
         workbook,
-        `QA_Export_${new Date().toISOString().slice(0, 10)}.xlsx`
+        `QA_.xlsx`
     );
+    console.log("[EXPORT] Complete");
+    console.groupEnd();
 }
 
 //unused

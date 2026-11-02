@@ -1,45 +1,84 @@
 async function importExcel(bufferArray){
+    const startTime = Date.now();
+    console.group("[IMPORT] Start");
     showImportOverlay();
     await new Promise(resolve =>setTimeout(resolve,50));
     try{
+        // Load datas
         const buffer = new Uint8Array(bufferArray).buffer;
         const workbook = XLSX.read(buffer);
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         const importRows = XLSX.utils.sheet_to_json(worksheet);
+        console.log("Workbook Loaded",{rows: importRows.length});
+
+        // Synchronization
+        console.group("[REPEAT] Synchronization");
+        // Synchronization - Expantion
+        console.log("[REPEAT] Before",getCurrentRepeatCounts());
         updateImportProgress(0,1,"Expanding Repeat Sections...");
         expandRepeatSections(importRows);
-        await new Promise(resolve =>setTimeout(resolve,50));
+        await new Promise(resolve =>setTimeout(resolve,2000));
+        console.log("[REPEAT] After Expansion",getCurrentRepeatCounts());
 
+        // Synchronization - Removeal
         updateImportProgress(0,1,"Removing Repeat Sections...");
         await removeExtraRepeatSections(importRows);
-        await new Promise(resolve =>setTimeout(resolve,50));
+        await new Promise(resolve =>setTimeout(resolve,1000));
+        console.log("[REPEAT] After Cleanup",getCurrentRepeatCounts());
+        console.groupEnd();
 
         updateImportProgress(0,importRows.length,"Preparing Field Import...");
         await fillAllVisibleFields(importRows);
+        console.log("[FILL] Initial Pass Complete",{
+            fields: getIndexedFields().length,repeatCounts:getCurrentRepeatCounts()
+        });
+
 
         const initialFieldCount = getIndexedFields().length;
         const maxfillPasses = Math.max(0,importRows.length - initialFieldCount);
-        console.log("Import:",{importRows: importRows.length,fields: initialFieldCount,maxfillPasses});
+        console.log("[FILL] Planning",{importRows: importRows.length,fields: initialFieldCount,maxfillPasses});
         let passIndex=0;
-        while(passIndex<Math.max(0,importRows.length - getIndexedFields().length)+2){//Expansion Passes + Stabilization + Sync 
+        while(passIndex<(Math.max(0,importRows.length - getIndexedFields().length))){//Expansion Passes + Stabilization + Sync 
         // for(let passIndex=0;passIndex<maxfillPasses+2;passIndex++){//Expansion Passes + Stabilization + Sync 
-            console.log("Import pass ",passIndex+1,{importRows: importRows.length,fields: initialFieldCount,maxfillPasses})
             await fillAllVisibleFields(importRows);
             passIndex++
+            // console.log((Math.max(0,importRows.length - getIndexedFields().length)+3));
+            console.log(`[FILL] Pass ${passIndex}`,{
+                fields:getIndexedFields().length,
+                remaining:Math.max(0,importRows.length - getIndexedFields().length)
+            });
         }
+        await fillAllVisibleFields(importRows);
+        await fillAllVisibleFields(importRows);
         await new Promise(resolve =>setTimeout(resolve,50));
+        console.log("[IMPORT] Complete",{
+            rows:importRows.length,
+            fields:getIndexedFields().length,
+            repeatCounts:getCurrentRepeatCounts(),
+            durationMs: Date.now() - startTime
+        });
         alert(`Excel Import Complete (${importRows.length} import Rows)`);
+    }catch(error){
+        console.error("[IMPORT] Failed",error);
+        throw error;
     }finally{
+        console.groupEnd();
         hideImportOverlay();
     }
-
 }
 
 async function fillAllVisibleFields(importRows){
-    const fieldElements = getIndexedFields();
-
+    console.log(
+        "fillAllVisibleFields",
+        getCurrentRepeatCounts()
+    );
     for(let rowIndex = 0; rowIndex < importRows.length; rowIndex++){
         try{
+            const fieldElements = getIndexedFields();
+            const beforeCounts =
+                JSON.stringify(
+                    getCurrentRepeatCounts()
+                );
             const importRow = importRows[rowIndex];
             const fieldIndex = Number(importRow[EXPORT_COLUMNS.NO]);
             if (Number.isNaN(fieldIndex)){
@@ -93,6 +132,30 @@ async function fillAllVisibleFields(importRows){
                 updateImportProgress(rowIndex + 1,importRows.length,"Filling Form Fields...");
                 await new Promise(resolve => setTimeout(resolve, 0));
             }
+            const afterCounts =
+                JSON.stringify(
+                    getCurrentRepeatCounts()
+                );
+
+            if (beforeCounts !== afterCounts){
+                console.log(
+                    rowIndex,
+                    importRows[rowIndex]
+                );
+                console.log(
+                        getCurrentRepeatCounts()
+                    );
+                console.warn(
+                    "Repeat count changed!",
+                    {
+                        rowIndex,
+                        row: importRows[rowIndex],
+                        beforeCounts,
+                        afterCounts
+                    }
+                );
+            }
+
         }catch(error){
             console.error("Import Error:",importRow,error);
         }

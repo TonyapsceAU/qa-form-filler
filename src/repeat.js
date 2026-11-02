@@ -87,6 +87,7 @@ function findRepeatField(repeatGroup){
 }
 
 function findAddButton(repeatGroup){
+    console.log("searching for expand button");
     const fieldElement = findRepeatField(repeatGroup);
     if (!fieldElement){
         fieldElement = getIndexedFields()
@@ -114,25 +115,31 @@ function findAddButton(repeatGroup){
     });
 }
 
-function expandRepeatSections(importRows){
+async function expandRepeatSections(importRows){
+    console.log("scanning for expantion");
     const requiredRepeatCounts = getRepeatRequirements(importRows);
     const currentRepeatCounts = getCurrentRepeatCounts();
-    Object.entries(requiredRepeatCounts).forEach(([repeatGroup, maxRepeatIndex]) => {
+    Object.entries(requiredRepeatCounts).forEach(async ([repeatGroup, maxRepeatIndex]) => {
         const currentRepeatCount = currentRepeatCounts[repeatGroup] || 0;
         const missingRepeatCount = maxRepeatIndex - currentRepeatCount;
-        console.log(repeatGroup,{currentRepeatCount,maxRepeatIndex,missingRepeatCount});
+        console.log("expand : ",repeatGroup,{currentRepeatCount,maxRepeatIndex,missingRepeatCount});
         if (missingRepeatCount <= 0){
             return;
         }
 
-        const addButton = findAddButton(repeatGroup);
-        if (!addButton){
-            console.warn("Cannot find add button:",repeatGroup);
-            return;
-        }
-
         for (let repeatIndex = 0;repeatIndex < missingRepeatCount;repeatIndex++){
+            let addButton = findAddButton(repeatGroup);
+            if (!addButton){
+                console.warn("Cannot find add button:",repeatGroup);
+                return;
+            }
+            console.log("Before expand",repeatGroup,getCurrentRepeatCounts());
             addButton.click();
+            await new Promise(
+                resolve =>
+                    setTimeout(resolve,100)
+            );
+            console.log("After expand",repeatGroup,getCurrentRepeatCounts());
         }
 
         console.log(`Expanded ${repeatGroup} by ${missingRepeatCount}`);
@@ -172,6 +179,7 @@ function findRemoveButton(repeatGroup){
 }
 
 async function removeExtraRepeatSections(importRows){
+    console.log("scanning for removeal");
     const requiredRepeatCounts = getRepeatRequirements(importRows);
     const currentRepeatCounts = getCurrentRepeatCounts();
 
@@ -181,7 +189,7 @@ async function removeExtraRepeatSections(importRows){
         }
         const requiredCount = requiredRepeatCounts[repeatGroup];
         const extraCount = currentCount - requiredCount;
-        console.log(repeatGroup,{currentCount,requiredCount,extraCount});
+        console.log("remove : ",repeatGroup,{currentCount,requiredCount,extraCount});
         if (extraCount <= 0){
             continue;
         }
@@ -193,6 +201,7 @@ async function removeExtraRepeatSections(importRows){
             }
             removeButton.click();
             removedCount++;
+            console.log("remove extra");
             await new Promise(resolve =>setTimeout(resolve, 50));
         }
 
