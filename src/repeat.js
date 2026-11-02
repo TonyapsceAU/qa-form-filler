@@ -1,18 +1,34 @@
-function getRepeatInfo(fieldName){
-    const match = (fieldName || "").match(/\.([a-zA-Z0-9_]+)\.(\d+)_/);
+function getKeywordRepeatInfo(fieldElement){
+    const keywordRow =
+        fieldElement.closest(
+            'div[style*="align-items: stretch"]'
+        );
 
+    if (!keywordRow){
+        return {repeatGroup: "", repeatIndex: ""};
+    }
+
+    const removeButton =
+        keywordRow.querySelector(
+            'button[aria-label^="Remove row"]'
+        );
+
+    if (!removeButton){
+        return {repeatGroup: "", repeatIndex: ""};
+    }
+
+    const match = removeButton.getAttribute("aria-label")?.match(/Remove row (\d+)/);
     if (!match){
-        return {repeatGroup: "",repeatIndex: ""};
+        return {repeatGroup: "", repeatIndex: ""};
     }
 
     return {
-        repeatGroup: match[1],
-        repeatIndex: Number(match[2]) + 1
+        repeatGroup: "keywords",
+        repeatIndex: Number(match[1])
     };
 }
 
 function getRepeatRequirements(importRows){
-    // console.log(importRows);
     const repeatGroups = {};
     importRows.forEach(importRow => {
         const repeatGroup = importRow.repeatGroup;
@@ -26,16 +42,30 @@ function getRepeatRequirements(importRows){
     return repeatGroups;
 }
 
+function getRepeatInfo(fieldName){
+    const match = (fieldName || "").match(/\.([a-zA-Z0-9_]+)\.(\d+)_/);
+
+    if (!match){
+        return {repeatGroup: "",repeatIndex: ""};
+    }
+
+    return {
+        repeatGroup: match[1],
+        repeatIndex: Number(match[2]) + 1
+    };
+}
+
 function getCurrentRepeatCounts(){
     const repeatCounts = {};
     getIndexedFields()
         .forEach(fieldElement => {
-            const repeatInfo = getRepeatInfo(fieldElement.name);
-
+            let repeatInfo = getRepeatInfo(fieldElement.name);
             if (!repeatInfo.repeatGroup){
-            return;
+                repeatInfo = getKeywordRepeatInfo(fieldElement);
             }
-
+            if (!repeatInfo.repeatGroup){
+                return;
+            }
             repeatCounts[repeatInfo.repeatGroup] = 
             Math.max(repeatCounts[repeatInfo.repeatGroup] || 0,repeatInfo.repeatIndex);
         });
@@ -43,10 +73,34 @@ function getCurrentRepeatCounts(){
     return repeatCounts;
 }
 
+function findRepeatField(repeatGroup){
+    let fieldElement = document.querySelector(`[name*="${repeatGroup}.0_"]`);
+    if (fieldElement){
+        return fieldElement;
+    }
+
+    return getIndexedFields()
+        .find(fieldElement => {
+            const repeatInfo = getKeywordRepeatInfo(fieldElement);
+            return (repeatInfo.repeatGroup === repeatGroup);
+        });
+}
+
 function findAddButton(repeatGroup){
-    const fieldElement = document.querySelector(`[name*="${repeatGroup}.0_"]`);
+    const fieldElement = findRepeatField(repeatGroup);
     if (!fieldElement){
-        return null;
+        fieldElement = getIndexedFields()
+            .find(fieldElement => {
+                const repeatInfo = getKeywordRepeatInfo(fieldElement);
+                return (repeatInfo.repeatGroup === repeatGroup);
+            });
+        if (!fieldElement){
+            return null;
+        }
+        return [...document.querySelectorAll("button")].find(buttonElement => {
+            const label = buttonElement.getAttribute("aria-label") || "";
+            return label.includes("Add");
+        });
     }
 
     const containerElement = fieldElement.closest("div[style*='margin-bottom']");
@@ -54,24 +108,24 @@ function findAddButton(repeatGroup){
         return null;
     }
 
-    return [...containerElement.querySelectorAll("button")]
-        .find(buttonElement => buttonElement.textContent.trim() === "+");
+    return [...containerElement.querySelectorAll("button")].find(buttonElement => {
+        const label = buttonElement.getAttribute("aria-label") || "";
+        return (buttonElement.textContent.trim() === "+"||label.startsWith("Add row"));
+    });
 }
 
 function expandRepeatSections(importRows){
     const requiredRepeatCounts = getRepeatRequirements(importRows);
     const currentRepeatCounts = getCurrentRepeatCounts();
-
     Object.entries(requiredRepeatCounts).forEach(([repeatGroup, maxRepeatIndex]) => {
         const currentRepeatCount = currentRepeatCounts[repeatGroup] || 0;
         const missingRepeatCount = maxRepeatIndex - currentRepeatCount;
-
+        console.log(repeatGroup,{currentRepeatCount,maxRepeatIndex,missingRepeatCount});
         if (missingRepeatCount <= 0){
             return;
         }
 
         const addButton = findAddButton(repeatGroup);
-
         if (!addButton){
             console.warn("Cannot find add button:",repeatGroup);
             return;
@@ -86,11 +140,23 @@ function expandRepeatSections(importRows){
     );
 }
 
-
 function findRemoveButton(repeatGroup){
-    const fieldElement = document.querySelector(`[name*="${repeatGroup}.0_"]`);
+    const fieldElement = findRepeatField(repeatGroup);
     if (!fieldElement){
-        return null;
+        fieldElement = getIndexedFields().find(fieldElement => {
+            const repeatInfo = getKeywordRepeatInfo(fieldElement);
+            return (repeatInfo.repeatGroup === repeatGroup);
+        });
+        if (!fieldElement){
+            return null;
+        }
+
+        return [...document.querySelectorAll("button")]
+            .filter(buttonElement => {
+                const label = buttonElement.getAttribute("aria-label") || "";
+                return label.includes("Remove");
+            })
+            .at(-1);
     }
 
     const containerElement = fieldElement.closest("div[style*='margin-bottom']");
@@ -99,7 +165,10 @@ function findRemoveButton(repeatGroup){
     }
 
     return [...containerElement.querySelectorAll("button")]
-        .find(buttonElement =>buttonElement.textContent.trim()=== "X");
+    .find(buttonElement => {
+        const label = buttonElement.getAttribute("aria-label") || "";
+        return (buttonElement.textContent.trim() === "X"||label.includes("Remove"));
+    });
 }
 
 async function removeExtraRepeatSections(importRows){
@@ -107,19 +176,23 @@ async function removeExtraRepeatSections(importRows){
     const currentRepeatCounts = getCurrentRepeatCounts();
 
     for (const [repeatGroup, currentCount] of Object.entries(currentRepeatCounts)){
-        const requiredCount = requiredRepeatCounts[repeatGroup] || 0;
+        if (!(repeatGroup in requiredRepeatCounts)){
+            continue;
+        }
+        const requiredCount = requiredRepeatCounts[repeatGroup];
         const extraCount = currentCount - requiredCount;
-
+        console.log(repeatGroup,{currentCount,requiredCount,extraCount});
         if (extraCount <= 0){
             continue;
         }
-
+        let removedCount = 0;
         for (let index = 0; index < extraCount; index++){
             const removeButton = findRemoveButton(repeatGroup);
             if (!removeButton){
                 break;
             }
             removeButton.click();
+            removedCount++;
             await new Promise(resolve =>setTimeout(resolve, 50));
         }
 

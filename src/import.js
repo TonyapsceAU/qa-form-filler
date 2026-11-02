@@ -20,6 +20,7 @@ async function importExcel(bufferArray){
         const initialFieldCount = getIndexedFields().length;
         const fillPasses = Math.max(0,importRows.length - initialFieldCount);
         console.log("Import:",{importRows: importRows.length,fields: initialFieldCount,fillPasses});
+        // for(let passIndex=0;passIndex<Math.max(0,importRows.length - getIndexedFields().length)+2;passIndex++){//Expansion Passes + Stabilization + Sync 
         for(let passIndex=0;passIndex<fillPasses+2;passIndex++){//Expansion Passes + Stabilization + Sync 
             console.log("Import pass ",passIndex+1)
             await fillAllVisibleFields(importRows);

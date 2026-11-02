@@ -10,7 +10,8 @@ function collectFormData() {
                 value: getFieldValue(fieldElement),
                 fieldId: fieldElement.id || "",
                 fieldName: fieldElement.name || "",
-                fieldType: fieldElement.tagName
+                fieldType: fieldElement.tagName,
+                fieldElement
             });
         });
 
@@ -20,7 +21,10 @@ function collectFormData() {
 function exportToExcel(){
     const formData = collectFormData();
     const exportRows = formData.map(fieldData => {
-        const repeatInfo = getRepeatInfo(fieldData.fieldName);
+        let repeatInfo = getRepeatInfo(fieldData.fieldName);
+        if (!repeatInfo.repeatGroup){
+            repeatInfo = getKeywordRepeatInfo(fieldData.fieldElement);
+        }
         return {
             [EXPORT_COLUMNS.NO]:fieldData.questionNo,
             [EXPORT_COLUMNS.SECTION]:fieldData.section,
