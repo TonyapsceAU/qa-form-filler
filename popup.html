@@ -16,7 +16,8 @@
         <hr>
         <button id="exportBtn"> Export Excel</button>
         <button id="importBtn"> Import Excel</button>
-        <button id="fillBtn"> Fill Form</button>
+        <h4>Saved Test Cases</h4>
+        <div id="testCaseList"></div>
         <input
             type="file"
             id="importFile"
@@ -24,8 +25,11 @@
             style="display:none"
         />
         <div id="importInfo"></div>
+        <button id="fillBtn"> Fill Form</button>
         <pre id="resultContainer"></pre>
         <script src="lib/xlsx.full.min.js"></script>
+        <script src="src/constants.js"></script>
+        <script src="src/storage.js"></script>
         <script src="popup.js"></script>
     </body>
 </html>

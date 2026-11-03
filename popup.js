@@ -1,27 +1,12 @@
-const ELEMENT_IDS = {
-    SCAN_BUTTON: "scanBtn",
-    RESULT_CONTAINER: "resultContainer",
-    HIGHLIGHT_BUTTON: "highlightModeBtn",
-    CLEAR_HIGHLIGHT_BUTTON: "clearhighlightBtn",
-    EXPORT_BUTTON: "exportBtn",
-    IMPORT_BUTTON: "importBtn",
-    IMPORT_FILE_INPUT: "importFile",
-    IMPORT_INFO: "importInfo",
-    FILL_BUTTON: "fillBtn"
-};
-
-const ACTIONS = {
-    SCAN_FORM: "scanForm",
-    HIGHLIGHT_FORM: "highlightForm",
-    CLEAR_HIGHLIGHT: "clearHighlight",
-    EXPORT_EXCEL: "exportExcel",
-    FILL_FORM: "fillForm"
-};
-
-// console.log("[SYSTEM]",getBrowserName());
 document.addEventListener(
     "DOMContentLoaded",
-    () => {
+    async () => {
+        // console.log("[SYSTEM]",getBrowserName());
+        // const testCases = await getTestCases();
+        // console.log("[STORAGE] Test Cases");
+        // console.log(testCases);
+        // console.table(Object.keys(testCases));
+
         const scanBtn = document.getElementById(ELEMENT_IDS.SCAN_BUTTON);
         const highlightModeBtn = document.getElementById(ELEMENT_IDS.HIGHLIGHT_BUTTON);
         const clearHighlightBtn = document.getElementById(ELEMENT_IDS.CLEAR_HIGHLIGHT_BUTTON);
@@ -45,10 +30,11 @@ document.addEventListener(
                     📄 Previously Loaded File:
                     <b>${loadedFile}</b>
                     <br>
-                    <small>Please import again before filling./small>
+                    <small>Please import again before filling.</small>
                 </div>
             `;
         }
+        
         scanBtn.addEventListener(
             "click",
             async () => {
@@ -190,6 +176,9 @@ document.addEventListener(
                 const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                 loadedImportRows = XLSX.utils.sheet_to_json(worksheet);
                 loadedFileName = file.name;
+                await saveTestCase(loadedFileName,loadedImportRows);
+                // await debugStorage();
+                await renderTestCaseList();
                 if (importInfo){
                     importInfo.innerHTML = `
                         <div style="
@@ -212,32 +201,22 @@ document.addEventListener(
         fillBtn.addEventListener(
             "click",
             async () => {
-
                 if (!loadedImportRows || loadedImportRows.length === 0){
                     alert("Please load an Excel file first.");
                     return;
                 }
-
-                const [tab] =
-                    await chrome.tabs.query({
-                        active: true,
-                        currentWindow: true
-                    });
-
+                const [tab] = await chrome.tabs.query({active: true,currentWindow: true});
                 await chrome.tabs.sendMessage(
                     tab.id,
                     {
-                        action:
-                            ACTIONS.FILL_FORM,
-
-                        importRows:
-                            loadedImportRows,
-
-                        fileName:
-                            loadedFileName
+                        action: ACTIONS.FILL_FORM,
+                        importRows: loadedImportRows,
+                        fileName: loadedFileName
                     }
                 );
 
             }
         );
+
+        await renderTestCaseList();
     });

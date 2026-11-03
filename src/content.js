@@ -15,10 +15,6 @@ chrome.runtime.onMessage.addListener(
                         exportToExcel();
                         sendResponse({success: true});
                         break;
-                    // case ACTIONS.IMPORT_EXCEL:
-                    //     await importExcel(request.buffer);
-                    //     sendResponse({success: true});
-                    //     break;
                     case ACTIONS.FILL_FORM:
                         await fillImportedRows(
                             request.importRows,

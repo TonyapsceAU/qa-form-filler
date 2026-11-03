@@ -7,6 +7,19 @@ const ACTIONS = {
     FILL_FORM: "fillForm"
 };
 
+const ELEMENT_IDS = {
+    SCAN_BUTTON: "scanBtn",
+    RESULT_CONTAINER: "resultContainer",
+    HIGHLIGHT_BUTTON: "highlightModeBtn",
+    CLEAR_HIGHLIGHT_BUTTON: "clearhighlightBtn",
+    EXPORT_BUTTON: "exportBtn",
+    IMPORT_BUTTON: "importBtn",
+    IMPORT_FILE_INPUT: "importFile",
+    IMPORT_INFO: "importInfo",
+    FILL_BUTTON: "fillBtn",
+    TEST_CASE_LIST: "testCaseList"
+};
+
 const EXPORT_COLUMNS = {
     NO: "No",
     SECTION: "Section",
@@ -57,3 +70,5 @@ const DEBUG_KEYWORDS = false;
 
 let loadedImportRows = [];
 let loadedFileName = "";
+
+const STORAGE_KEYS = {TEST_CASES: "testCases",ACTIVE_TEST_CASE: "activeTestCase"};

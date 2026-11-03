@@ -2,6 +2,55 @@
 
 All notable changes to this project will be documented in this file.
 
+# v1.4.0 - Test Case Storage Foundation
+
+## Features
+
+### Import / Fill Separation
+
+- Split the previous Import workflow into two independent actions:
+  - Import Excel
+  - Fill Form
+- Imported Excel files are now loaded into memory before form filling.
+- Added a dedicated Fill Form button.
+
+### Test Case Storage
+
+- Added persistent test case storage using Chrome Storage.
+- Imported Excel files are now automatically saved as test cases.
+- Added storage APIs for saving and retrieving test cases.
+- Established the foundation for future multiple test case management.
+
+### Import Information
+
+- Added loaded file display in popup.
+- Added row count display for imported Excel data.
+- Improved visibility of currently loaded test cases.
+
+## Improvements
+
+- Improved architecture by separating file processing from form filling.
+- Simplified future implementation of:
+  - Multiple test cases
+  - Saved test case management
+  - Folder import
+  - Test case libraries
+
+## Refactoring
+
+- Added storage.js module.
+- Added STORAGE_KEYS configuration constants.
+- Deprecated direct Excel-to-form workflow.
+- Refactored import flow to support future storage-based operations.
+
+## Known Issues
+
+- Test case selection UI is under development.
+- Stored test cases are currently accessible through storage APIs only.
+- Folder import and multi-file import are planned for future releases.
+
+---
+
 ## v1.3.1 - Import Workflow Refactoring
 
 ### Improvements
