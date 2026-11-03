@@ -25,12 +25,6 @@ function exportToExcel(){
     const formData = collectFormData();
     console.log("Fields Found:",formData.length);
     console.log("[EXPORT] Processing Repeat Sections");
-    // console.table(
-    //     formData.filter(
-    //         x => x.questionNo >= 10 &&
-    //             x.questionNo <= 20
-    //     )
-    // );
     const exportRows = formData.map(fieldData => {
         let repeatInfo = getRepeatInfo(fieldData.fieldName);
         if (!repeatInfo.repeatGroup){
@@ -90,10 +84,13 @@ function exportToExcel(){
     console.log("Rows:",exportRows.length);
     
     console.log("[EXPORT] Saving Workbook");
-    XLSX.writeFile(
-        workbook,
-        `QA_.xlsx`
-    );
+    const defaultFileName = `QA_${new Date().toISOString().slice(0,10)}`;
+    const inputFileName = prompt("Enter file name:",defaultFileName);
+    if (!inputFileName){
+        return;
+    }
+    const fileName = inputFileName.endsWith(".xlsx")? inputFileName: `${inputFileName}.xlsx`;
+    XLSX.writeFile(workbook,fileName);
     console.log("[EXPORT] Complete");
     console.groupEnd();
 }

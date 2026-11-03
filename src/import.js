@@ -56,12 +56,24 @@ async function importExcel(bufferArray){
             durationMs: Date.now() - startTime
         });
         alert(`Excel Import Complete (${importRows.length} import Rows)`);
+
+        //Validation Check
+        let mismatches = validateImportStructure(importRows);
+        console.log("[VALIDATION]",{mismatchCount:mismatches.length});
+        if (mismatches.length){
+            console.warn("[VALIDATION] Structure Mismatch");
+            console.table(mismatches.slice(0,10));
+            const fileName = localStorage.getItem("lastImportedFile") || "Unknown.xlsx";
+            showValidationError(fileName,mismatches.length);
+        }
     }catch(error){
         console.error("[IMPORT] Failed",error);
         throw error;
     }finally{
         console.groupEnd();
-        hideImportOverlay();
+        if (!validationFailed){
+            hideImportOverlay();
+        }
     }
 }
 

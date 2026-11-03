@@ -13,9 +13,10 @@ const ELEMENT_IDS = {
     CLEAR_HIGHLIGHT_BUTTON: "clearhighlightBtn",
     EXPORT_BUTTON: "exportBtn",
     IMPORT_BUTTON: "importBtn",
-    IMPORT_FILE_INPUT: "importFile"
+    IMPORT_FILE_INPUT: "importFile",
+    IMPORT_INFO: "importInfo"
 };
-
+let importedFileName = "";
 document.addEventListener(
     "DOMContentLoaded",
     () => {
@@ -27,7 +28,22 @@ document.addEventListener(
 
         const resultContainer = document.getElementById(ELEMENT_IDS.RESULT_CONTAINER);
         const importFileInput = document.getElementById(ELEMENT_IDS.IMPORT_FILE_INPUT);
+        const importInfo = document.getElementById(ELEMENT_IDS.IMPORT_INFO);
+        const lastImportedFile = localStorage.getItem("lastImportedFile");
 
+        if (importInfo && lastImportedFile){
+            importInfo.innerHTML = `
+                <div style="
+                    margin:8px 0;
+                    padding:8px;
+                    border-radius:4px;
+                    background:#f0f8ff;
+                ">
+                    📄 Last Imported File:
+                    <b>${lastImportedFile}</b>
+                </div>
+            `;
+        }
         scanBtn.addEventListener(
             "click",
             async () => {
@@ -161,7 +177,8 @@ document.addEventListener(
                 if (!file) {
                     return;
                 }
-
+                importedFileName = file.name;
+                localStorage.setItem("lastImportedFile",importedFileName);
                 const buffer = await file.arrayBuffer();
 
                 const [tab] =
@@ -179,4 +196,5 @@ document.addEventListener(
                 );
             }
         );
+
     });

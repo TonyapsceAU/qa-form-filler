@@ -126,7 +126,7 @@ async function expandRepeatSections(importRows){
         for (let repeatIndex = 0;repeatIndex < missingRepeatCount;repeatIndex++){
             let addButton = findAddButton(repeatGroup);
             if (!addButton){
-                console.warn("[WARN] Cannot find add button",,repeatGroup);
+                console.warn("[WARN] Cannot find add button",repeatGroup);
                 return;
             }
             // console.log("Before expand",repeatGroup,getCurrentRepeatCounts());

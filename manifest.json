@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "QA Form Filler",
-    "version": "1.2.2",
+    "version": "1.3.0",
     "permissions": [
         "activeTab",
         "tabs"
@@ -34,6 +34,7 @@
                 "src/highlight.js",
                 "src/export.js",
                 "src/overlay.js",
+                "src/validate.js",
                 "src/import.js",
                 "src/content.js"
             ]

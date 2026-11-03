@@ -80,3 +80,71 @@ function updateImportProgress(current,total,statusText = "Importing Excel..."){
     progressText.textContent = `${percentage}% (${current}/${total})`;
     statusElement.textContent = statusText;
 }
+
+function showValidationError(fileName,mismatchCount){
+    console.log("hi")
+    const overlayElement = document.getElementById(IMPORT_OVERLAY_ID);
+    if (!overlayElement){
+        return;
+    }
+
+    overlayElement.innerHTML = `
+        <div style="
+            background:white;
+            padding:24px 32px;
+            border-radius:8px;
+            max-width:500px;
+            box-shadow:0 4px 12px rgba(0,0,0,.3);
+        ">
+            <div style="
+                color:#d32f2f;
+                font-size:20px;
+                font-weight:bold;
+                margin-bottom:16px;
+            ">
+                ⚠ Structure Validation Failed
+            </div>
+
+            <div style="margin-bottom:8px;">
+                <b>File:</b><br>
+                ${fileName}
+            </div>
+
+            <div style="margin-bottom:8px;">
+                <b>Detected:</b><br>
+                ${mismatchCount} field mismatches
+            </div>
+
+            <div style="
+                margin-top:16px;
+                color:#444;
+                line-height:1.5;
+            ">
+                This Excel file does not match the current APWMS form structure.
+                <br><br>
+                Please export a fresh template from APWMS and re-enter the data.
+            </div>
+
+            <div style="
+                margin-top:20px;
+                text-align:right;
+            ">
+                <button
+                    id="qa-validation-close"
+                    style="
+                        padding:8px 16px;
+                        border:none;
+                        border-radius:4px;
+                        background:#1976d2;
+                        color:white;
+                        cursor:pointer;
+                    "
+                >
+                    OK
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.getElementById("qa-validation-close")?.addEventListener("click",hideImportOverlay);
+}

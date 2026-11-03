@@ -1,6 +1,29 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+# v1.3.0 - Import Validation & Usability Improvements
+
+## New Features
+
+### Custom Export File Names
+
+- Added support for custom Excel file names during export.
+- Users can now specify a file name before saving exported data.
+
+### Import File Tracking
+
+- Added display of the most recently imported Excel file.
+- Last imported file name is retained to assist with troubleshooting and validation.
+
+### Excel Structure Validation
+
+- Added structure validation during Excel import.
+- Detects mismatches between the imported Excel template and the current APWMS form structure.
+- Added field mapping mismatch reporting to help identify compatibility issues after APWMS form updates.
+
+---
+
 ## v1.2.2
 
 ### Improvements
