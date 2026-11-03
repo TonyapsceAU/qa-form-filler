@@ -1,30 +1,45 @@
 console.log("QA Form Filler Loaded");
 chrome.runtime.onMessage.addListener(
     (request,_sender,sendResponse) => {
-        switch (request.action) {
-            case ACTIONS.SCAN_FORM:
-                sendResponse(scanForm());
-                break;
-            case ACTIONS.HIGHLIGHT_FORM:
-                enableHighlightMode();
-                sendResponse({success: true});
-                break;
-            case ACTIONS.EXPORT_EXCEL:
-                exportToExcel();
-                sendResponse({success: true});
-                break;
-            case ACTIONS.IMPORT_EXCEL:
-                importExcel(request.buffer);
-                sendResponse({success: true});
-                break;
-            case ACTIONS.CLEAR_HIGHLIGHT:
-                disableHighlightMode();
-                sendResponse({success: true});
-                break;
-            default:
-                console.warn("Unknown action:",request.action);
-                break;
-        }
+        (async () => {
+            try {
+                switch (request.action) {
+                    case ACTIONS.SCAN_FORM:
+                        sendResponse(scanForm());
+                        break;
+                    case ACTIONS.HIGHLIGHT_FORM:
+                        enableHighlightMode();
+                        sendResponse({success: true});
+                        break;
+                    case ACTIONS.EXPORT_EXCEL:
+                        exportToExcel();
+                        sendResponse({success: true});
+                        break;
+                    // case ACTIONS.IMPORT_EXCEL:
+                    //     await importExcel(request.buffer);
+                    //     sendResponse({success: true});
+                    //     break;
+                    case ACTIONS.FILL_FORM:
+                        await fillImportedRows(
+                            request.importRows,
+                            request.fileName
+                        );
+                        sendResponse({success: true});
+                        break;
+                    case ACTIONS.CLEAR_HIGHLIGHT:
+                        disableHighlightMode();
+                        sendResponse({success: true});
+                        break;
+                    default:
+                        console.warn("Unknown action:",request.action);
+                        sendResponse({success: false,error: `Unknown action: ${request.action}`});
+                        break;
+                }
+            }catch(error){
+                console.error(error);
+                sendResponse({success: false,error: error.message});
+            }
+        })();
         return true;
     }
 );

@@ -8,7 +8,7 @@
 
     <body>
         <h3>QA Form Filler</h3>
-        <div class="toolRow"></div>
+        <div class="toolRow">
             <button id="scanBtn"> Scan Form</button>
             <button id="highlightModeBtn"> Highlight</button>
             <button id="clearhighlightBtn"> Clear Highlight</button>
@@ -16,6 +16,7 @@
         <hr>
         <button id="exportBtn"> Export Excel</button>
         <button id="importBtn"> Import Excel</button>
+        <button id="fillBtn"> Fill Form</button>
         <input
             type="file"
             id="importFile"
@@ -24,6 +25,7 @@
         />
         <div id="importInfo"></div>
         <pre id="resultContainer"></pre>
+        <script src="lib/xlsx.full.min.js"></script>
         <script src="popup.js"></script>
     </body>
 </html>

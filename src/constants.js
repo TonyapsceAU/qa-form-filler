@@ -1,9 +1,10 @@
 const ACTIONS = {
     SCAN_FORM: "scanForm",
     HIGHLIGHT_FORM: "highlightForm",
+    CLEAR_HIGHLIGHT: "clearHighlight",
     EXPORT_EXCEL: "exportExcel",
-    IMPORT_EXCEL: "importExcel",
-    CLEAR_HIGHLIGHT: "clearHighlight"
+    // IMPORT_EXCEL: "importExcel",
+    FILL_FORM: "fillForm"
 };
 
 const EXPORT_COLUMNS = {
@@ -53,3 +54,6 @@ const DEBUG_REPEAT = false;
 const DEBUG_LABELS = false;
 const DEBUG_HIGHLIGHT = false;
 const DEBUG_KEYWORDS = false;
+
+let loadedImportRows = [];
+let loadedFileName = "";

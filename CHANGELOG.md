@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## v1.3.1 - Import Workflow Refactoring
+
+### Improvements
+
+- Split Excel import and form filling into separate actions.
+- Added dedicated `Fill Form` button.
+- Added in-memory storage for imported Excel data.
+- Added loaded file information display in popup.
+- Added validation to prevent filling before a file is loaded.
+
+### Refactoring
+
+- Decoupled Excel loading from form filling workflow.
+- Introduced `FILL_FORM` action for future test case management features.
+- Prepared application architecture for multiple test case support.
+
+### Known Issues
+
+- Excel parsing in popup currently requires SheetJS (`xlsx.full.min.js`) to be loaded in popup context.
+
+---
+
 # v1.3.0 - Import Validation & Usability Improvements
 
 ## New Features

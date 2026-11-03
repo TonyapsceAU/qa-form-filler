@@ -1,11 +1,3 @@
-const ACTIONS = {
-    SCAN_FORM: "scanForm",
-    HIGHLIGHT_FORM: "highlightForm",
-    CLEAR_HIGHLIGHT: "clearHighlight",
-    EXPORT_EXCEL: "exportExcel",
-    IMPORT_EXCEL: "importExcel"
-};
-
 const ELEMENT_IDS = {
     SCAN_BUTTON: "scanBtn",
     RESULT_CONTAINER: "resultContainer",
@@ -14,9 +6,19 @@ const ELEMENT_IDS = {
     EXPORT_BUTTON: "exportBtn",
     IMPORT_BUTTON: "importBtn",
     IMPORT_FILE_INPUT: "importFile",
-    IMPORT_INFO: "importInfo"
+    IMPORT_INFO: "importInfo",
+    FILL_BUTTON: "fillBtn"
 };
-let importedFileName = "";
+
+const ACTIONS = {
+    SCAN_FORM: "scanForm",
+    HIGHLIGHT_FORM: "highlightForm",
+    CLEAR_HIGHLIGHT: "clearHighlight",
+    EXPORT_EXCEL: "exportExcel",
+    FILL_FORM: "fillForm"
+};
+
+// console.log("[SYSTEM]",getBrowserName());
 document.addEventListener(
     "DOMContentLoaded",
     () => {
@@ -25,13 +27,14 @@ document.addEventListener(
         const clearHighlightBtn = document.getElementById(ELEMENT_IDS.CLEAR_HIGHLIGHT_BUTTON);
         const exportBtn = document.getElementById(ELEMENT_IDS.EXPORT_BUTTON);
         const importBtn = document.getElementById(ELEMENT_IDS.IMPORT_BUTTON);
+        const fillBtn = document.getElementById(ELEMENT_IDS.FILL_BUTTON);
 
         const resultContainer = document.getElementById(ELEMENT_IDS.RESULT_CONTAINER);
         const importFileInput = document.getElementById(ELEMENT_IDS.IMPORT_FILE_INPUT);
         const importInfo = document.getElementById(ELEMENT_IDS.IMPORT_INFO);
-        const lastImportedFile = localStorage.getItem("lastImportedFile");
+        const loadedFile = localStorage.getItem("loadedFile");
 
-        if (importInfo && lastImportedFile){
+        if (importInfo && loadedFile){
             importInfo.innerHTML = `
                 <div style="
                     margin:8px 0;
@@ -39,8 +42,10 @@ document.addEventListener(
                     border-radius:4px;
                     background:#f0f8ff;
                 ">
-                    📄 Last Imported File:
-                    <b>${lastImportedFile}</b>
+                    📄 Previously Loaded File:
+                    <b>${loadedFile}</b>
+                    <br>
+                    <small>Please import again before filling./small>
                 </div>
             `;
         }
@@ -177,9 +182,41 @@ document.addEventListener(
                 if (!file) {
                     return;
                 }
-                importedFileName = file.name;
-                localStorage.setItem("lastImportedFile",importedFileName);
+                loadedFileName = file.name;
+                localStorage.setItem("loadedFile",loadedFileName);
                 const buffer = await file.arrayBuffer();
+
+                const workbook = XLSX.read(buffer);
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                loadedImportRows = XLSX.utils.sheet_to_json(worksheet);
+                loadedFileName = file.name;
+                if (importInfo){
+                    importInfo.innerHTML = `
+                        <div style="
+                            margin:8px 0;
+                            padding:8px;
+                            border-radius:4px;
+                            background:#f0f8ff;
+                        ">
+                            📄 Loaded File:
+                            <b>${loadedFileName}</b>
+                            <br>
+                            Rows:
+                            <b>${loadedImportRows.length}</b>
+                        </div>
+                    `;
+                }
+            }
+        );
+
+        fillBtn.addEventListener(
+            "click",
+            async () => {
+
+                if (!loadedImportRows || loadedImportRows.length === 0){
+                    alert("Please load an Excel file first.");
+                    return;
+                }
 
                 const [tab] =
                     await chrome.tabs.query({
@@ -190,11 +227,17 @@ document.addEventListener(
                 await chrome.tabs.sendMessage(
                     tab.id,
                     {
-                        action: ACTIONS.IMPORT_EXCEL,
-                        buffer: Array.from(new Uint8Array(buffer))
+                        action:
+                            ACTIONS.FILL_FORM,
+
+                        importRows:
+                            loadedImportRows,
+
+                        fileName:
+                            loadedFileName
                     }
                 );
+
             }
         );
-
     });

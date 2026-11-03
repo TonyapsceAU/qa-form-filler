@@ -1,15 +1,22 @@
 async function importExcel(bufferArray){
+    throw new Error("Deprecated: use fillImportedRows()");
+}
+
+
+
+async function fillImportedRows(importRows,fileName){
     const startTime = Date.now();
+    let keepOverlayOpen = false;
     console.group("[IMPORT] Start");
     showImportOverlay();
     await new Promise(resolve =>setTimeout(resolve,50));
     try{
-        // Load datas
-        const buffer = new Uint8Array(bufferArray).buffer;
-        const workbook = XLSX.read(buffer);
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const importRows = XLSX.utils.sheet_to_json(worksheet);
-        console.log("Workbook Loaded",{rows: importRows.length});
+        // // Load datas
+        // const buffer = new Uint8Array(bufferArray).buffer;
+        // const workbook = XLSX.read(buffer);
+        // const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        // const importRows = XLSX.utils.sheet_to_json(worksheet);
+        // console.log("Workbook Loaded",{rows: importRows.length});
 
         // Synchronization
         console.group("[REPEAT] Synchronization");
@@ -65,13 +72,14 @@ async function importExcel(bufferArray){
             console.table(mismatches.slice(0,10));
             const fileName = localStorage.getItem("lastImportedFile") || "Unknown.xlsx";
             showValidationError(fileName,mismatches.length);
+            keepOverlayOpen = true;
         }
     }catch(error){
         console.error("[IMPORT] Failed",error);
         throw error;
     }finally{
         console.groupEnd();
-        if (!validationFailed){
+        if (!keepOverlayOpen){
             hideImportOverlay();
         }
     }

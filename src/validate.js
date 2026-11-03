@@ -1,8 +1,5 @@
 function validateImportStructure(importRows){
-
-    const fieldElements =
-        getIndexedFields();
-
+    const fieldElements = getIndexedFields();
     const mismatches = [];
 
     importRows.forEach(importRow => {
