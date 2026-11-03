@@ -1,6 +1,26 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## v1.2.2
+
+### Improvements
+
+- Standardized import/export logging format
+- Added structured logging for import, export, repeat section handling and field filling
+- Improved warning and error message consistency
+- Centralized debug configuration in constants.js
+- Added configurable debug flags:
+  - DEBUG_REPEAT
+  - DEBUG_LABELS
+  - DEBUG_HIGHLIGHT
+  - DEBUG_KEYWORDS
+
+### Maintenance
+
+- Removed temporary debugging logs used during repeat section investigation
+- Improved code readability and troubleshooting workflow
+
+---
 
 ## v1.2.1
 
@@ -35,6 +55,7 @@ All notable changes to this project will be documented in this file.
 - Centralized constants and simplified action handling
 - Standardized naming conventions
 
+---
 
 ## v1.2.0
 

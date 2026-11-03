@@ -39,10 +39,8 @@ async function importExcel(bufferArray){
         console.log("[FILL] Planning",{importRows: importRows.length,fields: initialFieldCount,maxfillPasses});
         let passIndex=0;
         while(passIndex<(Math.max(0,importRows.length - getIndexedFields().length))){//Expansion Passes + Stabilization + Sync 
-        // for(let passIndex=0;passIndex<maxfillPasses+2;passIndex++){//Expansion Passes + Stabilization + Sync 
             await fillAllVisibleFields(importRows);
             passIndex++
-            // console.log((Math.max(0,importRows.length - getIndexedFields().length)+3));
             console.log(`[FILL] Pass ${passIndex}`,{
                 fields:getIndexedFields().length,
                 remaining:Math.max(0,importRows.length - getIndexedFields().length)
@@ -68,17 +66,11 @@ async function importExcel(bufferArray){
 }
 
 async function fillAllVisibleFields(importRows){
-    console.log(
-        "fillAllVisibleFields",
-        getCurrentRepeatCounts()
-    );
+    console.groupCollapsed("[FILL]");
+    console.log("Repeat Counts:",getCurrentRepeatCounts());
     for(let rowIndex = 0; rowIndex < importRows.length; rowIndex++){
         try{
             const fieldElements = getIndexedFields();
-            const beforeCounts =
-                JSON.stringify(
-                    getCurrentRepeatCounts()
-                );
             const importRow = importRows[rowIndex];
             const fieldIndex = Number(importRow[EXPORT_COLUMNS.NO]);
             if (Number.isNaN(fieldIndex)){
@@ -87,7 +79,7 @@ async function fillAllVisibleFields(importRows){
 
             const fieldElement = fieldElements[fieldIndex];
             if (!fieldElement){
-                console.log("Hidden field encountered at ",fieldIndex);
+                console.warn("[FILL] Hidden Field",{rowIndex,fieldIndex});
                 break;
             }
 
@@ -123,7 +115,6 @@ async function fillAllVisibleFields(importRows){
             }else{                                          // Normal Input
                 fieldElement.value = value;
             }
-
             fieldElement.dispatchEvent(new Event("input",{ bubbles:true }));
             fieldElement.dispatchEvent(new Event("change",{ bubbles:true }));
             fieldElement.dispatchEvent(new Event("blur",{ bubbles:true }));
@@ -132,32 +123,14 @@ async function fillAllVisibleFields(importRows){
                 updateImportProgress(rowIndex + 1,importRows.length,"Filling Form Fields...");
                 await new Promise(resolve => setTimeout(resolve, 0));
             }
-            const afterCounts =
-                JSON.stringify(
-                    getCurrentRepeatCounts()
-                );
-
-            if (beforeCounts !== afterCounts){
-                console.log(
-                    rowIndex,
-                    importRows[rowIndex]
-                );
-                console.log(
-                        getCurrentRepeatCounts()
-                    );
-                console.warn(
-                    "Repeat count changed!",
-                    {
-                        rowIndex,
-                        row: importRows[rowIndex],
-                        beforeCounts,
-                        afterCounts
-                    }
-                );
-            }
-
         }catch(error){
-            console.error("Import Error:",importRow,error);
+            console.error("[FILL] Row Failed",{rowIndex,field: importRow?.[EXPORT_COLUMNS.FIELD],error});
         }
     }
+    console.log("[FILL] Complete",{
+        rows: importRows.length,
+        fields: getIndexedFields().length,
+        repeatCounts: getCurrentRepeatCounts()
+    });
+    console.groupEnd();
 }

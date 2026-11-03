@@ -101,6 +101,9 @@ function getFieldLabelFromHeader(fieldElement){
         }
         headerRowElement = headerRowElement.previousElementSibling;
     }
+    if (DEBUG_LABELS){
+        console.warn("[LABEL] Unable to resolve field label",fieldElement);
+    }
     return "";
 }
 
