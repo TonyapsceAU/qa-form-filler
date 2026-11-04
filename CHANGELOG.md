@@ -2,6 +2,53 @@
 
 All notable changes to this project will be documented in this file.
 
+## v1.5.0 - Multi Test Case Support
+
+### Added
+
+#### Test Case Management
+
+- Added persistent test case storage using Chrome Storage.
+- Added saved test case list in popup.
+- Added Load button for loading saved test cases.
+- Added Delete button for removing saved test cases.
+- Added support for managing multiple saved test cases.
+- Added loaded test case information display.
+
+#### Multi File Import
+
+- Added support for importing multiple Excel files simultaneously.
+- Automatically creates and stores test cases from imported files.
+- Refreshes test case list automatically after import.
+
+#### Workflow Improvements
+
+- Separated Excel import from form filling.
+- Added dedicated Fill Form button.
+- Added ability to reuse previously imported test cases without re-importing files.
+
+### Improved
+
+- Reduced repetitive Excel imports during QA testing.
+- Improved test case reusability.
+- Improved popup workflow and usability.
+- Improved visibility of currently loaded test cases.
+
+### Refactored
+
+- Introduced storage layer abstraction (`storage.js`).
+- Added test case storage APIs.
+- Added active test case loading workflow.
+- Refactored import process to support future test case management features.
+
+### Fixed
+
+- Improved popup state management after imports.
+- Improved handling of imported test case information.
+- Improved test case persistence across popup sessions.
+
+---
+
 # v1.4.0 - Test Case Storage Foundation
 
 ## Features

@@ -164,19 +164,20 @@ document.addEventListener(
         importFileInput.addEventListener(
             "change",
             async (e) => {
-                const file = e.target.files?.[0];
-                if (!file) {
+                const files = [...e.target.files];
+                if (files.length === 0) {
                     return;
                 }
-                loadedFileName = file.name;
+                for (const file of files){
+                    const buffer = await file.arrayBuffer();
+                    const workbook = XLSX.read(buffer);
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    loadedImportRows = XLSX.utils.sheet_to_json(worksheet);
+                    loadedFileName = file.name;
+                    await saveTestCase(loadedFileName,loadedImportRows);
+                }
                 localStorage.setItem("loadedFile",loadedFileName);
-                const buffer = await file.arrayBuffer();
-
-                const workbook = XLSX.read(buffer);
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                loadedImportRows = XLSX.utils.sheet_to_json(worksheet);
-                loadedFileName = file.name;
-                await saveTestCase(loadedFileName,loadedImportRows);
+                
                 // await debugStorage();
                 await renderTestCaseList();
                 if (importInfo){
@@ -187,11 +188,12 @@ document.addEventListener(
                             border-radius:4px;
                             background:#f0f8ff;
                         ">
-                            📄 Loaded File:
-                            <b>${loadedFileName}</b>
+                            📁 Imported:
+                            <b>${files.length}</b>
+                            Test Cases
                             <br>
-                            Rows:
-                            <b>${loadedImportRows.length}</b>
+                            Last Loaded:
+                            <b>${loadedFileName}</b>
                         </div>
                     `;
                 }

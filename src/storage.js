@@ -35,10 +35,39 @@ async function renderTestCaseList(){
         const row = document.createElement("div");
         row.style.marginBottom = "4px";
         row.innerHTML = `
-            <button class="load-test-case" data-file="${testCase.fileName}" >
-                Load
-            </button>
-            ${testCase.fileName}
+            <div style="
+                display:flex;
+                align-items:center;
+                gap:8px;
+                width:100%;
+            ">
+                <button
+                    class="load-test-case"
+                    data-file="${testCase.fileName}"
+                >
+                    Load
+                </button>
+
+                <span style="
+                    flex:1;
+                    overflow:hidden;
+                    text-overflow:ellipsis;
+                    white-space:nowrap;
+                ">
+                    ${testCase.fileName}
+                </span>
+
+                <button
+                    class="delete-test-case"
+                    style="
+                        margin-left:auto;
+                        background:#dc3545;
+                        color:white;
+                    "
+                >
+                    🗑
+                </button>
+            </div>
         `;
         const loadButton = row.querySelector(".load-test-case");
         loadButton.addEventListener(
@@ -54,6 +83,40 @@ async function renderTestCaseList(){
                 `;
             }
         );
+
+        const deleteButton = row.querySelector(".delete-test-case");
+        deleteButton.addEventListener(
+            "click",
+            async () => {
+                if (!confirm(`Delete "${testCase.fileName}" ?`)){
+                    return;
+                }
+                await deleteTestCase(testCase.fileName);
+                await renderTestCaseList();
+
+            }
+        );
         testCaseList.appendChild(row);
     });
+}
+
+async function deleteTestCase(fileName){
+
+    const result =
+        await chrome.storage.local.get(
+            STORAGE_KEYS.TEST_CASES
+        );
+
+    const testCases =
+        result[
+            STORAGE_KEYS.TEST_CASES
+        ] || {};
+
+    delete testCases[fileName];
+
+    await chrome.storage.local.set({
+        [STORAGE_KEYS.TEST_CASES]:
+            testCases
+    });
+
 }

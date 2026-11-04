@@ -91,6 +91,13 @@ function exportToExcel(){
     }
     const fileName = inputFileName.endsWith(".xlsx")? inputFileName: `${inputFileName}.xlsx`;
     XLSX.writeFile(workbook,fileName);
+    // const excelBuffer = XLSX.write(workbook,{bookType: "xlsx",type: "array"});
+    // const blob = new Blob(
+    //     [excelBuffer],
+    //     {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
+    // );
+    // const url = URL.createObjectURL(blob);
+    // chrome.downloads.download({url,filename: fileName,saveAs: true});
     console.log("[EXPORT] Complete");
     console.groupEnd();
 }
