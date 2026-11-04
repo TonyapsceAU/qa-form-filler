@@ -85,10 +85,26 @@ pre{
     margin-bottom:4px;
 }
 
-.listName{
-    flex:1;
+.listRowContent {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
 }
 
-.deleteButton{
-    margin-left:auto;
+.listName {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.deleteButton {
+    margin-left: auto;
+    background: #dc3545;
+    color: white;
+}
+
+.fileRow {
+    padding: 4px 0;
 }

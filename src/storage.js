@@ -16,7 +16,6 @@ async function getTestCases(){
     return (result[STORAGE_KEYS.TEST_CASES] || {});
 }
 
-
 async function debugStorage(){
     const data = await chrome.storage.local.get();
     console.log("[STORAGE]",data);
@@ -32,72 +31,66 @@ async function renderTestCaseList(){
     testCaseList.innerHTML = "";
 
     Object.values(testCases).forEach(testCase => {
-        const row = document.createElement("div");
-        row.style.marginBottom = "4px";
-        row.innerHTML = `
-            <div style="
-                display:flex;
-                align-items:center;
-                gap:8px;
-                width:100%;
-            ">
-                <button
-                    class="load-test-case"
-                    data-file="${testCase.fileName}"
-                >
-                    Load
-                </button>
-
-                <span style="
-                    flex:1;
-                    overflow:hidden;
-                    text-overflow:ellipsis;
-                    white-space:nowrap;
-                ">
-                    ${testCase.fileName}
-                </span>
-
-                <button
-                    class="delete-test-case"
-                    style="
-                        margin-left:auto;
-                        background:#dc3545;
-                        color:white;
-                    "
-                >
-                    🗑
-                </button>
-            </div>
-        `;
-        const loadButton = row.querySelector(".load-test-case");
-        loadButton.addEventListener(
-            "click",() => {
-                loadedImportRows = testCase.importRows;
-                loadedFileName = testCase.fileName;
-                importInfo.innerHTML = `
-                    <div class="infoBox">
-                        📄 Loaded File:<b>${loadedFileName}</b>
-                        <br>
-                        Rows:<b>${loadedImportRows.length}</b>
-                    </div>
-                `;
-            }
+        testCaseList.appendChild(
+            createTestCaseRow(testCase)
         );
-
-        const deleteButton = row.querySelector(".delete-test-case");
-        deleteButton.addEventListener(
-            "click",
-            async () => {
-                if (!confirm(`Delete "${testCase.fileName}" ?`)){
-                    return;
-                }
-                await deleteTestCase(testCase.fileName);
-                await renderTestCaseList();
-
-            }
-        );
-        testCaseList.appendChild(row);
     });
+}
+
+function createTestCaseRow(testCase){
+    const row = document.createElement("div");
+    // row.style.marginBottom = "4px";
+    row.className = "listRow";
+    row.innerHTML = `
+        <div class="listRowContent">
+            <button
+                class="load-test-case"
+                data-file="${testCase.fileName}"
+            >
+                Load
+            </button>
+
+            <span class="listName">
+                ${testCase.fileName}
+            </span>
+
+            <button class="delete-test-case deleteButton">
+                🗑
+            </button>
+        </div>
+    `;
+    const loadButton = row.querySelector(".load-test-case");
+    loadButton.addEventListener(
+        "click",() => {
+            loadTestCase(testCase);
+        }
+    );
+
+    const deleteButton = row.querySelector(".delete-test-case");
+    deleteButton.addEventListener(
+        "click",
+        async () => {
+            if (!confirm(`Delete "${testCase.fileName}" ?`)){
+                return;
+            }
+            await deleteTestCase(testCase.fileName);
+            await renderTestCaseList();
+
+        }
+    );
+    return row;
+}
+
+function loadTestCase(testCase){
+    loadedImportRows = testCase.importRows;
+    loadedFileName = testCase.fileName;
+    renderImportInfo(`
+        <div class="infoBox">
+            📄 Loaded File:<b>${loadedFileName}</b>
+            <br>
+            Rows:<b>${loadedImportRows.length}</b>
+        </div>
+    `);
 }
 
 async function deleteTestCase(fileName){
@@ -164,12 +157,73 @@ async function renderSupportFileList(){
     supportFileList.innerHTML = "";
     Object.values(supportFiles)
         .forEach(file => {
-            const row = document.createElement("div");
-            row.innerHTML = `
-                <div style="padding:4px 0;">
-                📄 ${file.name} <small>(${Math.round(file.size / 1024)} KB)</small>
-                </div>
-            `;
-            supportFileList.appendChild(row);
+            supportFileList.appendChild(createSupportFileRow(file));
         });
+}
+
+function createSupportFileRow(file){
+    const row = document.createElement("div");
+    row.className = "listRow";
+    row.innerHTML = `
+        <div class="listRowContent">
+            <button class="load-support-file" >
+                Load
+            </button>
+
+            <span class="listName">
+                ${file.name}
+                <small>
+                    (${Math.round(file.size / 1024)} KB)
+                </small>
+            </span>
+
+            <button class="delete-support-file deleteButton" >
+                🗑
+            </button>
+
+        </div>
+    `;
+
+    const loadButton = row.querySelector(".load-support-file");
+    loadButton.addEventListener("click",() => {
+        loadSupportFile(file);
+    });
+
+    const deleteButton = row.querySelector(".delete-support-file");
+    deleteButton.addEventListener(
+        "click",
+        async () => {
+            if (!confirm(`Delete "${file.name}" ?`)){
+                return;
+            }
+            await deleteSupportFile(file.name);
+            await renderSupportFileList();
+        }
+    );
+
+    return row;
+}
+
+async function loadSupportFile(file){
+    const supportFile = await getSupportFile(file.name);
+    console.log("[SUPPORT FILE]",supportFile);
+    await renderImportInfo(`
+        <div class="infoBox">
+            📄 Loaded Support File:
+            <b>${file.name}</b>
+            <br>
+            Size:
+            <b>${Math.round(file.size / 1024)} KB</b>
+        </div>
+    `);
+}
+
+async function deleteSupportFile(fileName){
+    const result = await chrome.storage.local.get(STORAGE_KEYS.SUPPORT_FILES);
+    const supportFiles = result[STORAGE_KEYS.SUPPORT_FILES] || {};
+    delete supportFiles[fileName];
+    await chrome.storage.local.set({
+        [STORAGE_KEYS.SUPPORT_FILES]:
+            supportFiles
+    });
 }
