@@ -2,6 +2,61 @@
 
 All notable changes to this project will be documented in this file.
 
+# Changelog
+
+## v1.6.0 - Support File Management
+
+### Added
+
+#### Support File Management
+
+- Added support for importing non-Excel files.
+- Added support file storage using Chrome Storage.
+- Added support file listing in popup.
+- Added file reconstruction from stored buffers.
+- Added foundation for future automatic file upload support.
+
+#### Import Workflow
+
+- Import button now supports:
+  - Excel test cases
+  - PDF files
+  - Supporting documents
+- Added support file counters in import summary.
+- Added mixed file import workflow.
+
+### Improved
+
+#### Popup UI
+
+- Added Support Files section.
+- Improved import information display.
+- Improved popup readability and layout.
+- Improved visibility of imported resources.
+
+#### Code Organization
+
+- Extracted Import Info rendering logic.
+- Extracted Scan Result rendering logic.
+- Added shared active tab lookup helper.
+- Moved popup inline styles into CSS classes.
+- Improved popup code consistency and maintainability.
+
+### Refactored
+
+- Simplified popup rendering workflow.
+- Reduced duplicated rendering code.
+- Reduced duplicated tab lookup logic.
+- Improved separation between UI rendering and event handling.
+
+### Foundation Work
+
+- Established Support File Repository architecture.
+- Prepared infrastructure for future Excel-driven file uploads.
+- Prepared infrastructure for automatic file attachment support.
+
+---
+
 ## v1.5.0 - Multi Test Case Support
 
 ### Added
@@ -151,10 +206,10 @@ All notable changes to this project will be documented in this file.
 - Improved warning and error message consistency
 - Centralized debug configuration in constants.js
 - Added configurable debug flags:
-  - DEBUG_REPEAT
-  - DEBUG_LABELS
-  - DEBUG_HIGHLIGHT
-  - DEBUG_KEYWORDS
+  - DEBUG.REPEAT
+  - DEBUG.LABELS
+  - DEBUG.HIGHLIGHT
+  - DEBUG.KEYWORDS
 
 ### Maintenance
 

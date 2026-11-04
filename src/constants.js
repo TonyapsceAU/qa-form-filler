@@ -1,3 +1,4 @@
+// Actions
 const ACTIONS = {
     SCAN_FORM: "scanForm",
     HIGHLIGHT_FORM: "highlightForm",
@@ -7,6 +8,7 @@ const ACTIONS = {
     FILL_FORM: "fillForm"
 };
 
+// Element IDs
 const ELEMENT_IDS = {
     SCAN_BUTTON: "scanBtn",
     RESULT_CONTAINER: "resultContainer",
@@ -17,9 +19,24 @@ const ELEMENT_IDS = {
     IMPORT_FILE_INPUT: "importFile",
     IMPORT_INFO: "importInfo",
     FILL_BUTTON: "fillBtn",
-    TEST_CASE_LIST: "testCaseList"
+    TEST_CASE_LIST: "testCaseList",
+    SUPPORT_FILE_LIST:"supportFileList"
 };
 
+// Storage
+const STORAGE_KEYS = {
+    TEST_CASES: "testCases",
+    SUPPORT_FILES: "supportFiles",
+    ACTIVE_TEST_CASE: "activeTestCase"
+};
+
+// Supported File Types
+const FILE_TYPES = {
+    EXCEL: [".xlsx", ".xls"],
+    SUPPORT: [".pdf", ".doc", ".docx"]
+};
+
+// Export
 const EXPORT_COLUMNS = {
     NO: "No",
     SECTION: "Section",
@@ -32,7 +49,13 @@ const EXPORT_COLUMNS = {
     FIELD_NAME: "Field Name",
     TYPE: "Type"
 };
+const EXPORT_SHEET_NAME = "QA Export";
 
+// APWMS
+const APWMS_FIELD_PREFIX = "nsfcJrcApplicationInput";
+const PRELIM_PART_PREFIX = "prelim_part1_";
+
+// UI
 const TYPE_COLORS = {
     "INPUT(text)": "#00aa00",
     "INPUT(radio)": "#888800",
@@ -42,7 +65,6 @@ const TYPE_COLORS = {
     "RICHTEXT": "#cc00cc",
     "INPUT(email)": "#ff00aa"
 };
-
 const FIELD_LABEL_MAP = {
     orcid: "ORCID iD",
     surname: "Surname (with title)",
@@ -52,23 +74,20 @@ const FIELD_LABEL_MAP = {
     org: "Unit / Department / University"
 };
 
+// Overlay
 const IMPORT_OVERLAY_ID = "qa-import-overlay";
 
-const EXPORT_SHEET_NAME = "QA Export";
-
-const APWMS_FIELD_PREFIX = "nsfcJrcApplicationInput";
-
-const PRELIM_PART_PREFIX = "prelim_part1_";
-
 // Debug Settings
-const DEBUG_IMPORT = false;//missing useage
-const DEBUG_EXPORT = false;//missing useage
-const DEBUG_REPEAT = false;
-const DEBUG_LABELS = false;
-const DEBUG_HIGHLIGHT = false;
-const DEBUG_KEYWORDS = false;
+const DEBUG = {
+    IMPORT: false,//missing useage
+    EXPORT: false,//missing useage
+    REPEAT: false,
+    LABELS: false,
+    HIGHLIGHT: false,
+    KEYWORDS: false
+};
 
+
+// Runtime State
 let loadedImportRows = [];
 let loadedFileName = "";
-
-const STORAGE_KEYS = {TEST_CASES: "testCases",ACTIVE_TEST_CASE: "activeTestCase"};

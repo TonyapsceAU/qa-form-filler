@@ -13,7 +13,7 @@ function getKeywordRepeatInfo(fieldElement){
     if (!match){
         return {repeatGroup: "", repeatIndex: ""};
     }
-    if (DEBUG_KEYWORDS){
+    if (DEBUG.KEYWORDS){
         console.warn("[KEYWORDS] Unable to determine repeat index",removeButton);
     }
     return {
@@ -42,7 +42,7 @@ function getRepeatInfo(fieldName){
     if (!match){
         return {repeatGroup: "",repeatIndex: ""};
     }
-    if (DEBUG_REPEAT){
+    if (DEBUG.REPEAT){
         console.warn("[REPEAT] Pattern Not Matched",fieldName);
     }
     return {

@@ -50,3 +50,45 @@ pre{
     flex:1;
     margin-bottom:0;
 }
+
+.infoBox{
+    margin:8px 0;
+    padding:8px;
+    border-radius:4px;
+    background:#f0f8ff;
+}
+
+.scanResultRow{
+    border-bottom:1px solid #ddd;
+    padding:4px;
+    margin-bottom:4px;
+}
+
+.scanResultPre{
+    margin:2px 0;
+    white-space:pre-wrap;
+    word-break:break-word;
+}
+
+.scanHtmlPreview{
+    margin:2px 0;
+    max-height:150px;
+    overflow:auto;
+    white-space:pre-wrap;
+    word-break:break-word;
+}
+
+.listRow{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-bottom:4px;
+}
+
+.listName{
+    flex:1;
+}
+
+.deleteButton{
+    margin-left:auto;
+}

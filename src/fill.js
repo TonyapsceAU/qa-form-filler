@@ -97,6 +97,13 @@ async function fillAllVisibleFields(importRows){
             const value = importRow[EXPORT_COLUMNS.VALUE] ?? "";
             // File upload cannot be imported
             if (fieldElement.type === "file"){
+                const fileName = String(value).trim();
+                const file = await getSupportFile(fileName);
+                if (!file){
+                    console.warn("[FILE]","Support file not found:",fileName);
+                    continue;
+                }
+                await uploadFile(fieldElement,file);
                 continue;
             }
 

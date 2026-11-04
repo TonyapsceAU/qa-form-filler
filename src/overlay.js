@@ -82,7 +82,6 @@ function updateImportProgress(current,total,statusText = "Importing Excel..."){
 }
 
 function showValidationError(fileName,mismatchCount){
-    console.log("hi")
     const overlayElement = document.getElementById(IMPORT_OVERLAY_ID);
     if (!overlayElement){
         return;

@@ -4,7 +4,7 @@ function enableHighlightMode(){
     const fieldElements = getIndexedFields();
     console.log("Fields Found:",fieldElements.length);
     fieldElements.forEach((fieldElement,index) => {
-        if (DEBUG_HIGHLIGHT){
+        if (DEBUG.HIGHLIGHT){
             console.table(
                 fieldElements.map(
                     (fieldElement,index)=>({

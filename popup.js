@@ -16,98 +16,28 @@ document.addEventListener(
 
         const resultContainer = document.getElementById(ELEMENT_IDS.RESULT_CONTAINER);
         const importFileInput = document.getElementById(ELEMENT_IDS.IMPORT_FILE_INPUT);
-        const importInfo = document.getElementById(ELEMENT_IDS.IMPORT_INFO);
         const loadedFile = localStorage.getItem("loadedFile");
 
-        if (importInfo && loadedFile){
-            importInfo.innerHTML = `
-                <div style="
-                    margin:8px 0;
-                    padding:8px;
-                    border-radius:4px;
-                    background:#f0f8ff;
-                ">
-                    📄 Previously Loaded File:
-                    <b>${loadedFile}</b>
-                    <br>
-                    <small>Please import again before filling.</small>
-                </div>
-            `;
-        }
+        await renderImportInfo(`
+            <div class="infoBox">
+                📄 Previously Loaded File:
+                <b>${loadedFile}</b>
+                <br>
+                <small>Please import again before filling.</small>
+            </div>
+        `);
         
         scanBtn.addEventListener(
             "click",
             async () => {
                 try {
-                    const [tab] = await chrome.tabs.query({active: true,currentWindow: true});
+                    const [tab] = await getCurrentTab();
                     const scanResults = await chrome.tabs.sendMessage(tab.id,{action: ACTIONS.SCAN_FORM});
-                    resultContainer.innerHTML = "";
-                    scanResults.forEach(fieldInfo => {
-                        const resultRow = document.createElement("div");
-                        resultRow.style.borderBottom = "1px solid #ddd";
-                        resultRow.style.padding = "4px";
-                        resultRow.style.marginBottom = "4px";
-                        resultRow.innerHTML = ` 
-                            <b>[${fieldInfo.fieldId}]</b>
-                            <br>
-                                <b>tag:</b>
-                                ${fieldInfo.tagName || "(empty)"}
-                            <br>
-
-                            <b>attributes:</b>
-                            <pre style="
-                                margin:2px 0;
-                                white-space:pre-wrap;
-                                word-break:break-word;
-                            ">
-                                ${JSON.stringify(fieldInfo.attributes, null, 2 )}
-                            </pre>
-
-                            <b>computed:</b>
-                            <pre style="
-                                margin:2px 0;
-                                white-space:pre-wrap;
-                                word-break:break-word;
-                            ">
-                                ${JSON.stringify(fieldInfo.computed,null,2)}
-                            </pre>
-
-                            <b>html:</b>
-                            <pre style="
-                                margin:2px 0;
-                                max-height:150px;
-                                overflow:auto;
-                                white-space:pre-wrap;
-                                word-break:break-word;
-                            ">
-                                ${fieldInfo.parentHtml  || "(empty)"}
-                            </pre>
-                        `;
-
-                        const highlightButton = document.createElement("button");
-                        highlightButton.textContent = "Highlight";
-                        highlightButton.style.display = "block";
-                        highlightButton.style.marginTop = "4px";
-                        highlightButton.addEventListener(
-                            "click",
-                            async () => {
-                                console.log("Highlight clicked",fieldInfo);
-
-                                try{
-                                    await chrome.tabs.sendMessage(tab.id,{action: ACTIONS.HIGHLIGHT_FORM,fieldInfo: fieldInfo});
-                                }catch (error){
-                                    console.error(error);
-                                }
-                            }
-                        );
-                        resultRow.appendChild(highlightButton);
-                        resultContainer.appendChild(resultRow);
-                    });
+                    renderScanResults(scanResults,tab.id);
                 }catch(error){
                     resultContainer.textContent = "Scan Failed:\n" + error.message;
                     console.error(error);
                 }
-
             }
         );
         
@@ -116,12 +46,7 @@ document.addEventListener(
         highlightModeBtn.addEventListener(
             "click",
             async () => {
-                const [tab] =
-                    await chrome.tabs.query({
-                        active: true,
-                        currentWindow: true
-                    });
-
+                const [tab] = await getCurrentTab();
                 await chrome.tabs.sendMessage(
                     tab.id,
                     {action: ACTIONS.HIGHLIGHT_FORM}
@@ -132,12 +57,7 @@ document.addEventListener(
         clearHighlightBtn.addEventListener(
             "click",
             async () => {
-                const [tab] =
-                    await chrome.tabs.query({
-                        active: true,
-                        currentWindow: true
-                    });
-
+                const [tab] = await getCurrentTab();
                 await chrome.tabs.sendMessage(
                     tab.id,
                     {action: ACTIONS.CLEAR_HIGHLIGHT}
@@ -148,12 +68,7 @@ document.addEventListener(
         exportBtn.addEventListener(
             "click",
             async () => {
-                const [tab] =
-                    await chrome.tabs.query({
-                        active: true,
-                        currentWindow: true
-                    });
-
+                const [tab] = await getCurrentTab();
                 await chrome.tabs.sendMessage(
                     tab.id,
                     {action: ACTIONS.EXPORT_EXCEL}
@@ -168,35 +83,38 @@ document.addEventListener(
                 if (files.length === 0) {
                     return;
                 }
+                let importedTestCases = 0;
+                let importedSupportFiles = 0;
                 for (const file of files){
-                    const buffer = await file.arrayBuffer();
-                    const workbook = XLSX.read(buffer);
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    loadedImportRows = XLSX.utils.sheet_to_json(worksheet);
-                    loadedFileName = file.name;
-                    await saveTestCase(loadedFileName,loadedImportRows);
+                    if (file.name.endsWith(".xlsx") ||file.name.endsWith(".xls")){
+                        const buffer = await file.arrayBuffer();
+                        const workbook = XLSX.read(buffer);
+                        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                        loadedImportRows = XLSX.utils.sheet_to_json(worksheet);
+                        loadedFileName = file.name;
+                        await saveTestCase(loadedFileName,loadedImportRows);
+                        importedTestCases++;
+                    }else{
+                        console.log("saveSupportFile");
+                        await saveSupportFile(file);
+                        importedSupportFiles++;
+                    }
                 }
                 localStorage.setItem("loadedFile",loadedFileName);
                 
                 // await debugStorage();
                 await renderTestCaseList();
-                if (importInfo){
-                    importInfo.innerHTML = `
-                        <div style="
-                            margin:8px 0;
-                            padding:8px;
-                            border-radius:4px;
-                            background:#f0f8ff;
-                        ">
-                            📁 Imported:
-                            <b>${files.length}</b>
-                            Test Cases
-                            <br>
-                            Last Loaded:
-                            <b>${loadedFileName}</b>
-                        </div>
-                    `;
-                }
+                await renderSupportFileList();
+                await renderImportInfo(`
+                    <div class="infoBox">
+                        📁 Imported Test Cases: <b>${importedTestCases}</b>
+                        <br>
+                        📄 Support Files: <b>${importedSupportFiles}</b>
+                        <br>
+                        Last Loaded:
+                        <b>${loadedFileName}</b>
+                    </div>
+                `);
             }
         );
 
@@ -207,7 +125,7 @@ document.addEventListener(
                     alert("Please load an Excel file first.");
                     return;
                 }
-                const [tab] = await chrome.tabs.query({active: true,currentWindow: true});
+                const [tab] = await getCurrentTab();
                 await chrome.tabs.sendMessage(
                     tab.id,
                     {
@@ -221,4 +139,66 @@ document.addEventListener(
         );
 
         await renderTestCaseList();
+        await renderSupportFileList();
     });
+
+async function getCurrentTab(){
+    return await chrome.tabs.query({active: true,currentWindow: true});
+}
+
+async function renderImportInfo(message){
+    const importInfo = document.getElementById(ELEMENT_IDS.IMPORT_INFO);
+    if (!importInfo){
+        return;
+    }
+    importInfo.innerHTML = message;
+}
+
+function renderScanResults(scanResults,tabId){
+    const resultContainer = document.getElementById(ELEMENT_IDS.RESULT_CONTAINER);
+    resultContainer.innerHTML = "";
+    scanResults.forEach(fieldInfo => {
+        const resultRow = document.createElement("div");
+        resultRow.className = "scanResultRow";
+        resultRow.innerHTML = ` 
+            <b>[${fieldInfo.fieldId}]</b>
+            <br>
+                <b>tag:</b>
+                ${fieldInfo.tagName || "(empty)"}
+            <br>
+
+            <b>attributes:</b>
+            <pre class="scanResultPre">
+                ${JSON.stringify(fieldInfo.attributes, null, 2 )}
+            </pre>
+
+            <b>computed:</b>
+            <pre class="scanResultPre">
+                ${JSON.stringify(fieldInfo.computed,null,2)}
+            </pre>
+
+            <b>html:</b>
+            <pre class="scanHtmlPreview">
+                ${fieldInfo.parentHtml  || "(empty)"}
+            </pre>
+        `;
+
+        const highlightButton = document.createElement("button");
+        highlightButton.textContent = "Highlight";
+        highlightButton.style.display = "block";
+        highlightButton.style.marginTop = "4px";
+        highlightButton.addEventListener(
+            "click",
+            async () => {
+                console.log("Highlight clicked",fieldInfo);
+                try{
+                    await chrome.tabs.sendMessage(tabId,{action: ACTIONS.HIGHLIGHT_FORM,fieldInfo: fieldInfo});
+                }catch (error){
+                    console.error(error);
+                }
+            }
+        );
+        resultRow.appendChild(highlightButton);
+        resultContainer.appendChild(resultRow);
+    });
+}

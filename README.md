@@ -1,6 +1,6 @@
 # QA Form Filler
 
-Chrome extension for exporting APWMS forms, managing Excel-based test cases, and automatically filling forms.
+Chrome extension for exporting APWMS forms, managing Excel-based test cases, supporting documents, and automatically filling forms.
 
 ![Main Screenshot](docs/screenshot-main.png)
 
@@ -29,6 +29,14 @@ Chrome extension for exporting APWMS forms, managing Excel-based test cases, and
 - Multi-file Excel import
 - Reuse imported data without re-importing
 - Manage multiple test cases directly from the extension popup
+
+### Support File Management
+
+- Import PDF and supporting documents
+- Persistent support file storage
+- View imported support files
+- Reconstruct files from storage
+- Foundation for automatic file uploads
 
 ### User Experience
 
@@ -59,10 +67,16 @@ Chrome extension for exporting APWMS forms, managing Excel-based test cases, and
 ### Import
 
 1. Open an APWMS form.
-2. Click **Import Excel**.
-3. Select one or more Excel files.
-4. Imported files are automatically saved as test cases.
-5. Saved test cases will appear in the Test Case List.
+2. Click **Import Files**.
+3. Select one or more files.
+4. QA Form Filler will automatically identify:
+   - Excel files as Test Cases
+   - Other files as Support Files
+5. Imported resources will be saved for future use.
+
+### Support Files
+
+Imported support files appear in the Support Files section and are stored locally for future automated upload workflows.
 
 ### Manage Test Cases
 
