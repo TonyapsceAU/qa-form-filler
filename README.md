@@ -34,7 +34,7 @@ Chrome extension for exporting APWMS forms, managing Excel-based test cases, sup
 
 - Import PDF and supporting documents
 - Persistent support file storage
-- View imported support files
+- Preview support files directly from the popup
 - Delete saved support files
 - Reconstruct files from storage
 - Store binary file content in local storage
@@ -48,6 +48,10 @@ Chrome extension for exporting APWMS forms, managing Excel-based test cases, sup
 - Import file tracking
 - Loaded test case display
 - Custom export file names
+- Support file preview
+- Popup console logging
+- Improved import experience
+- Optimized form filling workflow
 
 ---
 
@@ -78,7 +82,7 @@ Chrome extension for exporting APWMS forms, managing Excel-based test cases, sup
 
 1. Open an APWMS form.
 2. Click **Import Files**.
-3. Select one or more files.
+3. Select one or more Excel files and/or support documents.
 4. QA Form Filler will automatically identify:
    - Excel files as Test Cases
    - Other files as Support Files
@@ -132,35 +136,6 @@ Available actions:
 5. Review the generated form and submit as needed.
 
 ![Import Screenshot](docs/screenshot-import.png)
-
----
-
-## Version 1.7.0 Highlights
-
-### New
-
-- Automatic APWMS document upload
-- Excel-driven support file attachment
-- Binary file storage and reconstruction
-- React upload bridge for APWMS file-upload controls
-- Support file deletion
-- Unified file import workflow for test cases and support files
-
-### Improved
-
-- Support file persistence
-- Import workflow
-- Debug logging for upload workflows
-- Test case and support file management
-
-### Fixed
-
-- Support file binary content was not being stored
-- Reconstructed files could be created as empty files
-- APWMS file-upload compatibility issues
-- Upload flow for React-based file upload controls
-- Support file retrieval from local storage
-- File reconstruction from saved support documents
 
 ---
 

@@ -44,8 +44,8 @@ async function fillImportedRows(importRows,fileName){
                 remaining:Math.max(0,importRows.length - getIndexedFields().length)
             });
         }
-        await fillAllVisibleFields(importRows);
-        await fillAllVisibleFields(importRows);
+        // await fillAllVisibleFields(importRows);
+        // await fillAllVisibleFields(importRows);
         await new Promise(resolve =>setTimeout(resolve,50));
         console.log("[IMPORT] Complete",{
             rows:importRows.length,

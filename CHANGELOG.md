@@ -4,6 +4,90 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.8.0 - Workflow & User Experience Improvements
+
+### Added
+
+#### Support File Management
+
+- Added Support File Preview functionality.
+- Support files can now be opened directly in a browser tab without downloading.
+- Added quick preview access from the Support Files list.
+- Added popup console logging for Support File operations:
+  - Import
+  - Preview
+  - Delete
+  - Retrieval
+
+#### Popup Logging
+
+- Added popup-side logging for Test Case operations.
+- Added popup-side logging for Support File operations.
+- Added storage operation logging to improve troubleshooting and diagnostics.
+- Standardized popup log message format.
+
+---
+
+### Improved
+
+#### User Experience
+
+- Improved Support File workflow by replacing the **Load** button with **Preview**.
+- Reduced unnecessary user actions during support file management.
+- Simplified document verification before form filling.
+- Improved overall popup usability and workflow consistency.
+
+#### Import Workflow
+
+- Removed Excel-only file picker restrictions.
+- Import dialog now supports selecting all file types directly.
+- Reduced user interaction required when importing support documents.
+- Improved mixed file import experience for Excel and support files.
+
+#### Form Filling
+
+- Optimized file upload handling during form filling.
+- Improved support file lookup performance.
+- Improved support file reconstruction workflow.
+- Improved upload reliability for APWMS file upload fields.
+- Reduced unnecessary processing during file upload operations.
+
+---
+
+### Refactored
+
+#### Support File Workflow
+
+- Simplified Support File management workflow.
+- Removed obsolete manual support file loading workflow.
+- Refactored support file actions around:
+  - Preview
+  - Reuse
+  - Automatic Upload
+
+#### Logging
+
+- Centralized popup logging structure.
+- Improved readability of popup console messages.
+- Improved troubleshooting support for future feature development.
+
+---
+
+### Fixed
+
+#### Import Experience
+
+- Fixed file picker defaulting to Excel-only file filters.
+- Fixed additional user steps required to locate support documents.
+
+#### File Upload
+
+- Improved support file handling during automatic uploads.
+- Improved reliability of support file processing during form filling.
+- Fixed several edge cases discovered while testing automatic document uploads.
+
+---
+
 ## v1.7.1 - Preview Document
 
 ### Improved
