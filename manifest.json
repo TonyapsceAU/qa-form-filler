@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "QA Form Filler",
-    "version": "1.6.1",
+    "version": "1.7.0",
     "permissions": [
         "activeTab",
         "tabs",
@@ -41,6 +41,16 @@
                 "src/validate.js",
                 "src/fill.js",
                 "src/content.js"
+            ]
+        }
+    ],
+    "web_accessible_resources":[
+        {
+            "resources":[
+                "src/pageBridge.js"
+            ],
+            "matches":[
+                "<all_urls>"
             ]
         }
     ]

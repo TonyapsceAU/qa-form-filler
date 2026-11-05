@@ -111,8 +111,8 @@ async function saveSupportFile(file){
         name: file.name,
         type: file.type,
         size: file.size,
-        importedAt: new Date().toISOString()
-        // buffer: Array.from(new Uint8Array(await file.arrayBuffer()))
+        importedAt: new Date().toISOString(),
+        buffer: Array.from(new Uint8Array(await file.arrayBuffer()))
     };
 
     await chrome.storage.local.set({[STORAGE_KEYS.SUPPORT_FILES]:supportFiles});
@@ -139,13 +139,67 @@ async function getSupportFile(fileName){
 }
 
 async function uploadFile(fileInput,file){
-    if (!file){
-        throw new Error("Support file not found.");
-    }
-    const dataTransfer = new DataTransfer();
-    dataTransfer.items.add(file);
-    fileInput.files = dataTransfer.files;
-    fileInput.dispatchEvent(new Event("change",{ bubbles: true }));
+    const allInputs = [
+        ...document.querySelectorAll(
+            'input[type="file"]'
+        )
+    ];
+    const inputIndex = allInputs.indexOf(fileInput);
+    // console.log("inputIndex",inputIndex);
+    // const bridgeId = `qa-${Date.now()}-${Math.random()}`;
+    // fileInput.setAttribute("data-qa-upload-id",bridgeId);
+    const buffer = await file.arrayBuffer();
+    // console.log(
+    //     "buffer length",
+    //     buffer.byteLength
+    // );
+    window.postMessage({
+        type:"QA_UPLOAD_FILE",
+        inputIndex,
+        fileName:file.name,
+        fileType:file.type,
+        fileBytes:[
+            ...new Uint8Array(buffer)
+        ]
+    },"*");
+
+
+    // attempt2
+    // console.log(
+    //     "keys:",
+    //     Reflect.ownKeys(fileInput)
+    // );
+    // if (!file){
+    //     throw new Error("Support file not found.");
+    // }
+
+    // const dataTransfer = new DataTransfer();
+    // dataTransfer.items.add(file);
+    // const reactPropsKey = Reflect.ownKeys(fileInput).find(key =>key.startsWith("__reactProps"));
+    // console.log("React Key:",reactPropsKey);
+    // if (!reactPropsKey){
+    //     throw new Error("React props not found.");
+    // }
+    // const reactProps =fileInput[reactPropsKey];
+    // console.log("React Props:",reactProps);
+
+    // if (typeof reactProps.onChange ==="function"){
+    //     await reactProps.onChange({target:{files:dataTransfer.files}});
+    //     console.log(
+    //         "File:",
+    //         file.name,
+    //         file.size,
+    //         file.type
+    //     );
+    //     console.log("React onChange called.");
+    // }else{
+    //     throw new Error("React onChange not found.");
+    // }
+
+    // attempt1
+    // fileInput.files = dataTransfer.files;
+    // fileInput.dispatchEvent(new Event("input",{ bubbles: true }));
+    // fileInput.dispatchEvent(new Event("change",{ bubbles: true }));
 }
 
 async function renderSupportFileList(){

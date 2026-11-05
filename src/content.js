@@ -1,4 +1,5 @@
 console.log("QA Form Filler Loaded");
+injectPageBridge();
 chrome.runtime.onMessage.addListener(
     (request,_sender,sendResponse) => {
         (async () => {
@@ -39,3 +40,36 @@ chrome.runtime.onMessage.addListener(
         return true;
     }
 );
+
+function injectPageBridge(){
+
+    if (
+        document.getElementById(
+            "qa-page-bridge"
+        )
+    ){
+        return;
+    }
+
+    const script =
+        document.createElement(
+            "script"
+        );
+
+    script.id =
+        "qa-page-bridge";
+
+    script.src =
+        chrome.runtime.getURL(
+            "src/pageBridge.js"
+        );
+
+    document.documentElement
+        .appendChild(script);
+
+    script.remove();
+
+    console.log(
+        "[QA] Page Bridge Injected"
+    );
+}

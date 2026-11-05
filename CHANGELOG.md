@@ -4,6 +4,90 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.7.0 - Automatic Document Upload
+
+### Added
+
+#### Automatic Document Upload
+
+- Added automatic APWMS file upload support.
+- Added Excel-driven document attachment workflow.
+- Added support for populating APWMS file upload fields using imported support files.
+- Added React upload bridge for APWMS file upload components.
+- Added support for reconstructing and uploading stored support files.
+- Added automatic document upload during form filling.
+
+#### Support File Storage
+
+- Added binary file buffer persistence.
+- Added support for restoring original file content from storage.
+- Added file reconstruction using stored binary data.
+- Added support for reusing uploaded support documents across test cases.
+
+---
+
+### Improved
+
+#### Form Filling
+
+- Extended Fill Form workflow to support file upload fields.
+- Improved compatibility with APWMS React-based upload controls.
+- Improved support file lookup during form filling.
+- Improved automatic attachment handling within imported test cases.
+
+#### Support File Management
+
+- Improved support file persistence reliability.
+- Improved support file reconstruction process.
+- Improved file import workflow for non-Excel documents.
+- Improved upload debugging and diagnostic logging.
+
+---
+
+### Fixed
+
+#### File Upload
+
+- Fixed support files being reconstructed as empty files.
+- Fixed binary file content not being saved to Chrome Storage.
+- Fixed uploaded files losing content during storage and retrieval.
+- Fixed support file reconstruction creating files with `size = 0`.
+- Fixed APWMS upload failures caused by missing file content.
+- Fixed support file retrieval from local storage.
+
+#### APWMS Compatibility
+
+- Fixed integration with APWMS React file upload controls.
+- Fixed file upload workflow for React-managed inputs.
+- Fixed automatic attachment submission to APWMS upload endpoints.
+
+---
+
+### Technical Changes
+
+- Added Page Bridge architecture for React upload handling.
+- Added Content Script ↔ Page Context communication for file uploads.
+- Added support for passing binary file data across execution contexts.
+- Refactored upload workflow to support APWMS React upload components.
+- Refactored support file storage to preserve complete file contents.
+
+---
+
+## v1.6.1 
+
+### Added
+
+#### Support File Management
+
+- Added support for importing non-Excel files.
+- Added support file storage using Chrome Storage.
+- Added support file listing in popup.
+- Added support file deletion.
+- Added file reconstruction from stored buffers.
+- Added foundation for future automatic file upload support.
+
+---
+
 ## v1.6.0 - Support File Management
 
 ### Added

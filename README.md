@@ -1,6 +1,6 @@
 # QA Form Filler
 
-Chrome extension for exporting APWMS forms, managing Excel-based test cases, supporting documents, and automatically filling forms.
+Chrome extension for exporting APWMS forms, managing Excel-based test cases, support documents, and automatically filling forms.
 
 ![Main Screenshot](docs/screenshot-main.png)
 
@@ -35,8 +35,12 @@ Chrome extension for exporting APWMS forms, managing Excel-based test cases, sup
 - Import PDF and supporting documents
 - Persistent support file storage
 - View imported support files
+- Delete saved support files
 - Reconstruct files from storage
-- Foundation for automatic file uploads
+- Store binary file content in local storage
+- Automatic APWMS document upload
+- Excel-driven support file attachment
+- Upload support files directly into APWMS file-upload fields
 
 ### User Experience
 
@@ -45,6 +49,8 @@ Chrome extension for exporting APWMS forms, managing Excel-based test cases, sup
 - Loaded test case display
 - Custom export file names
 
+---
+
 ## Installation
 
 1. Download the release package.
@@ -52,6 +58,8 @@ Chrome extension for exporting APWMS forms, managing Excel-based test cases, sup
 3. Enable Developer Mode.
 4. Click **Load unpacked**.
 5. Select the extension folder.
+
+---
 
 ## Usage
 
@@ -64,6 +72,8 @@ Chrome extension for exporting APWMS forms, managing Excel-based test cases, sup
 
 ![Export Screenshot](docs/screenshot-export.png)
 
+---
+
 ### Import
 
 1. Open an APWMS form.
@@ -74,9 +84,28 @@ Chrome extension for exporting APWMS forms, managing Excel-based test cases, sup
    - Other files as Support Files
 5. Imported resources will be saved for future use.
 
+---
+
 ### Support Files
 
 Imported support files appear in the Support Files section and are stored locally for future automated upload workflows.
+
+Supported workflows:
+
+- Import PDF and supporting documents
+- Store files locally in Chrome storage
+- Reuse support files across multiple test cases
+- Reference support files directly from Excel
+- Automatically upload matching documents into APWMS file-upload fields during form filling
+
+Example:
+
+| Excel Value | Result |
+|------------|---------|
+| `CV.pdf` | Uploads `CV.pdf` from Support File storage |
+| `Proposal.pdf` | Uploads `Proposal.pdf` from Support File storage |
+
+---
 
 ### Manage Test Cases
 
@@ -84,20 +113,82 @@ After importing files, saved test cases can be managed directly from the popup.
 
 Available actions:
 
-- **Load** - Load a saved test case into memory.
-- **Delete** - Remove a saved test case from storage.
-- **Fill Form** - Populate the current APWMS form using the loaded test case.
+- **Load** - Load a saved test case into memory
+- **Delete** - Remove a saved test case from storage
+- **Fill Form** - Populate the current APWMS form using the loaded test case
+
+---
 
 ### Fill Form
 
 1. Import or load a test case.
-2. Click **Fill Form**.
-3. The extension will populate the APWMS form using the loaded data.
-4. Repeat sections are automatically synchronized before filling.
+2. Import any required support documents.
+3. Click **Fill Form**.
+4. The extension will:
+   - Synchronize repeat sections
+   - Populate standard form fields
+   - Automatically upload referenced support documents
+   - Populate APWMS file-upload fields
+5. Review the generated form and submit as needed.
 
 ![Import Screenshot](docs/screenshot-import.png)
 
+---
+
+## Version 1.7.0 Highlights
+
+### New
+
+- Automatic APWMS document upload
+- Excel-driven support file attachment
+- Binary file storage and reconstruction
+- React upload bridge for APWMS file-upload controls
+- Support file deletion
+- Unified file import workflow for test cases and support files
+
+### Improved
+
+- Support file persistence
+- Import workflow
+- Debug logging for upload workflows
+- Test case and support file management
+
+### Fixed
+
+- Support file binary content was not being stored
+- Reconstructed files could be created as empty files
+- APWMS file-upload compatibility issues
+- Upload flow for React-based file upload controls
+- Support file retrieval from local storage
+- File reconstruction from saved support documents
+
+---
 
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).
+
+### Version 1.7.0
+
+#### Added
+
+- Automatic APWMS document upload
+- Excel-driven support file attachment
+- Binary support file storage
+- Support file reconstruction from stored binary data
+- React upload bridge for APWMS file-upload controls
+- Support file
+#### Improved
+
+- Test case management workflow
+- Support file management workflow
+- Import status reporting
+- Upload debugging and diagnostics
+
+#### Fixed
+
+- Support file content loss during storage
+- Empty file reconstruction issue
+- APWMS upload integration issues
+- React file-upload compatibility issues
+- Support file retrieval and rebuild process

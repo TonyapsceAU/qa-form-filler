@@ -97,13 +97,30 @@ async function fillAllVisibleFields(importRows){
             const value = importRow[EXPORT_COLUMNS.VALUE] ?? "";
             // File upload cannot be imported
             if (fieldElement.type === "file"){
+                console.group("[FILE UPLOAD]");
                 const fileName = String(value).trim();
+                console.log("Excel Value:",fileName);
                 const file = await getSupportFile(fileName);
                 if (!file){
-                    console.warn("[FILE]","Support file not found:",fileName);
+                    console.warn("Support file not found:",fileName);
                     continue;
                 }
-                await uploadFile(fieldElement,file);
+                console.log("Retrieved File:",file);
+                // console.log("Input:",fieldElement);
+                console.dir(fieldElement);
+                console.log(
+                    "fieldElement name:",
+                    fieldElement.constructor.name
+                );
+                try{
+                    await uploadFile(fieldElement,file);
+                    console.log("Uploaded.");
+                }catch(error){
+                    console.error("Upload failed:",error);
+                }
+                console.log("files length",fieldElement.files.length);
+                console.log(fieldElement.files[0]);        
+                console.groupEnd();
                 continue;
             }
 
@@ -142,6 +159,7 @@ async function fillAllVisibleFields(importRows){
                 await new Promise(resolve => setTimeout(resolve, 0));
             }
         }catch(error){
+            const importRow = importRows[rowIndex];
             console.error("[FILL] Row Failed",{rowIndex,field: importRow?.[EXPORT_COLUMNS.FIELD],error});
         }
     }
