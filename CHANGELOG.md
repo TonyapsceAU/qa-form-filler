@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.7.1 - Preview Document
+
+### Improved
+
+#### Support File Management
+
+- Replaced Support File "Load" button with "Preview".
+- Support files can now be opened directly in a browser tab.
+- Simplified support file workflow now that automatic document upload is supported.
+
+---
+
 ## v1.7.0 - Automatic Document Upload
 
 ### Added

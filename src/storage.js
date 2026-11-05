@@ -145,14 +145,7 @@ async function uploadFile(fileInput,file){
         )
     ];
     const inputIndex = allInputs.indexOf(fileInput);
-    // console.log("inputIndex",inputIndex);
-    // const bridgeId = `qa-${Date.now()}-${Math.random()}`;
-    // fileInput.setAttribute("data-qa-upload-id",bridgeId);
     const buffer = await file.arrayBuffer();
-    // console.log(
-    //     "buffer length",
-    //     buffer.byteLength
-    // );
     window.postMessage({
         type:"QA_UPLOAD_FILE",
         inputIndex,
@@ -162,44 +155,6 @@ async function uploadFile(fileInput,file){
             ...new Uint8Array(buffer)
         ]
     },"*");
-
-
-    // attempt2
-    // console.log(
-    //     "keys:",
-    //     Reflect.ownKeys(fileInput)
-    // );
-    // if (!file){
-    //     throw new Error("Support file not found.");
-    // }
-
-    // const dataTransfer = new DataTransfer();
-    // dataTransfer.items.add(file);
-    // const reactPropsKey = Reflect.ownKeys(fileInput).find(key =>key.startsWith("__reactProps"));
-    // console.log("React Key:",reactPropsKey);
-    // if (!reactPropsKey){
-    //     throw new Error("React props not found.");
-    // }
-    // const reactProps =fileInput[reactPropsKey];
-    // console.log("React Props:",reactProps);
-
-    // if (typeof reactProps.onChange ==="function"){
-    //     await reactProps.onChange({target:{files:dataTransfer.files}});
-    //     console.log(
-    //         "File:",
-    //         file.name,
-    //         file.size,
-    //         file.type
-    //     );
-    //     console.log("React onChange called.");
-    // }else{
-    //     throw new Error("React onChange not found.");
-    // }
-
-    // attempt1
-    // fileInput.files = dataTransfer.files;
-    // fileInput.dispatchEvent(new Event("input",{ bubbles: true }));
-    // fileInput.dispatchEvent(new Event("change",{ bubbles: true }));
 }
 
 async function renderSupportFileList(){
@@ -220,8 +175,8 @@ function createSupportFileRow(file){
     row.className = "listRow";
     row.innerHTML = `
         <div class="listRowContent">
-            <button class="load-support-file" >
-                Load
+            <button class="preview-support-file" >
+                Preview
             </button>
 
             <span class="listName">
@@ -238,10 +193,19 @@ function createSupportFileRow(file){
         </div>
     `;
 
-    const loadButton = row.querySelector(".load-support-file");
-    loadButton.addEventListener("click",() => {
-        loadSupportFile(file);
-    });
+    const previewButton = row.querySelector(".preview-support-file");
+    previewButton.addEventListener(
+        "click",
+        async () => {
+            const supportFile =await getSupportFile(file.name);
+            if (!supportFile){
+                alert(`Unable to open "${file.name}".`);
+                return;
+            }
+            const url =URL.createObjectURL(supportFile);
+            window.open(url,"_blank");
+        }
+    );
 
     const deleteButton = row.querySelector(".delete-support-file");
     deleteButton.addEventListener(

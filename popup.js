@@ -1,12 +1,6 @@
 document.addEventListener(
     "DOMContentLoaded",
     async () => {
-        // console.log("[SYSTEM]",getBrowserName());
-        // const testCases = await getTestCases();
-        // console.log("[STORAGE] Test Cases");
-        // console.log(testCases);
-        // console.table(Object.keys(testCases));
-
         const scanBtn = document.getElementById(ELEMENT_IDS.SCAN_BUTTON);
         const highlightModeBtn = document.getElementById(ELEMENT_IDS.HIGHLIGHT_BUTTON);
         const clearHighlightBtn = document.getElementById(ELEMENT_IDS.CLEAR_HIGHLIGHT_BUTTON);

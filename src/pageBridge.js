@@ -13,8 +13,6 @@ window.addEventListener("message",
                 event.data.fileName,
                 {type:event.data.fileType}
             );
-            // console.log("received bytes",event.data.fileBytes.length);
-            // console.log("rebuilt file size",file.size);
             const inputs = [...document.querySelectorAll('input[type="file"]')];
             const input =inputs[event.data.inputIndex];
             console.log("[QA Bridge] Input Index:",event.data.inputIndex);
@@ -34,20 +32,10 @@ window.addEventListener("message",
             const dt =new DataTransfer();
             dt.items.add(file);
             input.files = dt.files;
-            // console.log(
-            //     "input.files.length",
-            //     input.files.length
-            // );
             await input[reactKey].onChange({
                 target: input,
                 currentTarget: input
             });
-
-            // console.log(
-            //     "after onchange",
-            //     input.files,
-            //     input.files[0]
-            // );
 
             console.log("[QA Bridge] Upload Triggered");
         }catch(error){

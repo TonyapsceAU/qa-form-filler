@@ -42,34 +42,14 @@ chrome.runtime.onMessage.addListener(
 );
 
 function injectPageBridge(){
-
-    if (
-        document.getElementById(
-            "qa-page-bridge"
-        )
-    ){
+    if (document.getElementById("qa-page-bridge")){
         return;
     }
 
-    const script =
-        document.createElement(
-            "script"
-        );
-
-    script.id =
-        "qa-page-bridge";
-
-    script.src =
-        chrome.runtime.getURL(
-            "src/pageBridge.js"
-        );
-
-    document.documentElement
-        .appendChild(script);
-
+    const script =document.createElement("script");
+    script.id ="qa-page-bridge";
+    script.src =chrome.runtime.getURL("src/pageBridge.js");
+    document.documentElement.appendChild(script);
     script.remove();
-
-    console.log(
-        "[QA] Page Bridge Injected"
-    );
+    console.log("[QA] Page Bridge Injected");
 }
