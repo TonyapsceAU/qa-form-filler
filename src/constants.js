@@ -29,6 +29,7 @@ const STORAGE_KEYS = {
     SUPPORT_FILES: "supportFiles",
     ACTIVE_TEST_CASE: "activeTestCase"
 };
+const MAX_FILE_SIZE_MB = 10;
 
 // Supported File Types
 const FILE_TYPES = {

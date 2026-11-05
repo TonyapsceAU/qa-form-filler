@@ -80,6 +80,10 @@ document.addEventListener(
                 let importedTestCases = 0;
                 let importedSupportFiles = 0;
                 for (const file of files){
+                    if (file.size >MAX_FILE_SIZE_MB * 1024 * 1024){
+                        alert(`"${file.name}" is too large.\n\n` +`Maximum supported size: ${MAX_FILE_SIZE_MB} MB`);
+                        return;
+                    }
                     if (file.name.endsWith(".xlsx") ||file.name.endsWith(".xls")){
                         const buffer = await file.arrayBuffer();
                         const workbook = XLSX.read(buffer);
@@ -90,8 +94,10 @@ document.addEventListener(
                         importedTestCases++;
                     }else{
                         console.log("saveSupportFile");
-                        await saveSupportFile(file);
-                        importedSupportFiles++;
+                        const imported = await saveSupportFile(file);
+                        if (imported){
+                            importedSupportFiles++;
+                        }
                     }
                 }
                 localStorage.setItem("loadedFile",loadedFileName);

@@ -107,7 +107,14 @@ async function deleteTestCase(fileName){
 }
 
 async function saveSupportFile(file){
-    console.log("[SUPPORT FILE] Importing:",fileName,`(${Math.round(file.size / 1024)} KB)`);
+    const buffer = await file.arrayBuffer();
+    const bytesUsed = await chrome.storage.local.getBytesInUse();
+    const remaining = (10 * 1024 * 1024) - bytesUsed;
+    if (buffer.byteLength > remaining){
+        alert("Not enough storage space.\n\n" +"Please remove unused support files.");
+        return false;
+    }
+    console.log("[SUPPORT FILE] Importing:",file.name,`(${Math.round(file.size / 1024)} KB)`);
     const result = await chrome.storage.local.get(STORAGE_KEYS.SUPPORT_FILES);
     const supportFiles = result[STORAGE_KEYS.SUPPORT_FILES] || {};
     supportFiles[file.name] = {
@@ -117,8 +124,10 @@ async function saveSupportFile(file){
         importedAt: new Date().toISOString(),
         buffer: Array.from(new Uint8Array(await file.arrayBuffer()))
     };
+    
     await chrome.storage.local.set({[STORAGE_KEYS.SUPPORT_FILES]:supportFiles});
-    console.log("[SUPPORT FILE] Imported:",fileName);
+    console.log("[SUPPORT FILE] Imported:",file.name);
+    return true;
 }
 
 async function getSupportFiles(){
