@@ -1,6 +1,7 @@
 async function menuNavigation(){
     console.group("[NAVIGATION]");
-    const pages = getAllPages(await waitForNavigation());
+    await waitForNavigation()
+    const pages = getAllPages(getNavigationInfo());
     console.log("Page Count:",pages.length);
     await openPage(pages[0].title);
     console.groupEnd();
@@ -9,7 +10,7 @@ async function menuNavigation(){
 function getAllPages(navigationInfo){
     console.group("[NAVIGATION]","getAllPages");
     const pages = [];
-    if(navigationInfo.type==="legacy"){
+    if(navigationInfo.type==="structured"){
         navigationInfo.navigation
             .querySelectorAll("button")
             .forEach(button => {
@@ -29,54 +30,68 @@ function getAllPages(navigationInfo){
                     button
                 });
         });
-    }else if (navigationInfo.type === "modern"){
-        console.log("Modern Buttons:",navigationInfo.buttons);
-        navigationInfo.buttons
-            .forEach((button,index) => {
-                pages.push({
-                    part:`Part ${index + 1}`,
-                    title: button.textContent.trim(),
-                    button
-                });
-
+    }else if (navigationInfo.type === "section"){
+        const container = document.querySelectorAll('div[style*="justify-content: space-between"]');
+        container.forEach(item => {
+            const partElement = [...item.querySelectorAll("*")].find(element =>/^Part\s+/i.test(element.textContent.trim()));
+            const button = item.querySelector("button");
+            if (!partElement ||!button){
+                return;
+            }
+            pages.push({
+                part: partElement.textContent.trim(),
+                title: button.textContent.trim(),
+                button
             });
+        });
     }
-        
+    // console.log(pages[0]);
     console.log("Pages:",pages.map(page =>`${page.part} ${page.title}`));
     console.groupEnd();
     return pages;
 }
 
+function getNavigationInfo(){
+    const navigation = document.querySelector('nav[aria-label="Form navigation"]');
+    if (navigation){
+        console.log("[NAVIGATION]","Found structured navigation");
+        return ({type:"structured",navigation});
+    }
+
+    const buttons = [...document.querySelectorAll("button")].filter(button =>button.textContent.trim());
+    if (buttons.length === 0){
+        return;
+    }
+    console.log("[NAVIGATION]","Found section navigation");
+    return ({type:"section",buttons:buttons});
+}
+
 async function waitForNavigation(){
     return new Promise(resolve => {
         const interval = setInterval(() => {
-            const navigation = document.querySelector('nav[aria-label="Form navigation"]');
-            if (navigation){
-                clearInterval(interval);
-                console.log("[NAVIGATION]","Found");
-                resolve({type:"legacy",navigation});
-                return;
+            console.log("[NAVIGATION]","Waiting...");
+            clearInterval(interval);
+            const navigationInfo = getNavigationInfo();
+            let found = false;
+            if (navigationInfo?.type ==="t "){
+                found = true;
             }
-
-            const buttons = [...document.querySelectorAll("button")].filter(button =>button.textContent.trim());
-            const pageButtons =
-                buttons.filter(button =>
-                    button.textContent.includes("RESEARCH") ||
-                    button.textContent.includes("NOMINEE") ||
-                    button.textContent.includes("ATTACHMENT")
-                );
-            if (pageButtons.length === 0){
+            if (navigationInfo?.type ==="section" &&navigationInfo.buttons.length){
+                found = true;
+            }
+            if (!found){
                 return;
             }
             clearInterval(interval);
-            console.log("[NAVIGATION]","Found modern navigation");
-            resolve({type:"modern",buttons:pageButtons});
+            console.log("[NAVIGATION]","Ready");
+            resolve();
         },500);
     });
 }
 
 async function openPage(title){
-    const pages = getAllPages(await waitForNavigation());
+    await waitForNavigation()
+    const pages = getAllPages(getNavigationInfo());
     console.log("[PAGES]",pages);
     const page = pages.find(page =>page.title === title);
     if (!page){

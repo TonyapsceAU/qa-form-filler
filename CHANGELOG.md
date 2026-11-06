@@ -4,6 +4,53 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.9.4 - Navigation Engine Refactoring
+
+### Improved
+
+#### Navigation Engine
+
+- Improved navigation discovery workflow.
+- Improved support for multiple APWMS navigation structures.
+- Improved page discovery architecture.
+- Improved separation between navigation detection and page extraction.
+- Improved navigation debugging and diagnostics.
+
+#### Compatibility
+
+- Improved handling of different APWMS form layouts.
+- Reduced dependence on a single navigation implementation.
+- Improved resilience against navigation structure variations.
+
+---
+
+### Refactored
+
+#### Navigation Architecture
+
+- Added `getNavigationInfo()`.
+- Refactored `waitForNavigation()` to focus on navigation readiness detection.
+- Moved page filtering logic into `getAllPages()`.
+- Separated navigation detection from page discovery responsibilities.
+- Simplified future support for additional navigation structures.
+
+#### Code Organization
+
+- Improved navigation module maintainability.
+- Reduced coupling between navigation-related functions.
+- Improved extensibility for future page navigation features.
+
+---
+
+### Foundation Work
+
+- Prepared infrastructure for Export All Pages.
+- Prepared infrastructure for page-aware Excel exports.
+- Prepared infrastructure for workbook-per-form exports.
+- Prepared infrastructure for future multi-page form automation.
+
+---
+
 ## v1.9.3 - Next Page Navigation
 
 ### Added
