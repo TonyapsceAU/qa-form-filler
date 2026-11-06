@@ -11,8 +11,8 @@
 5. Click **Load unpacked**.
 6. Select the extracted QA Form Filler folder.
 7. Pin QA Form Filler to the browser toolbar for easier access.
-![Installation_extention Screenshot](docs\USER_MANUAL_img\Installation_extention.png)
-![Installation_Pin_Icon Screenshot](docs\USER_MANUAL_img\Installation_Pin_Icon.png)
+![Installation_extention Screenshot](docs/USER_MANUAL_img/Installation_extention.png)
+![Installation_Pin_Icon Screenshot](docs/USER_MANUAL_img/Installation_Pin_Icon.png)
 ---
 
 ## 2. Create a Data Sheet
@@ -26,8 +26,8 @@
 
 3. Click **Export Excel**.
 4. Save the exported Excel file, excel would be save to download.
-![Export_button Screenshot](docs\USER_MANUAL_img\Export_button.png)
-![export Screenshot](docs\screenshot-export.png)
+![Export_button Screenshot](docs/USER_MANUAL_img/Export_button.png)
+![export Screenshot](docs/screenshot-export.png)
 
 ### Documents
 
@@ -39,7 +39,7 @@ For document upload:
 > File names must match the uploaded Support File exactly, including the file extension.
 
 Example:
-![document_upload Screenshot](docs\USER_MANUAL_img\document_upload.png)
+![document_upload Screenshot](docs/USER_MANUAL_img/document_upload.png)
 
 ---
 
@@ -52,7 +52,7 @@ Example:
 3. QA Form Filler will automatically identify:
    - Excel files as Test Cases
    - Other files as Support Files
-![Import_Files Screenshot](docs\USER_MANUAL_img\Import_Files.png)
+![Import_Files Screenshot](docs/USER_MANUAL_img/Import_Files.png)
 
 ### Storage Limit
 
@@ -84,7 +84,7 @@ Support Files can only be automatically uploaded when:
 2. The file has been imported into QA Form Filler.
 
 Example:
-![Support_Doc Screenshot](docs\USER_MANUAL_img\Support_Doc.png)
+![Support_Doc Screenshot](docs/USER_MANUAL_img/Support_Doc.png)
 
 ### Preview Support Files
 
@@ -113,7 +113,7 @@ QA Form Filler will automatically:
 
 > Manual page switching is not required.
 
-![Fill_form Screenshot](docs\USER_MANUAL_img\Fill_form.png)
+![Fill_form Screenshot](docs/USER_MANUAL_img/Fill_form.png)
 ---
 
 ## 5. Troubleshooting & Developer Tools
@@ -137,7 +137,7 @@ Useful for:
 - Verifying field locations
 - Troubleshooting incorrect field matching
 
-![HighLigh Screenshot](docs\USER_MANUAL_img\HighLigh.png)
+![HighLigh Screenshot](docs/USER_MANUAL_img/HighLigh.png)
 
 ### Clear Highlight
 
