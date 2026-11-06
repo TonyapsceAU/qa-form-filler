@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "QA Form Filler",
-    "version": "1.8.0",
+    "version": "1.9.0",
     "permissions": [
         "activeTab",
         "tabs",
@@ -36,6 +36,7 @@
                 "src/repeat.js",
                 "src/scan.js",
                 "src/highlight.js",
+                "src/navigation.js",
                 "src/export.js",
                 "src/overlay.js",
                 "src/validate.js",

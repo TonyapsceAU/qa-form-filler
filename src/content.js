@@ -17,7 +17,7 @@ chrome.runtime.onMessage.addListener(
                         sendResponse({success: true});
                         break;
                     case ACTIONS.FILL_FORM:
-                        await fillImportedRows(
+                        await fillForm(
                             request.importRows,
                             request.fileName
                         );

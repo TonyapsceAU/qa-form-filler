@@ -4,6 +4,73 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.9.0 - Multi-Page Form Automation Foundation
+
+### Added
+
+#### Navigation Engine
+
+- Added Form Navigation detection.
+- Added Navigation discovery workflow.
+- Added support for locating form navigation containers.
+- Added support for retrieving available form pages.
+- Added page metadata extraction:
+  - Part Name
+  - Page Title
+  - Navigation Button
+- Added page opening by page title.
+- Added Navigation logging.
+
+#### Navigation APIs
+
+- Added `waitForNavigation()`.
+- Added `getAllPages()`.
+- Added `openPage(title)`.
+- Added `menuNavigation()`.
+
+---
+
+### Improved
+
+#### Form Filling
+
+- Added Navigation initialization before form filling.
+- Prepared Fill Form workflow for future multi-page form support.
+- Improved separation between navigation and field-filling logic.
+- Improved architecture for future page-aware imports.
+
+#### Logging
+
+- Added `[NAVIGATION]` logging category.
+- Improved navigation diagnostics.
+- Improved debugging visibility for page discovery and page opening actions.
+
+---
+
+### Refactored
+
+#### Navigation Architecture
+
+- Centralized navigation discovery logic.
+- Extracted navigation waiting logic into reusable functions.
+- Simplified future implementation of:
+  - Export All Pages
+  - Fill All Pages
+  - Page-aware Excel Imports
+  - Automatic Page Switching
+
+---
+
+### Foundation Work
+
+- Established Multi-Page Form Automation architecture.
+- Established Navigation Engine for APWMS forms.
+- Prepared infrastructure for page-aware Excel exports.
+- Prepared infrastructure for automatic cross-page form filling.
+- Prepared infrastructure for page sequencing and navigation workflows.
+
+---
+
 ## v1.8.0 - Workflow & User Experience Improvements
 
 ### Added

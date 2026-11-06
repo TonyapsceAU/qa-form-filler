@@ -2,6 +2,11 @@ async function importExcel(bufferArray){
     throw new Error("Deprecated: use fillImportedRows()");
 }
 
+async function fillForm(importRows,fileName){
+    await menuNavigation();
+    await fillImportedRows(importRows,fileName);
+}
+
 async function fillImportedRows(importRows,fileName){
     const startTime = Date.now();
     let keepOverlayOpen = false;
