@@ -4,6 +4,61 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.9.3 - Next Page Navigation
+
+### Added
+
+#### Navigation Engine
+
+- Added Next Page navigation support.
+- Added automatic Next button discovery.
+- Added automatic page transition handling.
+- Added page render synchronization workflow.
+- Added navigation logging for page transitions.
+
+#### Navigation APIs
+
+- Added `findNextButton()`.
+- Added `clickNextPage()`.
+
+---
+
+### Improved
+
+#### Navigation Engine
+
+- Extended Navigation Engine capabilities beyond menu-based navigation.
+- Improved support for sequential page traversal.
+- Improved preparation for multi-page workflows.
+- Improved navigation reliability during form automation.
+
+#### Form Filling
+
+- Prepared infrastructure for automatic page progression.
+- Improved foundation for future multi-page form filling.
+- Improved groundwork for automatic page sequencing.
+
+---
+
+### Refactored
+
+#### Navigation Workflow
+
+- Separated page opening and page progression workflows.
+- Improved navigation code organization.
+- Improved maintainability of navigation-related features.
+
+---
+
+### Foundation Work
+
+- Prepared support for Export All Pages.
+- Prepared support for Fill All Pages.
+- Prepared support for automatic page sequencing.
+- Expanded Multi-Page Form Automation infrastructure.
+
+---
+
 ## v1.9.2 - Multi-Structure Navigation Support
 
 ### Added

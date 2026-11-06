@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "QA Form Filler",
-    "version": "1.9.2",
+    "version": "1.9.3",
     "permissions": [
         "activeTab",
         "tabs",

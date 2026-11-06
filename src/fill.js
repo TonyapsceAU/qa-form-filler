@@ -5,6 +5,7 @@ async function importExcel(bufferArray){
 async function fillForm(importRows,fileName){
     await menuNavigation();
     await fillImportedRows(importRows,fileName);
+    await clickNextPage();
 }
 
 async function fillImportedRows(importRows,fileName){

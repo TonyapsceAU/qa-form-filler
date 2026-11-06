@@ -87,3 +87,34 @@ async function openPage(title){
     page.button.click();
     return true;
 }
+
+function findNextButton(){
+    const nextButton =
+        [...document.querySelectorAll("button")]
+            .find(button =>button.textContent.trim() ==="Next");
+    if (!nextButton){
+        console.warn("[NAVIGATION]","Next Button Not Found");
+        return null;
+    }
+    return nextButton;
+}
+
+async function clickNextPage(){
+    const nextButton = findNextButton();
+    if (!nextButton){
+        return false;
+    }
+    console.log("[NAVIGATION]","Click Next");
+    nextButton.click();
+    await waitForPageRender();
+    return true;
+}
+
+async function waitForPageRender(){
+    return new Promise(resolve => {
+        setTimeout(() => {
+            console.log("[NAVIGATION]","Render Complete");
+            resolve();
+        },1000);
+    });
+}
