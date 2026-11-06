@@ -6,26 +6,42 @@ async function menuNavigation(){
     console.groupEnd();
 }
 
-function getAllPages(navigation){
-    console.group("[NAVIGATION]");
+function getAllPages(navigationInfo){
+    console.group("[NAVIGATION]","getAllPages");
     const pages = [];
-    navigation
-        .querySelectorAll("button")
-        .forEach(button => {
-            const container =button.closest('div[style*="flex-direction: column"]');
-            if (!container){
-                return;
-            }
-            const partElement =container.querySelector("strong");
-            if (!partElement){
-                return;
-            }
-            pages.push({
-                part:partElement.textContent.trim(),
-                title:button.textContent.trim(),
-                button
-            });
+    if(navigationInfo.type==="legacy"){
+        navigationInfo.navigation
+            .querySelectorAll("button")
+            .forEach(button => {
+                const container =button.closest('div[style*="flex-direction: column"]');
+                if (!container){
+                    return;
+                }
+                const partElement =
+                    [...container.querySelectorAll("*")]
+                        .find(element =>/^Part\s+/i.test(element.textContent.trim()));
+                if (!partElement){
+                    return;
+                }
+                pages.push({
+                    part:partElement.textContent.trim(),
+                    title:button.textContent.trim(),
+                    button
+                });
         });
+    }else if (navigationInfo.type === "modern"){
+        console.log("Modern Buttons:",navigationInfo.buttons);
+        navigationInfo.buttons
+            .forEach((button,index) => {
+                pages.push({
+                    part:`Part ${index + 1}`,
+                    title: button.textContent.trim(),
+                    button
+                });
+
+            });
+    }
+        
     console.log("Pages:",pages.map(page =>`${page.part} ${page.title}`));
     console.groupEnd();
     return pages;
@@ -35,12 +51,26 @@ async function waitForNavigation(){
     return new Promise(resolve => {
         const interval = setInterval(() => {
             const navigation = document.querySelector('nav[aria-label="Form navigation"]');
-            if (!navigation){
+            if (navigation){
+                clearInterval(interval);
+                console.log("[NAVIGATION]","Found");
+                resolve({type:"legacy",navigation});
+                return;
+            }
+
+            const buttons = [...document.querySelectorAll("button")].filter(button =>button.textContent.trim());
+            const pageButtons =
+                buttons.filter(button =>
+                    button.textContent.includes("RESEARCH") ||
+                    button.textContent.includes("NOMINEE") ||
+                    button.textContent.includes("ATTACHMENT")
+                );
+            if (pageButtons.length === 0){
                 return;
             }
             clearInterval(interval);
-            console.log("[NAVIGATION]","Found");
-            resolve(navigation);
+            console.log("[NAVIGATION]","Found modern navigation");
+            resolve({type:"modern",buttons:pageButtons});
         },500);
     });
 }

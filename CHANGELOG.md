@@ -4,6 +4,64 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.9.2 - Navigation Engine Foundation
+
+### Added
+
+#### Navigation Engine
+
+- Added Navigation Engine foundation.
+- Added navigation discovery workflow.
+- Added automatic detection of supported navigation structures.
+- Added support for page discovery.
+- Added support for opening pages by title.
+- Added navigation diagnostics and logging.
+
+#### Navigation APIs
+
+- Added `waitForNavigation()`.
+- Added `getAllPages()`.
+- Added `openPage(title)`.
+- Added `menuNavigation()`.
+
+---
+
+### Improved
+
+#### Form Filling
+
+- Added Navigation initialization during form filling.
+- Improved architecture for future multi-page form support.
+- Improved separation between navigation and form-filling logic.
+
+#### Compatibility
+
+- Added support for multiple APWMS navigation structures.
+- Improved resilience against APWMS UI variations.
+- Reduced dependence on a single navigation implementation.
+
+---
+
+### Refactored
+
+#### Navigation Architecture
+
+- Centralized navigation logic.
+- Added reusable navigation functions.
+- Improved extensibility for future page automation features.
+
+---
+
+### Foundation Work
+
+- Established infrastructure for multi-page form automation.
+- Prepared support for page-aware exports.
+- Prepared support for page-aware imports.
+- Prepared support for automatic page switching.
+- Prepared support for full-form automation across multiple pages.
+
+---
+
 ## v1.9.1 - User Manual & Documentation
 
 ### Added
