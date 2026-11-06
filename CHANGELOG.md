@@ -4,6 +4,51 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.9.1 - User Manual & Documentation
+
+### Added
+
+#### User Manual
+
+- Added USER_MANUAL.md.
+- Added installation guide.
+- Added data sheet creation guide.
+- Added support document workflow guide.
+- Added file import guide.
+- Added form filling guide.
+- Added troubleshooting and developer tools guide.
+- Added recommended usage workflow.
+
+---
+
+### Improved
+
+#### Documentation
+
+- Improved project documentation structure.
+- Added documentation link to README.
+- Improved onboarding experience for new users.
+- Improved explanations for Support File workflows.
+- Improved guidance for document upload features.
+
+---
+
+### Documentation Coverage
+
+The User Manual now covers:
+
+- Installation
+- Creating Data Sheets
+- Document Upload Fields
+- Importing Files
+- Support File Management
+- Filling Forms
+- Scan Form
+- Highlight Mode
+- Troubleshooting
+
+---
+
 ## v1.9.0 - Multi-Page Form Automation Foundation
 
 ### Added

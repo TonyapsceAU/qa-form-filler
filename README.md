@@ -4,6 +4,8 @@ Chrome extension for exporting APWMS forms, managing Excel-based test cases, sup
 
 ![Main Screenshot](docs/screenshot-main.png)
 
+- User Manual: [USER_MANUAL.md](docs/USER_MANUAL.md)
+
 ## Features
 
 ### Form Automation
@@ -65,105 +67,6 @@ Chrome extension for exporting APWMS forms, managing Excel-based test cases, sup
 
 ---
 
-## Usage
-
-### Export
-
-1. Open an APWMS form.
-2. Click **Export Excel**.
-3. Enter an export file name.
-4. Save the generated Excel file.
-
-![Export Screenshot](docs/screenshot-export.png)
-
----
-
-### Import
-
-1. Open an APWMS form.
-2. Click **Import Files**.
-3. Select one or more Excel files and/or support documents.
-4. QA Form Filler will automatically identify:
-   - Excel files as Test Cases
-   - Other files as Support Files
-5. Imported resources will be saved for future use.
-
----
-
-### Support Files
-
-Imported support files appear in the Support Files section and are stored locally for future automated upload workflows.
-
-Supported workflows:
-
-- Import PDF and supporting documents
-- Store files locally in Chrome storage
-- Reuse support files across multiple test cases
-- Reference support files directly from Excel
-- Automatically upload matching documents into APWMS file-upload fields during form filling
-
-Example:
-
-| Excel Value | Result |
-|------------|---------|
-| `CV.pdf` | Uploads `CV.pdf` from Support File storage |
-| `Proposal.pdf` | Uploads `Proposal.pdf` from Support File storage |
-
----
-
-### Manage Test Cases
-
-After importing files, saved test cases can be managed directly from the popup.
-
-Available actions:
-
-- **Load** - Load a saved test case into memory
-- **Delete** - Remove a saved test case from storage
-- **Fill Form** - Populate the current APWMS form using the loaded test case
-
----
-
-### Fill Form
-
-1. Import or load a test case.
-2. Import any required support documents.
-3. Click **Fill Form**.
-4. The extension will:
-   - Synchronize repeat sections
-   - Populate standard form fields
-   - Automatically upload referenced support documents
-   - Populate APWMS file-upload fields
-5. Review the generated form and submit as needed.
-
-![Import Screenshot](docs/screenshot-import.png)
-
----
-
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).
-
-### Version 1.7.0
-
-#### Added
-
-- Automatic APWMS document upload
-- Excel-driven support file attachment
-- Binary support file storage
-- Support file reconstruction from stored binary data
-- React upload bridge for APWMS file-upload controls
-- Support file
-#### Improved
-
-- Test case management workflow
-- Support file management workflow
-- Import status reporting
-- Upload debugging and diagnostics
-
-#### Fixed
-
-- Support file content loss during storage
-- Empty file reconstruction issue
-- APWMS upload integration issues
-- React file-upload compatibility issues
-- Support file retrieval and rebuild process
