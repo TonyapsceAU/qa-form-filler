@@ -4,25 +4,60 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
-## v1.9.2 - Navigation Engine Foundation
+## v1.9.2 - Multi-Structure Navigation Support
 
 ### Added
 
+#### Navigation Compatibility
+
+- Added support for multiple APWMS navigation structures.
+- Added navigation structure detection.
+- Added support for navigation discovery across different form layouts.
+- Added support for page discovery using alternative navigation implementations.
+
+#### Navigation Diagnostics
+
+- Added additional navigation logging.
+- Added navigation structure detection logs.
+- Improved troubleshooting information during page discovery.
+
+---
+
+### Improved
+
 #### Navigation Engine
 
-- Added Navigation Engine foundation.
-- Added navigation discovery workflow.
-- Added automatic detection of supported navigation structures.
-- Added support for page discovery.
-- Added support for opening pages by title.
-- Added navigation diagnostics and logging.
+- Improved navigation discovery reliability.
+- Improved page detection across APWMS forms.
+- Improved compatibility with different navigation layouts.
+- Reduced dependence on a single navigation container structure.
+- Improved resilience against APWMS UI implementation differences.
 
-#### Navigation APIs
+#### Form Filling
 
-- Added `waitForNavigation()`.
-- Added `getAllPages()`.
-- Added `openPage(title)`.
-- Added `menuNavigation()`.
+- Improved navigation initialization during form filling.
+- Improved preparation for future page-aware filling workflows.
+- Improved groundwork for automatic page switching.
+
+---
+
+### Refactored
+
+#### Navigation Architecture
+
+- Refactored navigation discovery workflow.
+- Simplified support for additional navigation structures.
+- Improved extensibility of navigation-related functions.
+- Improved separation between navigation discovery and page processing.
+
+---
+
+### Foundation Work
+
+- Expanded Navigation Engine compatibility coverage.
+- Prepared support for automatic page sequencing.
+- Prepared support for Next-page navigation workflows.
+- Prepared support for future multi-page export and import functionality.
 
 ---
 
