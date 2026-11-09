@@ -48,7 +48,7 @@ function injectPageBridge(){
 
     const script =document.createElement("script");
     script.id ="qa-page-bridge";
-    script.src =chrome.runtime.getURL("src/pageBridge.js");
+    script.src = chrome.runtime.getURL("src/pageBridge.js");
     document.documentElement.appendChild(script);
     script.remove();
     console.log("[QA] Page Bridge Injected");

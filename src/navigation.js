@@ -1,8 +1,12 @@
 async function menuNavigation(){
     console.group("[NAVIGATION]");
+    if(DEBUG.NAVIGATION){console.log("Step 1)Waiting for navigation");}
     await waitForNavigation()
+    if(DEBUG.NAVIGATION){console.log("Step 2)Navigation Info:",getNavigationInfo());}
+    if(DEBUG.NAVIGATION){console.log("Step 3)");}
     const pages = getAllPages(getNavigationInfo());
     console.log("Page Count:",pages.length);
+    if(DEBUG.NAVIGATION){console.log("Step 4)");}
     await openPage(pages[0].title);
     console.groupEnd();
 }
@@ -45,7 +49,6 @@ function getAllPages(navigationInfo){
             });
         });
     }
-    // console.log(pages[0]);
     console.log("Pages:",pages.map(page =>`${page.part} ${page.title}`));
     console.groupEnd();
     return pages;
@@ -73,7 +76,7 @@ async function waitForNavigation(){
             clearInterval(interval);
             const navigationInfo = getNavigationInfo();
             let found = false;
-            if (navigationInfo?.type ==="t "){
+            if (navigationInfo?.type ==="structured"){
                 found = true;
             }
             if (navigationInfo?.type ==="section" &&navigationInfo.buttons.length){

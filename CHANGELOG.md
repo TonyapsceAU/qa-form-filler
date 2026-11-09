@@ -4,6 +4,57 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.9.5 - Navigation Diagnostics & Stability Improvements
+
+### Fixed
+
+#### Navigation Engine
+
+- Fixed navigation readiness detection.
+- Fixed structured navigation handling.
+- Fixed navigation state validation during form filling.
+- Fixed issues causing navigation workflows to become stuck.
+- Fixed navigation-related issues discovered during testing.
+
+---
+
+### Added
+
+#### Navigation Diagnostics
+
+- Added step-by-step navigation debugging logs.
+- Added navigation information diagnostics.
+- Added page discovery diagnostics.
+- Added navigation readiness logging.
+- Added navigation troubleshooting visibility.
+
+---
+
+### Improved
+
+#### Navigation Engine
+
+- Improved navigation stability during form filling.
+- Improved reliability of page discovery workflows.
+- Improved navigation debugging capabilities.
+- Improved support for investigating navigation issues across different APWMS forms.
+
+#### Developer Experience
+
+- Improved navigation logging structure.
+- Improved visibility of navigation execution flow.
+- Simplified troubleshooting of navigation-related issues.
+
+---
+
+### Foundation Work
+
+- Prepared Navigation Engine for Export All Pages.
+- Improved infrastructure for page-aware Excel exports.
+- Improved readiness for future multi-page automation features.
+
+---
+
 ## v1.9.4 - Navigation Engine Refactoring
 
 ### Improved
