@@ -4,6 +4,53 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.9.6 - Non-Editable Field Detection
+
+### Added
+
+#### Field Validation
+
+- Added `isEditableField()`.
+- Added detection of disabled form fields.
+- Added detection of read-only form fields.
+- Added automatic skipping of non-editable inputs during form filling.
+
+#### Diagnostics
+
+- Added logging for skipped non-editable fields.
+- Added visibility into field validation decisions during form filling.
+
+---
+
+### Improved
+
+#### Form Filling
+
+- Improved compatibility with APWMS system-managed fields.
+- Improved handling of auto-generated form values.
+- Prevented unnecessary writes to disabled inputs.
+- Reduced filling errors caused by non-editable controls.
+- Improved reliability of automatic form completion.
+
+#### APWMS Compatibility
+
+- Improved support for calculated fields.
+- Improved support for system-generated code fields.
+- Improved support for disabled textareas and inputs.
+- Improved behavior on forms containing protected fields.
+
+---
+
+### Fixed
+
+#### Field Processing
+
+- Fixed attempts to populate disabled inputs.
+- Fixed attempts to populate read-only fields.
+- Fixed unnecessary processing of system-controlled form fields.
+
+---
+
 ## v1.9.5 - Navigation Diagnostics & Stability Improvements
 
 ### Fixed

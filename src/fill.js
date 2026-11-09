@@ -100,6 +100,10 @@ async function fillAllVisibleFields(importRows){
                 break;
             }
 
+            if (!isEditableField(fieldElement)){
+                continue;
+            }
+
             const value = importRow[EXPORT_COLUMNS.VALUE] ?? "";
             // File upload cannot be imported
             if (fieldElement.type === "file"){
@@ -162,8 +166,8 @@ async function fillAllVisibleFields(importRows){
 
             if ((rowIndex % 10 === 0) ||(rowIndex === importRows.length - 1)){
                 updateImportProgress(rowIndex + 1,importRows.length,"Filling Form Fields...");
-                await new Promise(resolve => setTimeout(resolve, 0));
             }
+            await new Promise(resolve => setTimeout(resolve, 100));
         }catch(error){
             const importRow = importRows[rowIndex];
             console.error("[FILL] Row Failed",{rowIndex,field: importRow?.[EXPORT_COLUMNS.FIELD],error});
@@ -175,4 +179,24 @@ async function fillAllVisibleFields(importRows){
         repeatCounts: getCurrentRepeatCounts()
     });
     console.groupEnd();
+}
+
+function isEditableField(fieldElement){
+    if (!fieldElement){
+        return false;
+    }
+
+    if (fieldElement.disabled){
+        return false;
+    }
+
+    if (fieldElement.readOnly){
+        return false;
+    }
+
+    if (fieldElement.classList.contains("ant-input-disabled")){
+        return false;
+    }
+
+    return true;
 }
