@@ -3,7 +3,8 @@ const ACTIONS = {
     SCAN_FORM: "scanForm",
     HIGHLIGHT_FORM: "highlightForm",
     CLEAR_HIGHLIGHT: "clearHighlight",
-    EXPORT_EXCEL: "exportExcel",
+    EXPORT_ALL_EXCEL: "exportAllExcel",
+    EXPORT_CURRENT_EXCEL: "exportCurExcel",
     // IMPORT_EXCEL: "importExcel",
     FILL_FORM: "fillForm"
 };
@@ -14,7 +15,8 @@ const ELEMENT_IDS = {
     RESULT_CONTAINER: "resultContainer",
     HIGHLIGHT_BUTTON: "highlightModeBtn",
     CLEAR_HIGHLIGHT_BUTTON: "clearhighlightBtn",
-    EXPORT_BUTTON: "exportBtn",
+    EXPOT_ALL_BUTTON: "exportAllBtn",
+    EXPOT_CURRENT_BUTTON: "exportCurBtn",
     IMPORT_BUTTON: "importBtn",
     IMPORT_FILE_INPUT: "importFile",
     IMPORT_INFO: "importInfo",

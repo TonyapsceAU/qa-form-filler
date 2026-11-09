@@ -12,9 +12,12 @@ chrome.runtime.onMessage.addListener(
                         enableHighlightMode();
                         sendResponse({success: true});
                         break;
-                    case ACTIONS.EXPORT_EXCEL:
-                        // exportToExcel();
+                    case ACTIONS.EXPORT_ALL_EXCEL:
                         exportAllToExcel();
+                        sendResponse({success: true});
+                        break;
+                    case ACTIONS.EXPORT_CURRENT_EXCEL:
+                        exportToExcel();
                         sendResponse({success: true});
                         break;
                     case ACTIONS.FILL_FORM:

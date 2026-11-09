@@ -4,7 +4,8 @@ document.addEventListener(
         const scanBtn = document.getElementById(ELEMENT_IDS.SCAN_BUTTON);
         const highlightModeBtn = document.getElementById(ELEMENT_IDS.HIGHLIGHT_BUTTON);
         const clearHighlightBtn = document.getElementById(ELEMENT_IDS.CLEAR_HIGHLIGHT_BUTTON);
-        const exportBtn = document.getElementById(ELEMENT_IDS.EXPORT_BUTTON);
+        const exportAllBtn = document.getElementById(ELEMENT_IDS.EXPOT_ALL_BUTTON);
+        const exportCurretnBtn = document.getElementById(ELEMENT_IDS.EXPOT_CURRENT_BUTTON);
         const importBtn = document.getElementById(ELEMENT_IDS.IMPORT_BUTTON);
         const fillBtn = document.getElementById(ELEMENT_IDS.FILL_BUTTON);
 
@@ -59,13 +60,24 @@ document.addEventListener(
             }
         );
 
-        exportBtn.addEventListener(
+        exportAllBtn.addEventListener(
             "click",
             async () => {
                 const [tab] = await getCurrentTab();
                 await chrome.tabs.sendMessage(
                     tab.id,
-                    {action: ACTIONS.EXPORT_EXCEL}
+                    {action: ACTIONS.EXPORT_ALL_EXCEL}
+                );
+            }
+        );
+
+        exportCurretnBtn.addEventListener(
+            "click",
+            async () => {
+                const [tab] = await getCurrentTab();
+                await chrome.tabs.sendMessage(
+                    tab.id,
+                    {action: ACTIONS.EXPORT_CURRENT_EXCEL}
                 );
             }
         );

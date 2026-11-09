@@ -4,6 +4,52 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.9.8 - Split Export Workflows
+
+### Added
+
+#### Export Options
+
+- Added **Export Current Page** action.
+- Added **Export All Pages** action.
+- Added dedicated workflow for page-level exports.
+- Added dedicated workflow for full-form exports.
+
+#### Multi-Page Export
+
+- Added workbook generation for complete forms.
+- Added worksheet-per-page export structure.
+- Added support for exporting all discovered form pages into a single workbook.
+
+---
+
+### Improved
+
+#### User Experience
+
+- Improved export workflow clarity.
+- Improved distinction between single-page and full-form exports.
+- Reduced accidental full-form exports.
+- Improved user control over export scope.
+
+#### Export Workflow
+
+- Preserved original export behavior through Export Current Page.
+- Improved accessibility of multi-page export functionality.
+- Improved export flexibility for testing and data preparation workflows.
+
+---
+
+### Refactored
+
+#### Export Architecture
+
+- Separated single-page export and multi-page export workflows.
+- Improved maintainability of export-related features.
+- Improved foundation for future page-aware import workflows.
+
+---
+
 ## v1.9.7 - Multi-Page Form Export
 
 ### Added
