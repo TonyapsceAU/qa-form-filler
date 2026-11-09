@@ -80,9 +80,9 @@ const IMPORT_OVERLAY_ID = "qa-import-overlay";
 
 // Debug Settings
 const DEBUG = {
-    NAVIGATION: true,
+    NAVIGATION: false,
     IMPORT: false,//missing useage
-    EXPORT: false,//missing useage
+    EXPORT: true,//missing useage
     REPEAT: false,
     LABELS: false,
     HIGHLIGHT: false,

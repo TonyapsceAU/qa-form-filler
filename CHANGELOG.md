@@ -4,6 +4,66 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.9.7 - Multi-Page Form Export
+
+### Added
+
+#### Multi-Page Export
+
+- Added Export All Pages workflow.
+- Added automatic return-to-menu navigation.
+- Added page discovery before export.
+- Added workbook generation for complete forms.
+- Added support for exporting multiple form pages into a single Excel workbook.
+- Added page-aware export processing.
+
+#### Excel Export
+
+- Added one worksheet per form page.
+- Added automatic worksheet generation for discovered pages.
+- Added worksheet appending workflow during export.
+- Added workbook download for multi-page exports.
+
+#### Navigation Integration
+
+- Added export integration with Navigation Engine.
+- Added menu navigation support during export.
+- Added page-by-page export workflow.
+- Added automatic page rendering synchronization during export.
+
+---
+
+### Improved
+
+#### Export Workflow
+
+- Improved support for large multi-page APWMS forms.
+- Improved export coverage across complete applications.
+- Improved structure of exported Excel workbooks.
+- Improved preparation for future multi-page imports.
+
+#### Navigation Engine
+
+- Improved integration between export and navigation workflows.
+- Improved support for sequential page processing.
+- Improved page traversal during export operations.
+
+---
+
+### Fixed
+
+#### Form Filling
+
+- Fixed form filling stopping after the first page.
+- Improved multi-page navigation reliability during filling operations.
+
+#### Extension Stability
+
+- Fixed message channel disconnects during form filling.
+- Improved handling of long-running navigation and form operations.
+
+---
+
 ## v1.9.6 - Non-Editable Field Detection
 
 ### Added

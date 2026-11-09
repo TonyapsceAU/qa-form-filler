@@ -9,9 +9,9 @@ async function fillForm(importRows,fileName){
 }
 
 async function fillImportedRows(importRows,fileName){
+    console.group("[IMPORT] Start");
     const startTime = Date.now();
     let keepOverlayOpen = false;
-    console.group("[IMPORT] Start");
     showImportOverlay();
     await new Promise(resolve =>setTimeout(resolve,50));
     try{

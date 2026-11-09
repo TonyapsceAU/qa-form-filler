@@ -20,29 +20,76 @@ function collectFormData() {
     return formData;
 }
 
+async function exportAllToExcel(){
+    //navigate to main manue
+    console.group("[EXPORT] Started");
+    const menuButton = findMenuButton();
+    if(DEBUG.EXPORT){console.log(menuButton);}
+    await clickMenuButton();
+    //export
+    const pages = getAllPages(getNavigationInfo());
+    console.log("[EXPORT]","Pages:",pages);
+    if(DEBUG.EXPORT){console.log(collectFormData().length);}
+    const pageData = [];
+    const workbook = XLSX.utils.book_new();
+    await openPage(pages[0].title);
+    await waitForPageRender();
+    for(let index = 0; index < pages.length; index++){
+        const page = pages[index];
+        // await openPage(page.title);
+        // await waitForPageRender();
+        const formData = collectFormData();
+        pageData.push({
+            part: String(index),
+            title: page.title,
+            formData: formData
+        });
+        // getSheetName(page,0);
+        const worksheet = XLSX.utils.json_to_sheet(createExportRows(formData));
+        console.log("[EXPORT]","Sheet Name:",index);
+        XLSX.utils.book_append_sheet(workbook,worksheet,String(index));
+        console.log("[EXPORT]",index,page.title,"Fields:",pageData.at(-1).formData.length);
+        if(index < pages.length - 1){
+            await clickNextPage();
+        }
+    }
+    if (!workbook.Workbook) {
+        workbook.Workbook = {};
+    }
+    if (!workbook.Workbook.Views) {
+        workbook.Workbook.Views = [{}];
+    }
+    workbook.Workbook.Views[0] = {xSplit: 4,ySplit: 1};
+    // console.log("Rows:",exportRows.length);
+    
+    console.log("[EXPORT] Saving Workbook");
+    const defaultFileName = `QA_${new Date().toISOString().slice(0,10)}`;
+    const inputFileName = prompt("Enter file name:",defaultFileName);
+    if (!inputFileName){
+        return;
+    }
+    const fileName = inputFileName.endsWith(".xlsx")? inputFileName: `${inputFileName}.xlsx`;
+    XLSX.writeFile(workbook,fileName);
+    console.log("[EXPORT] Complete");
+    console.groupEnd();
+}
+
+function getSheetName(page, index){
+    console.log(page.part);
+    return (
+        page.part ||
+        `Page ${index + 1}`
+    )
+        .replace(/[\\/*?:[\]]/g,"")
+        .substring(0,31);
+}
+
 function exportToExcel(){
     console.group("[EXPORT] Started");
     const formData = collectFormData();
     console.log("Fields Found:",formData.length);
     console.log("[EXPORT] Processing Repeat Sections");
-    const exportRows = formData.map(fieldData => {
-        let repeatInfo = getRepeatInfo(fieldData.fieldName);
-        if (!repeatInfo.repeatGroup){
-            repeatInfo = getKeywordRepeatInfo(fieldData.fieldElement);
-        }
-        return {
-            [EXPORT_COLUMNS.NO]:fieldData.questionNo,
-            [EXPORT_COLUMNS.SECTION]:fieldData.section,
-            [EXPORT_COLUMNS.GROUP]:fieldData.group,
-            [EXPORT_COLUMNS.REPEAT_GROUP]:repeatInfo.repeatGroup || "",
-            [EXPORT_COLUMNS.REPEAT_INDEX]:repeatInfo.repeatIndex || "",
-            [EXPORT_COLUMNS.FIELD]:fieldData.field,
-            [EXPORT_COLUMNS.VALUE]:fieldData.value,
-            [EXPORT_COLUMNS.FIELD_ID]:fieldData.fieldId,
-            [EXPORT_COLUMNS.FIELD_NAME]:fieldData.fieldName,
-            [EXPORT_COLUMNS.TYPE]:fieldData.fieldType
-        };
-    });
+    const exportRows = createExportRows(formData);
     const repeatSummary = {};
     exportRows.forEach(row => {
         const repeatGroup = row[EXPORT_COLUMNS.REPEAT_GROUP];
@@ -100,6 +147,28 @@ function exportToExcel(){
     // chrome.downloads.download({url,filename: fileName,saveAs: true});
     console.log("[EXPORT] Complete");
     console.groupEnd();
+}
+
+function createExportRows(formData){
+    return formData.map(fieldData => {
+        let repeatInfo = getRepeatInfo(fieldData.fieldName);
+        if (!repeatInfo.repeatGroup){
+            repeatInfo = getKeywordRepeatInfo(fieldData.fieldElement);
+        }
+
+        return {
+            [EXPORT_COLUMNS.NO]:fieldData.questionNo,
+            [EXPORT_COLUMNS.SECTION]:fieldData.section,
+            [EXPORT_COLUMNS.GROUP]:fieldData.group,
+            [EXPORT_COLUMNS.REPEAT_GROUP]:repeatInfo.repeatGroup || "",
+            [EXPORT_COLUMNS.REPEAT_INDEX]:repeatInfo.repeatIndex || "",
+            [EXPORT_COLUMNS.FIELD]:fieldData.field,
+            [EXPORT_COLUMNS.VALUE]:fieldData.value,
+            [EXPORT_COLUMNS.FIELD_ID]:fieldData.fieldId,
+            [EXPORT_COLUMNS.FIELD_NAME]:fieldData.fieldName,
+            [EXPORT_COLUMNS.TYPE]:fieldData.fieldType
+        };
+    });
 }
 
 //unused

@@ -7,7 +7,7 @@ async function menuNavigation(){
     const pages = getAllPages(getNavigationInfo());
     console.log("Page Count:",pages.length);
     if(DEBUG.NAVIGATION){console.log("Step 4)");}
-    await openPage(pages[0].title);
+    if(pages.length != 0){await openPage(pages[0].title);}
     console.groupEnd();
 }
 
@@ -135,4 +135,27 @@ async function waitForPageRender(){
             resolve();
         },1000);
     });
+}
+
+function findMenuButton(){
+    const menuButton = 
+        [...document.querySelectorAll("button")]
+            .find(button =>button.textContent.trim() ==="Menu");
+    if (!menuButton){
+        console.warn("[NAVIGATION]","Menu Button Not Found");
+        return null;
+    }
+    console.log("[NAVIGATION]","Menu Button Found");
+    return menuButton;
+}
+
+async function clickMenuButton(){
+    const menuButton = findMenuButton();
+    if (!menuButton){
+        return false;
+    }
+    console.log("[NAVIGATION]","Opening Menu");
+    menuButton.click();
+    await waitForNavigation();
+    return true;
 }

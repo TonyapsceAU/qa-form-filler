@@ -13,7 +13,8 @@ chrome.runtime.onMessage.addListener(
                         sendResponse({success: true});
                         break;
                     case ACTIONS.EXPORT_EXCEL:
-                        exportToExcel();
+                        // exportToExcel();
+                        exportAllToExcel();
                         sendResponse({success: true});
                         break;
                     case ACTIONS.FILL_FORM:
