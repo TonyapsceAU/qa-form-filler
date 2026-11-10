@@ -6,7 +6,8 @@ const ACTIONS = {
     EXPORT_ALL_EXCEL: "exportAllExcel",
     EXPORT_CURRENT_EXCEL: "exportCurExcel",
     // IMPORT_EXCEL: "importExcel",
-    FILL_FORM: "fillForm"
+    FILL_ALL: "fillAll",
+    Fill_CURRENT_PAGE: "fillCurrent"
 };
 
 // Element IDs
@@ -20,7 +21,8 @@ const ELEMENT_IDS = {
     IMPORT_BUTTON: "importBtn",
     IMPORT_FILE_INPUT: "importFile",
     IMPORT_INFO: "importInfo",
-    FILL_BUTTON: "fillBtn",
+    FILL_ALL_BUTTON: "fillAllBtn",
+    FILL_CURRENT_BUTTON: "fillCurBtn",
     TEST_CASE_LIST: "testCaseList",
     SUPPORT_FILE_LIST:"supportFileList"
 };
@@ -83,8 +85,8 @@ const IMPORT_OVERLAY_ID = "qa-import-overlay";
 // Debug Settings
 const DEBUG = {
     NAVIGATION: false,
-    IMPORT: false,//missing useage
-    EXPORT: true,//missing useage
+    IMPORT: true,//missing useage
+    EXPORT: false,
     REPEAT: false,
     LABELS: false,
     HIGHLIGHT: false,

@@ -20,11 +20,12 @@ chrome.runtime.onMessage.addListener(
                         exportToExcel();
                         sendResponse({success: true});
                         break;
-                    case ACTIONS.FILL_FORM:
-                        await fillForm(
-                            request.importRows,
-                            request.fileName
-                        );
+                    case ACTIONS.FILL_ALL:
+                        await fillAll(request.importRows,request.fileName);
+                        sendResponse({success: true});
+                        break;
+                    case ACTIONS.Fill_CURRENT_PAGE:
+                        await fillImportedRows(request.importRows,request.fileName);
                         sendResponse({success: true});
                         break;
                     case ACTIONS.CLEAR_HIGHLIGHT:

@@ -7,7 +7,8 @@ document.addEventListener(
         const exportAllBtn = document.getElementById(ELEMENT_IDS.EXPOT_ALL_BUTTON);
         const exportCurretnBtn = document.getElementById(ELEMENT_IDS.EXPOT_CURRENT_BUTTON);
         const importBtn = document.getElementById(ELEMENT_IDS.IMPORT_BUTTON);
-        const fillBtn = document.getElementById(ELEMENT_IDS.FILL_BUTTON);
+        const fillAllBtn = document.getElementById(ELEMENT_IDS.FILL_ALL_BUTTON);
+        const fillCurBtn = document.getElementById(ELEMENT_IDS.FILL_CURRENT_BUTTON);
 
         const resultContainer = document.getElementById(ELEMENT_IDS.RESULT_CONTAINER);
         const importFileInput = document.getElementById(ELEMENT_IDS.IMPORT_FILE_INPUT);
@@ -130,7 +131,7 @@ document.addEventListener(
             }
         );
 
-        fillBtn.addEventListener(
+        fillCurBtn.addEventListener(
             "click",
             async () => {
                 if (!loadedImportRows || loadedImportRows.length === 0){
@@ -141,7 +142,27 @@ document.addEventListener(
                 await chrome.tabs.sendMessage(
                     tab.id,
                     {
-                        action: ACTIONS.FILL_FORM,
+                        action: ACTIONS.Fill_CURRENT_PAGE,
+                        importRows: loadedImportRows,
+                        fileName: loadedFileName
+                    }
+                );
+
+            }
+        );
+
+        fillAllBtn.addEventListener(
+            "click",
+            async () => {
+                if (!loadedImportRows || loadedImportRows.length === 0){
+                    alert("Please load an Excel file first.");
+                    return;
+                }
+                const [tab] = await getCurrentTab();
+                await chrome.tabs.sendMessage(
+                    tab.id,
+                    {
+                        action: ACTIONS.FILL_ALL,
                         importRows: loadedImportRows,
                         fileName: loadedFileName
                     }

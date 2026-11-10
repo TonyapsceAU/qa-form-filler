@@ -2,7 +2,7 @@ async function importExcel(bufferArray){
     throw new Error("Deprecated: use fillImportedRows()");
 }
 
-async function fillForm(importRows,fileName){
+async function fillAll(importRows,fileName){
     await menuNavigation();
     await fillImportedRows(importRows,fileName);
     await clickNextPage();

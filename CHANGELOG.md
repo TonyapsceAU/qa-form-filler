@@ -4,6 +4,54 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.9.10 - Split Fill Workflows
+
+### Added
+
+#### Fill Options
+
+- Added **Fill Current Page** action.
+- Added **Fill All Pages** action.
+- Added dedicated workflow for single-page form filling.
+- Added dedicated workflow for multi-page form filling.
+
+#### Multi-Page Filling
+
+- Added page-aware filling workflow.
+- Added integration with Navigation Engine.
+- Added support for processing multiple form pages.
+- Added infrastructure for automatic page progression.
+
+---
+
+### Improved
+
+#### User Experience
+
+- Improved clarity of fill operations.
+- Improved control over filling scope.
+- Reduced accidental full-form fills.
+- Simplified testing of individual form pages.
+
+#### Form Filling
+
+- Preserved original behavior through Fill Current Page.
+- Improved preparation for complete multi-page automation.
+- Improved flexibility when working with APWMS forms.
+
+---
+
+### Refactored
+
+#### Fill Architecture
+
+- Separated single-page and multi-page filling workflows.
+- Decoupled current-page filling from navigation-dependent operations.
+- Improved maintainability of form-filling logic.
+- Improved foundation for page-aware Excel imports.
+
+---
+
 ## v1.9.9 - Import Validation Report
 
 ### Added
