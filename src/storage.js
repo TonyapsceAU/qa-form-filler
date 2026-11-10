@@ -140,6 +140,7 @@ async function getSupportFile(fileName){
     const supportFile = supportFiles[fileName];
     if (!supportFile){
         console.warn("[SUPPORT FILE] Not Found:",fileName);
+        // console.groupEnd();
         return null;
     }
     console.log("[SUPPORT FILE] Loaded:",fileName);

@@ -1,7 +1,7 @@
 async function menuNavigation(){
     console.group("[NAVIGATION]");
     if(DEBUG.NAVIGATION){console.log("Step 1)Waiting for navigation");}
-    await waitForNavigation()
+    await waitForMenuRender()
     if(DEBUG.NAVIGATION){console.log("Step 2)Navigation Info:",getNavigationInfo());}
     if(DEBUG.NAVIGATION){console.log("Step 3)");}
     const pages = getAllPages(getNavigationInfo());
@@ -69,7 +69,7 @@ function getNavigationInfo(){
     return ({type:"section",buttons:buttons});
 }
 
-async function waitForNavigation(){
+async function waitForMenuRender(){
     return new Promise(resolve => {
         const interval = setInterval(() => {
             console.log("[NAVIGATION]","Waiting...");
@@ -79,7 +79,7 @@ async function waitForNavigation(){
             if (navigationInfo?.type ==="structured"){
                 found = true;
             }
-            if (navigationInfo?.type ==="section" &&navigationInfo.buttons.length){
+            if (navigationInfo?.type ==="section" && navigationInfo.buttons.length){
                 found = true;
             }
             if (!found){
@@ -93,7 +93,7 @@ async function waitForNavigation(){
 }
 
 async function openPage(title){
-    await waitForNavigation()
+    await waitForMenuRender()
     const pages = getAllPages(getNavigationInfo());
     console.log("[PAGES]",pages);
     const page = pages.find(page =>page.title === title);
@@ -156,6 +156,6 @@ async function clickMenuButton(){
     }
     console.log("[NAVIGATION]","Opening Menu");
     menuButton.click();
-    await waitForNavigation();
+    await waitForMenuRender();
     return true;
 }

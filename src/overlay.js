@@ -81,20 +81,88 @@ function updateImportProgress(current,total,statusText = "Importing Excel..."){
     statusElement.textContent = statusText;
 }
 
-function showValidationError(fileName,mismatchCount){
-    const overlayElement = document.getElementById(IMPORT_OVERLAY_ID);
+function showValidationError(fileName,report){
+
+    const overlayElement =
+        document.getElementById(
+            IMPORT_OVERLAY_ID
+        );
+
     if (!overlayElement){
         return;
     }
+
+    const totalIssues =
+        report.nameMismatches.length +
+        report.typeMismatches.length +
+        report.missingFields.length +
+        (
+            report.rowCountMismatch
+                ? 1
+                : 0
+        );
+
+    const detailRows = [
+
+        ...report.nameMismatches.map(
+            item => ({
+                issue: "Name",
+                fieldIndex:
+                    item.fieldIndex,
+                expected:
+                    item.expectedName,
+                actual:
+                    item.actualName
+            })
+        ),
+
+        ...report.typeMismatches.map(
+            item => ({
+                issue: "Type",
+                fieldIndex:
+                    item.fieldIndex,
+                expected:
+                    item.expectedType,
+                actual:
+                    item.actualType
+            })
+        ),
+
+        ...report.missingFields.map(
+            item => ({
+                issue: "Missing",
+                fieldIndex:
+                    item.fieldIndex,
+                expected:
+                    item.field,
+                actual:
+                    "Not Found"
+            })
+        )
+
+    ]
+    .slice(0,10)
+    .map(item => `
+        <tr>
+            <td>${item.fieldIndex}</td>
+            <td>${item.issue}</td>
+            <td>${item.expected}</td>
+            <td>${item.actual}</td>
+        </tr>
+    `)
+    .join("");
 
     overlayElement.innerHTML = `
         <div style="
             background:white;
             padding:24px 32px;
             border-radius:8px;
-            max-width:500px;
+            max-width:900px;
+            max-height:80vh;
+            overflow:auto;
             box-shadow:0 4px 12px rgba(0,0,0,.3);
         ">
+
             <div style="
                 color:#d32f2f;
                 font-size:20px;
@@ -104,24 +172,115 @@ function showValidationError(fileName,mismatchCount){
                 ⚠ Structure Validation Failed
             </div>
 
-            <div style="margin-bottom:8px;">
+            <div style="margin-bottom:12px;">
                 <b>File:</b><br>
                 ${fileName}
             </div>
 
-            <div style="margin-bottom:8px;">
-                <b>Detected:</b><br>
-                ${mismatchCount} field mismatches
+            <div style="
+                display:grid;
+                grid-template-columns:repeat(2,1fr);
+                gap:12px;
+                margin-bottom:20px;
+            ">
+
+                <div>
+                    <b>Excel Fields</b><br>
+                    ${report.excelFields}
+                </div>
+
+                <div>
+                    <b>Form Fields</b><br>
+                    ${report.formFields}
+                </div>
+
+                <div>
+                    <b>Name Mismatches</b><br>
+                    ${report.nameMismatches.length}
+                </div>
+
+                <div>
+                    <b>Type Mismatches</b><br>
+                    ${report.typeMismatches.length}
+                </div>
+
+                <div>
+                    <b>Missing Fields</b><br>
+                    ${report.missingFields.length}
+                </div>
+
+                <div>
+                    <b>Total Issues</b><br>
+                    ${totalIssues}
+                </div>
+
             </div>
 
+            ${
+                report.rowCountMismatch
+                ? `
+                    <div style="
+                        margin-bottom:16px;
+                        padding:12px;
+                        background:#fff3cd;
+                        border:1px solid #ffe69c;
+                        border-radius:4px;
+                    ">
+                        <b>Row Count Mismatch</b><br>
+
+                        Excel: ${report.excelFields}<br>
+                        Form: ${report.formFields}
+                    </div>
+                `
+                : ""
+            }
+
+            ${
+                detailRows
+                ? `
+                    <div style="margin-top:20px;">
+
+                        <div style="
+                            font-weight:bold;
+                            margin-bottom:10px;
+                        ">
+                            First 10 Issues
+                        </div>
+
+                        <table style="
+                            width:100%;
+                            border-collapse:collapse;
+                            font-size:13px;
+                        ">
+                            <thead>
+                                <tr style="
+                                    background:#f5f5f5;
+                                ">
+                                    <th style="padding:8px;border:1px solid #ddd;">#</th>
+                                    <th style="padding:8px;border:1px solid #ddd;">Issue</th>
+                                    <th style="padding:8px;border:1px solid #ddd;">Expected</th>
+                                    <th style="padding:8px;border:1px solid #ddd;">Actual</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                ${detailRows}
+                            </tbody>
+                        </table>
+
+                    </div>
+                `
+                : ""
+            }
+
             <div style="
-                margin-top:16px;
+                margin-top:20px;
                 color:#444;
-                line-height:1.5;
+                line-height:1.6;
             ">
-                This Excel file does not match the current APWMS form structure.
+                The Excel template appears to be incompatible with the current APWMS form structure.
                 <br><br>
-                Please export a fresh template from APWMS and re-enter the data.
+                Please export a fresh template and re-enter the data before importing again.
             </div>
 
             <div style="
@@ -142,8 +301,16 @@ function showValidationError(fileName,mismatchCount){
                     OK
                 </button>
             </div>
+
         </div>
     `;
 
-    document.getElementById("qa-validation-close")?.addEventListener("click",hideImportOverlay);
+    document
+        .getElementById(
+            "qa-validation-close"
+        )
+        ?.addEventListener(
+            "click",
+            hideImportOverlay
+        );
 }

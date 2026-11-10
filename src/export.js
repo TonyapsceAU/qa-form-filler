@@ -21,23 +21,24 @@ function collectFormData() {
 }
 
 async function exportAllToExcel(){
-    //navigate to main manue
     console.group("[EXPORT] Started");
     const menuButton = findMenuButton();
-    if(DEBUG.EXPORT){console.log(menuButton);}
-    await clickMenuButton();
-    //export
+    if(menuButton){//menu button only apper outside
+        if(DEBUG.EXPORT){console.log(menuButton);}
+        await clickMenuButton();//navigate to main manue
+    }
     const pages = getAllPages(getNavigationInfo());
+
+    // go to first page
     console.log("[EXPORT]","Pages:",pages);
+    await openPage(pages[0].title);
+    await waitForPageRender();
+    //export
     if(DEBUG.EXPORT){console.log(collectFormData().length);}
     const pageData = [];
     const workbook = XLSX.utils.book_new();
-    await openPage(pages[0].title);
-    await waitForPageRender();
     for(let index = 0; index < pages.length; index++){
         const page = pages[index];
-        // await openPage(page.title);
-        // await waitForPageRender();
         const formData = collectFormData();
         pageData.push({
             part: String(index),

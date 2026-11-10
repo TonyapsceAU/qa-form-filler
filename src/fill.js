@@ -62,13 +62,20 @@ async function fillImportedRows(importRows,fileName){
         alert(`Excel Import Complete (${importRows.length} import Rows)`);
 
         //Validation Check
-        let mismatches = validateImportStructure(importRows);
-        console.log("[VALIDATION]",{mismatchCount:mismatches.length});
-        if (mismatches.length){
-            console.warn("[VALIDATION] Structure Mismatch");
-            console.table(mismatches.slice(0,10));
-            const fileName = localStorage.getItem("LoadedFile") || "Unknown.xlsx";
-            showValidationError(fileName,mismatches.length);
+        const report = validateImportStructure(importRows);
+        const totalIssues =
+            report.nameMismatches.length +
+            report.typeMismatches.length +
+            report.missingFields.length +
+            (report.rowCountMismatch? 1: 0);
+
+        console.log("[VALIDATION]",report);
+        if (totalIssues){
+            console.warn("[VALIDATION]","Structure Mismatch");
+            console.table(report.nameMismatches.slice(0,10));
+            console.table(report.typeMismatches.slice(0,10));
+            // const fileName = localStorage.getItem("LoadedFile") ||"Unknown.xlsx";
+            showValidationError(fileName,report);
             keepOverlayOpen = true;
         }
     }catch(error){
@@ -113,6 +120,7 @@ async function fillAllVisibleFields(importRows){
                 const file = await getSupportFile(fileName);
                 if (!file){
                     console.warn("Support file not found:",fileName);
+                    console.groupEnd();
                     continue;
                 }
                 console.log("Retrieved File:",file);

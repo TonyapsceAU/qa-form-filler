@@ -4,6 +4,56 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.9.9 - Import Validation Report
+
+### Added
+
+#### Import Validation
+
+- Added validation summary reporting.
+- Added row count mismatch detection.
+- Added field name mismatch detection.
+- Added field type mismatch detection.
+- Added missing field detection.
+- Added validation issue aggregation.
+
+#### Validation UI
+
+- Added detailed validation report overlay.
+- Added validation summary statistics.
+- Added validation issue preview table.
+- Added display of the first detected validation issues.
+- Added file information to validation reports.
+
+---
+
+### Improved
+
+#### Import Workflow
+
+- Improved visibility of form structure changes.
+- Improved troubleshooting when imported templates become outdated.
+- Improved diagnostics after APWMS form updates.
+- Improved identification of affected fields.
+
+#### User Experience
+
+- Replaced simple mismatch count reporting with structured validation reports.
+- Added actionable validation information.
+- Improved guidance for template regeneration.
+
+---
+
+### Fixed
+
+#### Validation Diagnostics
+
+- Fixed limited visibility of structure validation failures.
+- Fixed inability to identify which fields caused validation failures.
+- Improved reporting of import compatibility issues.
+
+---
+
 ## v1.9.8 - Split Export Workflows
 
 ### Added
@@ -233,7 +283,7 @@ All notable changes to this project will be documented in this file.
 #### Navigation Architecture
 
 - Added `getNavigationInfo()`.
-- Refactored `waitForNavigation()` to focus on navigation readiness detection.
+- Refactored `waitForMenuRender()` to focus on navigation readiness detection.
 - Moved page filtering logic into `getAllPages()`.
 - Separated navigation detection from page discovery responsibilities.
 - Simplified future support for additional navigation structures.
@@ -467,7 +517,7 @@ The User Manual now covers:
 
 #### Navigation APIs
 
-- Added `waitForNavigation()`.
+- Added `waitForMenuRender()`.
 - Added `getAllPages()`.
 - Added `openPage(title)`.
 - Added `menuNavigation()`.
