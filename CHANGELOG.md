@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.9.11 - Ant Design Select Export Support
+
+### Added
+
+#### Select Field Support
+Added support for exporting values from Ant Design Select controls.
+Added detection of .ant-select components during form data extraction.
+Added extraction of selected option text from Ant Design dropdown fields.
+Added support for exporting combobox-based APWMS fields.
+
+---
+
 ## v1.9.10 - Split Fill Workflows
 
 ### Added

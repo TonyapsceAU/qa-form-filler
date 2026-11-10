@@ -9,6 +9,7 @@ async function fillAll(importRows,fileName){
 }
 
 async function fillImportedRows(importRows,fileName){
+    console.log("[IMPORT] Fill Imported Rows",importRows.length,fileName);
     console.group("[IMPORT] Start");
     const startTime = Date.now();
     let keepOverlayOpen = false;

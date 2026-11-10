@@ -51,6 +51,8 @@ function getFieldValue(fieldElement){
     if (fieldElement.getAttribute("contenteditable") === "true"){
         return fieldElement.innerText.trim();
     }
-
+    if (fieldElement.closest(".ant-select")){
+        return fieldElement.closest(".ant-select").querySelector(".ant-select-selection-item")?.textContent?.trim();
+    }
     return fieldElement.value || "";
 }
