@@ -51,8 +51,6 @@ async function fillImportedRows(importRows,fileName){
                 remaining:Math.max(0,importRows.length - getIndexedFields().length)
             });
         }
-        // await fillAllVisibleFields(importRows);
-        // await fillAllVisibleFields(importRows);
         await new Promise(resolve =>setTimeout(resolve,50));
         console.log("[IMPORT] Complete",{
             rows:importRows.length,
@@ -101,7 +99,6 @@ async function fillAllVisibleFields(importRows){
             if (Number.isNaN(fieldIndex)){
                 continue;
             }
-
             const fieldElement = fieldElements[fieldIndex];
             if (!fieldElement){
                 console.warn("[FILL] Hidden Field",{rowIndex,fieldIndex});
@@ -171,7 +168,13 @@ async function fillAllVisibleFields(importRows){
             }
             fieldElement.dispatchEvent(new Event("input",{ bubbles:true }));
             fieldElement.dispatchEvent(new Event("change",{ bubbles:true }));
-            fieldElement.dispatchEvent(new Event("blur",{ bubbles:true }));
+
+            if (fieldElement.closest(".ant-picker")){
+                fieldElement.dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",bubbles:true}));
+            }else{
+                fieldElement.dispatchEvent(new Event("blur",{ bubbles:true }));
+            }
+
 
             if ((rowIndex % 10 === 0) ||(rowIndex === importRows.length - 1)){
                 updateImportProgress(rowIndex + 1,importRows.length,"Filling Form Fields...");

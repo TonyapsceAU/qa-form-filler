@@ -8,16 +8,26 @@ function getDisplayLabel(fieldElement){
 
 function getGroupLabel(fieldElement){
     const groupElement  = fieldElement.closest(".webform-main-question");
-    if (!groupElement ) {
+    if (!groupElement) {
         return "";
+        const labels = [...document.querySelectorAll('div[style*="margin-bottom: 4px"] strong')]
+            .map(element =>element.innerText?.trim())
+            .filter(text =>/^\d+\./.test(text));
+        console.log(fieldElement);
+        console.log("[LABEL]","New Form Groups:",labels);
+        return labels[0].indexOf(fieldElement) || "";
+    }else{
+        const labelCandidates = Array
+            .from(groupElement.querySelectorAll("*"))
+            .map(element => element.innerText?.trim())
+            .filter(Boolean);
+
+        let  groupLabel = labelCandidates.find(text => /^[0-9a-zA-Z(). ]+/.test(text) && !text.includes("\n"))
+        if(DEBUG.EXPORT){console.log("[LABEL]","Group Label:",groupLabel);}
+        if(groupLabel){
+            return groupLabel|| "";
+        }
     }
-
-    const labelCandidates  = Array
-        .from(groupElement.querySelectorAll("*"))
-        .map(element => element.innerText?.trim())
-        .filter(Boolean);
-
-    return labelCandidates .find(text => /^[0-9a-zA-Z(). ]+/.test(text) && !text.includes("\n")) || "";
 }
 
 function getSubGroupLabel(fieldElement){

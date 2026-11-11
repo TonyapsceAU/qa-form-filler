@@ -4,6 +4,68 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.9.13 - Extended New Form Compatibility
+
+### Added
+
+#### New Form Support
+
+- Added support for newer APWMS form structures.
+- Added support for updated repeat section layouts.
+- Added support for new repeat group detection methods.
+- Added support for additional Ant Design form controls.
+- Added support for Ant Design autocomplete-based select inputs.
+
+#### Repeat Sections
+
+- Added repeat section detection for newer APWMS forms.
+- Added support for repeat sections using icon-based add/remove controls.
+- Added support for dynamic repeat row indexing in newer forms.
+- Added support for exporting repeat metadata from updated form layouts.
+
+---
+
+### Improved
+
+#### Export Workflow
+
+- Improved export compatibility with newer APWMS forms.
+- Improved repeat group identification.
+- Improved repeat index generation.
+- Improved export accuracy for dynamic form sections.
+- Improved export coverage for newer APWMS controls.
+
+#### Field Detection
+
+- Improved group label extraction.
+- Improved handling of alternative form layouts.
+- Improved compatibility with updated APWMS page structures.
+- Improved support for React and Ant Design components.
+
+#### APWMS Compatibility
+
+- Improved support for APWMS v60 and newer form implementations.
+- Improved support for modernized repeat section controls.
+- Improved handling of updated field rendering behavior.
+
+---
+
+### Fixed
+
+#### Repeat Section Export
+
+- Fixed repeat group information not being exported in newer forms.
+- Fixed repeat metadata missing from exported worksheets.
+- Fixed repeat section detection failures caused by updated APWMS layouts.
+
+#### Data Export
+
+- Fixed empty exports for certain Ant Design select controls.
+- Fixed value extraction issues for autocomplete-based selection fields.
+- Improved extraction of selected values from dynamically rendered controls.
+
+---
+
 ## v1.9.12 - New Form Repeat Group Support
 
 ### Added

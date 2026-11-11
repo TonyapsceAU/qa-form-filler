@@ -52,7 +52,12 @@ function getFieldValue(fieldElement){
         return fieldElement.innerText.trim();
     }
     if (fieldElement.closest(".ant-select")){
-        return fieldElement.closest(".ant-select").querySelector(".ant-select-selection-item")?.textContent?.trim();
+        const selectedItem = fieldElement.closest(".ant-select")
+            .querySelector(".ant-select-selection-item");
+        if (selectedItem){
+            return selectedItem.textContent?.trim();
+        }
+        return fieldElement.value?.trim();
     }
     return fieldElement.value || "";
 }
