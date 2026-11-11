@@ -1,39 +1,27 @@
 function getKeywordRepeatInfo(fieldElement){
     const keywordRow = fieldElement.closest('div[style*="align-items: stretch"]');
     if (!keywordRow){
-        return {repeatGroup: "", repeatIndex: ""};
+        return {repeatGroup: "",repeatIndex: ""};
     }
-
     const removeButton = keywordRow.querySelector('button[aria-label^="Remove row"]');
-    if (!removeButton){
-        return {repeatGroup: "", repeatIndex: ""};
-    }
-
-    const match = removeButton.getAttribute("aria-label")?.match(/Remove row (\d+)/);
-    if (!match){
-        return {repeatGroup: "", repeatIndex: ""};
-    }
-    if (DEBUG.KEYWORDS){
-        console.warn("[KEYWORDS] Unable to determine repeat index",removeButton);
-    }
-    return {
-        repeatGroup: "keywords",
-        repeatIndex: Number(match[1])
-    };
-}
-
-function getRepeatRequirements(importRows){
-    const repeatGroups = {};
-    importRows.forEach(importRow => {
-        const repeatGroup = importRow.repeatGroup;
-        if (!repeatGroup){
-            return;
+    if (removeButton){
+        const match =removeButton.getAttribute("aria-label")?.match(/Remove row (\d+)/);
+        if (match){
+            return {repeatGroup: "keywords",repeatIndex: Number(match[1])};
         }
-        const repeatIndex = Number(importRow.repeatIndex);
-        repeatGroups[repeatGroup] = Math.max(repeatGroups[repeatGroup] || 0,repeatIndex);
-    });
-    console.log("[REPEAT] Requirements",repeatGroups)
-    return repeatGroups;
+    }
+
+    const closeButton = keywordRow.querySelector(".anticon-close");
+    if (!closeButton){
+        return {repeatGroup: "",repeatIndex: ""};
+    }
+    repeatGrouplable  = [...document.querySelectorAll('div[style*="align-items: stretch"]')]
+        .filter(row => getSubGroupLabel(row) === getSubGroupLabel(fieldElement));
+    if(DEBUG.REPEAT){console.log("Repeat ind",repeatGrouplable.indexOf(keywordRow) + 1);}
+    return {
+        repeatGroup: getSubGroupLabel(fieldElement) || "",
+        repeatIndex: repeatGrouplable.indexOf(keywordRow) + 1
+    };
 }
 
 function getRepeatInfo(fieldName){
@@ -51,6 +39,20 @@ function getRepeatInfo(fieldName){
     };
 }
 
+function getRepeatRequirements(importRows){
+    const repeatGroups = {};
+    importRows.forEach(importRow => {
+        const repeatGroup = importRow.repeatGroup;
+        if (!repeatGroup){
+            return;
+        }
+        const repeatIndex = Number(importRow.repeatIndex);
+        repeatGroups[repeatGroup] = Math.max(repeatGroups[repeatGroup] || 0,repeatIndex);
+    });
+    console.log("[REPEAT] Requirements",repeatGroups)
+    return repeatGroups;
+}
+
 function getCurrentRepeatCounts(){
     const repeatCounts = {};
     getIndexedFields()
@@ -63,9 +65,9 @@ function getCurrentRepeatCounts(){
                 return;
             }
             repeatCounts[repeatInfo.repeatGroup] = 
-            Math.max(repeatCounts[repeatInfo.repeatGroup] || 0,repeatInfo.repeatIndex);
+            Math.max(repeatCounts[repeatInfo.repeatGroup] || 0, repeatInfo.repeatIndex);
         });
-
+    console.log("[REPEAT] Current Counts",repeatCounts);
     return repeatCounts;
 }
 

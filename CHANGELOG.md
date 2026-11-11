@@ -4,6 +4,52 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.9.12 - New Form Repeat Group Support
+
+### Added
+
+#### Repeat Section Support
+
+- Added repeat group detection for new APWMS form structures.
+- Added support for exporting repeat section metadata from newly introduced form layouts.
+- Added repeat index generation for dynamically repeated rows.
+- Added compatibility with Ant Design based repeat section controls.
+
+---
+
+### Improved
+
+#### Export Workflow
+
+- Improved repeat group detection during export.
+- Improved repeat index generation for repeated form records.
+- Improved export accuracy for dynamic form sections.
+- Improved support for exporting repeatable APWMS form content.
+
+#### APWMS Compatibility
+
+- Improved compatibility with newer APWMS form implementations.
+- Improved support for forms using updated repeat section layouts.
+- Improved handling of dynamically generated repeat controls.
+
+---
+
+### Fixed
+
+#### Repeat Sections
+
+- Fixed repeat groups not being detected in newer APWMS forms.
+- Fixed repeat group information being exported as empty values.
+- Fixed repeat index information missing from exported worksheets.
+- Fixed repeat section export compatibility issues introduced by updated APWMS UI structures.
+
+#### Excel Export
+
+- Fixed incomplete repeat section metadata in exported templates.
+- Improved preservation of repeat section information required for future imports and form expansion workflows.
+
+---
+
 ## v1.9.11 - Ant Design Select Export Support
 
 ### Added
