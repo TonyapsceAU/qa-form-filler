@@ -40,6 +40,7 @@ function getRepeatInfo(fieldName){
 }
 
 function getRepeatRequirements(importRows){
+    // console.group("[REPEAT] importRows",importRows);
     const repeatGroups = {};
     importRows.forEach(importRow => {
         const repeatGroup = importRow.repeatGroup;

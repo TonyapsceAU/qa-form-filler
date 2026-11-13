@@ -25,7 +25,7 @@ chrome.runtime.onMessage.addListener(
                         sendResponse({success: true});
                         break;
                     case ACTIONS.Fill_CURRENT_PAGE:
-                        await fillImportedRows(request.importRows,request.fileName);
+                        await fillPage(request.importRows,request.fileName);
                         sendResponse({success: true});
                         break;
                     case ACTIONS.CLEAR_HIGHLIGHT:

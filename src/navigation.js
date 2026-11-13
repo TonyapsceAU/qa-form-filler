@@ -1,16 +1,3 @@
-async function menuNavigation(){
-    console.group("[NAVIGATION]");
-    if(DEBUG.NAVIGATION){console.log("Step 1)Waiting for navigation");}
-    await waitForMenuRender()
-    if(DEBUG.NAVIGATION){console.log("Step 2)Navigation Info:",getNavigationInfo());}
-    if(DEBUG.NAVIGATION){console.log("Step 3)");}
-    const pages = getAllPages(getNavigationInfo());
-    console.log("Page Count:",pages.length);
-    if(DEBUG.NAVIGATION){console.log("Step 4)");}
-    if(pages.length != 0){await openPage(pages[0].title);}
-    console.groupEnd();
-}
-
 function getAllPages(navigationInfo){
     console.group("[NAVIGATION]","getAllPages");
     const pages = [];
@@ -158,4 +145,23 @@ async function clickMenuButton(){
     menuButton.click();
     await waitForMenuRender();
     return true;
+}
+
+async function confirmPageChange(){
+    const saveButton = [...document.querySelectorAll("button")]
+        .find(button => button.textContent.trim() === "Save and continue");
+    if (!saveButton){
+        return;
+    }
+    saveButton.click();
+    const startTime = Date.now();
+    while(Date.now() - startTime < 10000){
+        const okButton = [...document.querySelectorAll("button")]
+            .find(button => button.textContent.trim() === "OK");
+        if (okButton){
+            okButton.click();
+            return;
+        }
+        await new Promise(resolve => setTimeout(resolve,500));
+    }
 }

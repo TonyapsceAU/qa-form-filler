@@ -86,11 +86,17 @@ function loadTestCase(testCase){
     console.log("[TEST CASE] Loaded:",testCase.fileName);
     loadedImportRows = testCase.importRows;
     loadedFileName = testCase.fileName;
+    console.log("[TEST CASE] Loaded Rows:",loadedImportRows);
+    const totalRows = 
+        loadedImportRows.length? loadedImportRows.reduce((sum,page) => 
+            sum + page.importRows.length,0): loadedImportRows.length;
     renderImportInfo(`
         <div class="infoBox">
             📄 Loaded File:<b>${loadedFileName}</b>
             <br>
-            Rows:<b>${loadedImportRows.length}</b>
+            Sheets:<b>${loadedImportRows.length || 1}</b>
+            <br>
+            Rows:<b>${totalRows}</b>
         </div>
     `);
 }

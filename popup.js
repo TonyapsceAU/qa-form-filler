@@ -100,8 +100,11 @@ document.addEventListener(
                     if (file.name.endsWith(".xlsx") ||file.name.endsWith(".xls")){
                         const buffer = await file.arrayBuffer();
                         const workbook = XLSX.read(buffer);
-                        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                        loadedImportRows = XLSX.utils.sheet_to_json(worksheet);
+                        loadedImportRows = workbook.SheetNames.map(
+                            sheetName => ({
+                                sheetName,
+                                importRows:XLSX.utils.sheet_to_json(workbook.Sheets[sheetName])})
+                        );
                         loadedFileName = file.name;
                         await saveTestCase(loadedFileName,loadedImportRows);
                         importedTestCases++;
