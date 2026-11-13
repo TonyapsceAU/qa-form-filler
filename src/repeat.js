@@ -68,7 +68,7 @@ function getCurrentRepeatCounts(){
             repeatCounts[repeatInfo.repeatGroup] = 
             Math.max(repeatCounts[repeatInfo.repeatGroup] || 0, repeatInfo.repeatIndex);
         });
-    console.log("[REPEAT] Current Counts",repeatCounts);
+    // console.log("[REPEAT] Current Counts",repeatCounts);
     return repeatCounts;
 }
 
@@ -87,7 +87,7 @@ function findRepeatField(repeatGroup){
 
 function findAddButton(repeatGroup){
     // console.log("searching for expand button");
-    const fieldElement = findRepeatField(repeatGroup);
+    let fieldElement = findRepeatField(repeatGroup);
     if (!fieldElement){
         fieldElement = getIndexedFields()
             .find(fieldElement => {
@@ -99,18 +99,28 @@ function findAddButton(repeatGroup){
         }
         return [...document.querySelectorAll("button")].find(buttonElement => {
             const label = buttonElement.getAttribute("aria-label") || "";
-            return label.includes("Add");
+            const hasPlusIcon = buttonElement.querySelector("span[aria-label='plus']");
+            return label.includes("Add") || hasPlusIcon;
         });
     }
 
-    const containerElement = fieldElement.closest("div[style*='margin-bottom']");
+    const containerElement = fieldElement.closest("div[style*='margin-bottom']") || fieldElement.closest(".ant-col")?.parentElement;
     if (!containerElement){
-        return null;
+        // 擴大容錯：如果找不到 margin-bottom 容器，就找上一層的通用 row 容器
+        const fallbackContainer = fieldElement.closest("div[style*='display: flex']") || fieldElement.parentElement;
+        if (!fallbackContainer) return null;
+        
+        return [...fallbackContainer.querySelectorAll("button")].find(buttonElement => {
+            const label = buttonElement.getAttribute("aria-label") || "";
+            const hasPlusIcon = buttonElement.querySelector("span[aria-label='plus']");
+            return (buttonElement.textContent.trim() === "+" || label.startsWith("Add row") || hasPlusIcon);
+        });
     }
 
     return [...containerElement.querySelectorAll("button")].find(buttonElement => {
         const label = buttonElement.getAttribute("aria-label") || "";
-        return (buttonElement.textContent.trim() === "+"||label.startsWith("Add row"));
+        const hasPlusIcon = buttonElement.querySelector("span[aria-label='plus']");
+        return (buttonElement.textContent.trim() === "+" || label.startsWith("Add row") || hasPlusIcon);
     });
 }
 
@@ -144,35 +154,125 @@ async function expandRepeatSections(importRows){
     console.groupEnd();
 }
 
-function findRemoveButton(repeatGroup){
-    const fieldElement = findRepeatField(repeatGroup);
-    if (!fieldElement){
-        fieldElement = getIndexedFields().find(fieldElement => {
-            const repeatInfo = getKeywordRepeatInfo(fieldElement);
-            return (repeatInfo.repeatGroup === repeatGroup);
-        });
-        if (!fieldElement){
-            return null;
+function findRemoveButton(repeatGroup) {
+    // 1. 取得該 repeatGroup 的所有欄位陣列
+    const allFields = getIndexedFields().filter(fieldEl => {
+        const repeatInfo = getKeywordRepeatInfo(fieldEl);
+        return repeatInfo && repeatInfo.repeatGroup === repeatGroup;
+    });
+
+    // 確保主欄位也被納入
+    const primaryField = findRepeatField(repeatGroup);
+    if (primaryField && !allFields.includes(primaryField)) {
+        allFields.push(primaryField);
+    }
+
+    // 2. 從最底部開始往前迴圈檢查（用 .slice().reverse() 避免直接改動原陣列順序）
+    for (const fieldElement of allFields.slice().reverse()) {
+        // console.log("findRemoveButton", repeatGroup, fieldElement);
+        if (!fieldElement) continue;
+        
+        const containerElement = fieldElement.closest("div[style*='margin-bottom']") || fieldElement.closest(".ant-col")?.parentElement;
+        
+        let targetButton = null;
+
+        if (!containerElement) {
+            const fallbackContainer = fieldElement.closest("div[style*='display: flex']") || fieldElement.parentElement;
+            if (!fallbackContainer) continue;
+            
+            targetButton = [...fallbackContainer.querySelectorAll("button")].find(buttonElement => {
+                const label = buttonElement.getAttribute("aria-label") || "";
+                const hasCloseIcon = Boolean(buttonElement.querySelector("span[aria-label='close'], .anticon-close"));
+                const isDangerous = buttonElement.classList.contains("ant-btn-dangerous");
+                const hasPlus = Boolean(buttonElement.querySelector("span[aria-label='plus'], .anticon-plus"));
+                
+                return !hasPlus && (buttonElement.textContent.trim() === "X" || label.includes("Remove") || hasCloseIcon || isDangerous);
+            });
+        } else {
+            targetButton = [...containerElement.querySelectorAll("button")].find(buttonElement => {
+                const label = buttonElement.getAttribute("aria-label") || "";
+                const hasCloseIcon = Boolean(buttonElement.querySelector("span[aria-label='close'], .anticon-close"));
+                const isDangerous = buttonElement.classList.contains("ant-btn-dangerous");
+                const hasPlus = Boolean(buttonElement.querySelector("span[aria-label='plus'], .anticon-plus"));
+                
+                return !hasPlus && (buttonElement.textContent.trim() === "X" || label.includes("Remove") || hasCloseIcon || isDangerous);
+            });
         }
 
-        return [...document.querySelectorAll("button")]
-            .filter(buttonElement => {
-                const label = buttonElement.getAttribute("aria-label") || "";
-                return label.includes("Remove");
-            })
-            .at(-1);
+        // 3. 檢查找到的按鈕：如果存在且「沒有被 disabled」，就直接回傳它！
+        if (targetButton) {
+            if (!targetButton.disabled) {
+                return targetButton;
+            } else {
+                console.log("Remove button is disabled for this row, checking previous row...");
+            }
+        }
     }
 
-    const containerElement = fieldElement.closest("div[style*='margin-bottom']");
-    if (!containerElement){
-        return null;
-    }
+    // 4. 如果上面都沒找到，走全域備用尋找
+    return [...document.querySelectorAll("button")]
+        .filter(buttonElement => {
+            if (buttonElement.disabled) return false;
+            const label = buttonElement.getAttribute("aria-label") || "";
+            const hasCloseIcon = Boolean(buttonElement.querySelector("span[aria-label='close'], .anticon-close"));
+            const isDangerous = buttonElement.classList.contains("ant-btn-dangerous");
+            const hasPlus = Boolean(buttonElement.querySelector("span[aria-label='plus'], .anticon-plus"));
+            
+            return !hasPlus && (label.includes("Remove") || hasCloseIcon || isDangerous);
+        })
+        .at(-1) || null;
+}
 
-    return [...containerElement.querySelectorAll("button")]
-    .find(buttonElement => {
-        const label = buttonElement.getAttribute("aria-label") || "";
-        return (buttonElement.textContent.trim() === "X"||label.includes("Remove"));
+function findRemoveButton2(repeatGroup){
+    // let fieldElement = findRepeatField(repeatGroup);
+    
+    const allFields = getIndexedFields().filter(fieldEl => {
+        const repeatInfo = getKeywordRepeatInfo(fieldEl);
+        return repeatInfo && repeatInfo.repeatGroup === repeatGroup;
     });
+    allfieldElement = allFields;// allFields process this to become a array of fieldElements;
+    for(fieldElement in allfieldElement.reverse()){
+        console.log("findRemoveButton",repeatGroup,fieldElement);
+        if (!fieldElement){
+            fieldElement = getIndexedFields().find(fieldElement => {
+                const repeatInfo = getKeywordRepeatInfo(fieldElement);
+                return (repeatInfo.repeatGroup === repeatGroup);
+            });
+            if (!fieldElement){
+                return null;
+            }
+
+            return [...document.querySelectorAll("button")]
+                .filter(buttonElement => {
+                    const label = buttonElement.getAttribute("aria-label") || "";
+                    const hasCloseIcon = buttonElement.querySelector("span[aria-label='close']");
+                    const isDangerous = buttonElement.classList.contains("ant-btn-dangerous");
+                    return label.includes("Remove") || hasCloseIcon || isDangerous;
+                })
+                .at(-1);
+        }
+        
+        const containerElement = fieldElement.closest("div[style*='margin-bottom']") || fieldElement.closest(".ant-col")?.parentElement;
+        // console.log("containerElement",containerElement);
+        if (!containerElement){
+            const fallbackContainer = fieldElement.closest("div[style*='display: flex']") || fieldElement.parentElement;
+            if (!fallbackContainer) return null;
+            
+            return [...fallbackContainer.querySelectorAll("button")].find(buttonElement => {
+                const label = buttonElement.getAttribute("aria-label") || "";
+                const hasCloseIcon = buttonElement.querySelector("span[aria-label='close']");
+                const isDangerous = buttonElement.classList.contains("ant-btn-dangerous");
+                return (buttonElement.textContent.trim() === "X" || label.includes("Remove") || hasCloseIcon || isDangerous);
+            });
+        }
+
+        return [...containerElement.querySelectorAll("button")].find(buttonElement => {
+            const label = buttonElement.getAttribute("aria-label") || "";
+            const hasCloseIcon = buttonElement.querySelector("span[aria-label='close']");
+            const isDangerous = buttonElement.classList.contains("ant-btn-dangerous");
+            return (buttonElement.textContent.trim() === "X" || label.includes("Remove") || hasCloseIcon || isDangerous);
+        });
+    }
 }
 
 async function removeExtraRepeatSections(importRows){
@@ -193,6 +293,7 @@ async function removeExtraRepeatSections(importRows){
         let removedCount = 0;
         for (let index = 0; index < extraCount; index++){
             const removeButton = findRemoveButton(repeatGroup);
+            // console.log(removeButton)
             if (!removeButton){
                 console.warn("[WARN] Cannot find remove button",repeatGroup);
                 break;

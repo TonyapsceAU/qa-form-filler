@@ -4,13 +4,20 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
-## v1.9.16 - Extended Compatibility
+
+## v1.9.17 - Extended Repeat Group Compatibility
+
+update findRemoveButton() and findAddButton() to support new form
+
+---
+
+## v1.9.16 - Extended Fill Compatibility
 
 support Readonly Select
 
 ---
 
-## v1.9.15 - Extended Compatibility
+## v1.9.15 - Extended Fill Compatibility
 
 support Searchable Select
 
