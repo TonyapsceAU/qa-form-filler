@@ -1,5 +1,5 @@
 function getIndexedFields(){
-    return [...document.querySelectorAll('input, textarea, [contenteditable="true"]')]
+    return [...document.querySelectorAll('input, textarea, select, [contenteditable="true"]')]
 }
 
 function extractElementData(fieldElement){

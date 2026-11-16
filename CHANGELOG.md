@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.9.18 - Improved Export and Repeat Field Handling
+
+### Improved
+
+#### Excel Export
+
+- Include native select controls in form field scanning and export.
+- Export selected values from native single-select and multi-select controls.
+- Export selected values from custom Ant Design multi-select controls.
+- Add an **Input Type** column to identify the control type of each exported field.
+- Export selected file names instead of browser-generated fake paths.
+- Handle page confirmation when navigating between sections during multi-page export.
+
+#### Repeat Sections
+
+- Combine standard field-name and keyword-row repeat detection in `getKeywordRepeatInfo()`.
+- Support both form field elements and exported field data when detecting repeat groups and indexes.
+
+### Fixed
+
+- Preserve field indexes between export and fill when forms contain native select controls.
+- Avoid exporting stale or duplicated page data when moving between pages requires confirmation.
+- Support filling native multi-select controls from newline-separated exported values.
+- Clarify file upload export behavior in the user manual.
 
 ## v1.9.17 - Extended Repeat Group Compatibility
 

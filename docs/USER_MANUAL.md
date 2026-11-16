@@ -22,7 +22,7 @@
 1. Open the target APWMS form.
 2. Fill sample values into all required fields.
 
-> Document upload fields cannot be exported automatically and must be entered manually later.
+> File contents cannot be exported. If a file is selected, its filename is exported; otherwise, enter the filename manually. To upload it during filling, import the matching file as a Support File.
 
 3. Click **Export Excel**.
 4. Save the exported Excel file, excel would be save to download.

@@ -52,7 +52,8 @@ const EXPORT_COLUMNS = {
     VALUE: "Value",
     FIELD_ID: "Field ID",
     FIELD_NAME: "Field Name",
-    TYPE: "Type"
+    TYPE: "Type",
+    INPUT_TYPE: "Input Type"
 };
 const EXPORT_SHEET_NAME = "QA Export";
 

@@ -15,6 +15,8 @@ async function fillAll(importRows,fileName){
     if(pages.length != 0){
         await openPage(pages[0].title);
         await waitForPageRender();
+        console.groupEnd();
+
         console.log("[IMPORT] Fill Imported Rows",importRows.length,fileName,importRows[0].importRows);
         console.group("[IMPORT] Start");
         const startTime = Date.now();
@@ -116,6 +118,7 @@ async function fillImportedRows(importRows,fileName){
     // console.group("[FILL] Imported Rows type",importRows);
     // Synchronization
     console.group("[REPEAT] Synchronization");
+
     // Synchronization - Expantion
     // console.log("[REPEAT] Before",getCurrentRepeatCounts());
     updateImportProgress(0,1,"Expanding Repeat Sections...");
@@ -129,7 +132,6 @@ async function fillImportedRows(importRows,fileName){
     await new Promise(resolve =>setTimeout(resolve,1000));
     // console.log("[REPEAT] After Csleanup",getCurrentRepeatCounts());
     console.groupEnd();
-    return ;
     updateImportProgress(0,importRows.length,"Preparing Field Import...");
     await fillAllVisibleFields(importRows);
     console.log("[FILL] Initial Pass Complete",{
@@ -141,6 +143,7 @@ async function fillImportedRows(importRows,fileName){
     const maxfillPasses = Math.max(0,importRows.length - initialFieldCount);
     console.log("[FILL] Planning",{importRows: importRows.length,fields: initialFieldCount,maxfillPasses});
     let passIndex=0;
+    // return ;
     while(passIndex<(Math.max(0,importRows.length - getIndexedFields().length))){//Expansion Passes + Stabilization + Sync 
         await fillAllVisibleFields(importRows);
         passIndex++
@@ -176,7 +179,7 @@ async function fillAllVisibleFields(importRows){
             const value = importRow[EXPORT_COLUMNS.VALUE] ?? "";
             // File upload cannot be imported
             if (fieldElement.type === "file"){
-                console.group("[FILE UPLOAD]");
+                console.groupCollapsed("[FILE UPLOAD]");
                 const fileName = String(value).trim();
                 console.log("Excel Value:",fileName);
                 const file = await getSupportFile(fileName);
@@ -222,20 +225,17 @@ async function fillAllVisibleFields(importRows){
                 continue;
             }
 
-            // if (fieldElement.closest(".ant-select")){
-            //     fieldElement.focus();
-            //     fieldElement.value = value;
-            //     fieldElement.dispatchEvent(new InputEvent("input",{bubbles:true}));
-            //     await new Promise(resolve => setTimeout(resolve,500));
-            //     const option =[...document.querySelectorAll(".ant-select-item-option")]
-            //         .find(option =>option.textContent.trim() ===String(value).trim());
-            //     if (option){
-            //         option.click();
-            //     }else{
-            //         console.warn("[SELECT]","Option Not Found:",value);
-            //     }
-            //     continue;
-            // }
+            if (fieldElement.tagName === "SELECT" && fieldElement.multiple){
+                const selectedValues = String(value).trim()
+                    ? String(value).split("\n")
+                    : [];
+                [...fieldElement.options].forEach(option => {
+                    option.selected = selectedValues.includes(option.value);
+                });
+                fieldElement.dispatchEvent(new Event("input",{ bubbles:true }));
+                fieldElement.dispatchEvent(new Event("change",{ bubbles:true }));
+                continue;
+            }
 
             // Readonly Ant Select 處理邏輯（支援虛擬列表自動滾動尋找）
             const isReadonlyAntSelect = 
@@ -308,11 +308,11 @@ async function fillAllVisibleFields(importRows){
 
             // Searchable Select
             if (fieldElement.id?.startsWith("rc_select_")){
-                console.log("[SELECT]",fieldElement.id,value);
+                // console.log("[SELECT]",fieldElement.id,value);
                 const select = fieldElement.closest(".ant-select")|| 
                     document.querySelector(`#${fieldElement.id}`)?.closest(".ant-select");
                 if (!select){
-                console.warn("[SELECT]","Select Not Found");
+                // console.warn("[SELECT]","Select Not Found");
                 continue;
                 }
                 const selector =select.querySelector(".ant-select-selector");
@@ -320,7 +320,7 @@ async function fillAllVisibleFields(importRows){
                 await new Promise(resolve =>setTimeout(resolve,500));
                 const option =[...document.querySelectorAll(".ant-select-item-option")]
                     .find(option =>option.textContent.trim().includes(String(value).trim()));
-                console.log("[SELECT]",value,option);
+                // console.log("[SELECT]",value,option);
                 if (option){
                     option.click();
                 }else{

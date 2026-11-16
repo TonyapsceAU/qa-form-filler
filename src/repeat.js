@@ -1,13 +1,38 @@
-function getKeywordRepeatInfo(fieldElement){
-    const keywordRow = fieldElement.closest('div[style*="align-items: stretch"]');
+// 從匯出欄位資料或欄位 DOM 元素辨識重複群組與列序號。
+// 一般重複欄位先依 name 中的群組和零起算序號判斷；
+// 關鍵字欄位則讀取「Remove row N」標籤，或依相同子群組的列位置計算。
+// 無法辨識或找不到對應欄位時，回傳空群組與空序號。
+function getKeywordRepeatInfo(fieldData){
+    const fieldElement = fieldData?.fieldElement ||
+        (fieldData?.nodeType === 1 ? fieldData : null);
+    const fieldName = fieldData?.fieldName || fieldElement?.name || "";
+    const match = fieldName.match(/\.([a-zA-Z0-9_]+)\.(\d+)_/);
+    if (match){
+        if (DEBUG.REPEAT){
+            console.warn("[REPEAT] Pattern Matched",fieldName);
+        }
+        return {
+            repeatGroup: match[1],
+            repeatIndex: Number(match[2]) + 1
+        };
+    }
+
+    const keywordField = fieldElement ||
+        getIndexedFields().find(element => element.name === fieldName);
+    if (!keywordField){
+        return {repeatGroup: "",repeatIndex: ""};
+    }
+
+    const keywordRow = keywordField.closest('div[style*="align-items: stretch"]');
     if (!keywordRow){
         return {repeatGroup: "",repeatIndex: ""};
     }
+
     const removeButton = keywordRow.querySelector('button[aria-label^="Remove row"]');
     if (removeButton){
         const match =removeButton.getAttribute("aria-label")?.match(/Remove row (\d+)/);
         if (match){
-            return {repeatGroup: "keywords",repeatIndex: Number(match[1])};
+            return {repeatGroup: getSubGroupLabel(keywordField) || "keywords",repeatIndex: Number(match[1])};
         }
     }
 
@@ -15,27 +40,12 @@ function getKeywordRepeatInfo(fieldElement){
     if (!closeButton){
         return {repeatGroup: "",repeatIndex: ""};
     }
-    repeatGrouplable  = [...document.querySelectorAll('div[style*="align-items: stretch"]')]
-        .filter(row => getSubGroupLabel(row) === getSubGroupLabel(fieldElement));
-    if(DEBUG.REPEAT){console.log("Repeat ind",repeatGrouplable.indexOf(keywordRow) + 1);}
+    const repeatGroupLabels = [...document.querySelectorAll('div[style*="align-items: stretch"]')]
+        .filter(row => getSubGroupLabel(row) === getSubGroupLabel(keywordField));
+    if(DEBUG.REPEAT){console.log("Repeat ind",repeatGroupLabels.indexOf(keywordRow) + 1);}
     return {
-        repeatGroup: getSubGroupLabel(fieldElement) || "",
-        repeatIndex: repeatGrouplable.indexOf(keywordRow) + 1
-    };
-}
-
-function getRepeatInfo(fieldName){
-    const match = (fieldName || "").match(/\.([a-zA-Z0-9_]+)\.(\d+)_/);
-
-    if (!match){
-        return {repeatGroup: "",repeatIndex: ""};
-    }
-    if (DEBUG.REPEAT){
-        console.warn("[REPEAT] Pattern Not Matched",fieldName);
-    }
-    return {
-        repeatGroup: match[1],
-        repeatIndex: Number(match[2]) + 1
+        repeatGroup: getSubGroupLabel(keywordField) || "",
+        repeatIndex: repeatGroupLabels.indexOf(keywordRow) + 1
     };
 }
 
@@ -58,10 +68,7 @@ function getCurrentRepeatCounts(){
     const repeatCounts = {};
     getIndexedFields()
         .forEach(fieldElement => {
-            let repeatInfo = getRepeatInfo(fieldElement.name);
-            if (!repeatInfo.repeatGroup){
-                repeatInfo = getKeywordRepeatInfo(fieldElement);
-            }
+            const repeatInfo = getKeywordRepeatInfo(fieldElement);
             if (!repeatInfo.repeatGroup){
                 return;
             }

@@ -12,6 +12,7 @@ function collectFormData() {
                 fieldId: fieldElement.id || "",
                 fieldName: fieldElement.name || "",
                 fieldType: fieldElement.tagName,
+                inputType: fieldElement.type || "",
                 fieldElement
             });
         });
@@ -51,7 +52,12 @@ async function exportAllToExcel(){
         XLSX.utils.book_append_sheet(workbook,worksheet,String(index));
         console.log("[EXPORT]",index,page.title,"Fields:",pageData.at(-1).formData.length);
         if(index < pages.length - 1){
-            await clickNextPage();
+            const nextPageOpened = await clickNextPage();
+            if (!nextPageOpened){
+                throw new Error(`Unable to continue from page "${page.title}" during export.`);
+            }
+            await confirmPageChange();
+            await waitForPageRender();
         }
     }
     if (!workbook.Workbook) {
@@ -114,7 +120,8 @@ function exportToExcel(){
         { width: 30 },   // Value
         { width: 30 },   // Field ID
         { width: 10 },   // Field Name
-        { width: 12 }    // Type
+        { width: 12 },   // Type
+        { width: 14 }    // Input Type
     ];
 
     const workbook = XLSX.utils.book_new();
@@ -145,10 +152,7 @@ function exportToExcel(){
 
 function createExportRows(formData){
     return formData.map(fieldData => {
-        let repeatInfo = getRepeatInfo(fieldData.fieldName);
-        if (!repeatInfo.repeatGroup){
-            repeatInfo = getKeywordRepeatInfo(fieldData.fieldElement);
-        }
+        const repeatInfo = getKeywordRepeatInfo(fieldData);
 
         return {
             [EXPORT_COLUMNS.NO]:fieldData.questionNo,
@@ -160,7 +164,8 @@ function createExportRows(formData){
             [EXPORT_COLUMNS.VALUE]:fieldData.value,
             [EXPORT_COLUMNS.FIELD_ID]:fieldData.fieldId,
             [EXPORT_COLUMNS.FIELD_NAME]:fieldData.fieldName,
-            [EXPORT_COLUMNS.TYPE]:fieldData.fieldType
+            [EXPORT_COLUMNS.TYPE]:fieldData.fieldType,
+            [EXPORT_COLUMNS.INPUT_TYPE]:fieldData.inputType
         };
     });
 }

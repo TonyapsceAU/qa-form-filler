@@ -51,11 +51,25 @@ function getFieldValue(fieldElement){
     if (fieldElement.getAttribute("contenteditable") === "true"){
         return fieldElement.innerText.trim();
     }
+    if (fieldElement.type === "file"){
+        return [...(fieldElement.files || [])]
+            .map(file => file.name)
+            .join("\n");
+    }
+    if (fieldElement.tagName === "SELECT"){
+        const selectedValues = [...fieldElement.selectedOptions]
+            .map(option => option.value);
+        return fieldElement.multiple
+            ? selectedValues.join("\n")
+            : (selectedValues[0] ?? "");
+    }
     if (fieldElement.closest(".ant-select")){
-        const selectedItem = fieldElement.closest(".ant-select")
-            .querySelector(".ant-select-selection-item");
-        if (selectedItem){
-            return selectedItem.textContent?.trim();
+        const selectedItems = [...fieldElement.closest(".ant-select")
+            .querySelectorAll(".ant-select-selection-item")]
+            .map(item => item.getAttribute("title") || item.textContent?.trim())
+            .filter(Boolean);
+        if (selectedItems.length){
+            return selectedItems.join("\n");
         }
         return fieldElement.value?.trim();
     }
