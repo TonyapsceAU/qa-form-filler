@@ -70,3 +70,6 @@ Chrome extension for exporting APWMS forms, managing Excel-based test cases, sup
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).
+
+## Known Bug:
+JRSC : Cant correctly remove extrav rows for Qf & Qg, would not have proble is start fill with an blank form.

@@ -122,7 +122,7 @@ async function fillImportedRows(importRows,fileName){
     // Synchronization - Expantion
     // console.log("[REPEAT] Before",getCurrentRepeatCounts());
     updateImportProgress(0,1,"Expanding Repeat Sections...");
-    expandRepeatSections(importRows);
+    await expandRepeatSections(importRows);
     await new Promise(resolve =>setTimeout(resolve,2000));
     // console.log("[REPEAT] After Expansion",getCurrentRepeatCounts());
 
@@ -132,12 +132,16 @@ async function fillImportedRows(importRows,fileName){
     await new Promise(resolve =>setTimeout(resolve,1000));
     // console.log("[REPEAT] After Csleanup",getCurrentRepeatCounts());
     console.groupEnd();
+
+    return ;
+    
     updateImportProgress(0,importRows.length,"Preparing Field Import...");
     await fillAllVisibleFields(importRows);
     console.log("[FILL] Initial Pass Complete",{
         fields: getIndexedFields().length,repeatCounts:getCurrentRepeatCounts()
     });
 
+    return ;
 
     const initialFieldCount = getIndexedFields().length;
     const maxfillPasses = Math.max(0,importRows.length - initialFieldCount);

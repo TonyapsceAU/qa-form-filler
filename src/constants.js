@@ -47,6 +47,7 @@ const EXPORT_COLUMNS = {
     SECTION: "Section",
     GROUP: "Group",
     REPEAT_GROUP: "repeatGroup",
+    REPEAT_SECTION: "repeatSection",
     REPEAT_INDEX: "repeatIndex",
     FIELD: "Field",
     VALUE: "Value",

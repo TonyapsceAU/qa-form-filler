@@ -103,7 +103,11 @@ function exportToExcel(){
         if (!repeatGroup){
             return;
         }
-        repeatSummary[repeatGroup] = Math.max(repeatSummary[repeatGroup] || 0,
+        const repeatKey = JSON.stringify([
+            row[EXPORT_COLUMNS.REPEAT_SECTION] || "",
+            repeatGroup
+        ]);
+        repeatSummary[repeatKey] = Math.max(repeatSummary[repeatKey] || 0,
             Number(row[EXPORT_COLUMNS.REPEAT_INDEX]));
     });
     console.log("Repeat Groups:",repeatSummary);
@@ -115,6 +119,7 @@ function exportToExcel(){
         { width: 10 },   // section
         { width: 10 },   // Group
         { width: 10 },  // repeatGroup
+        { width: 20 },  // repeatSection
         { width: 7 },  // repeatIndex
         { width: 10 },   // Field
         { width: 30 },   // Value
@@ -159,6 +164,7 @@ function createExportRows(formData){
             [EXPORT_COLUMNS.SECTION]:fieldData.section,
             [EXPORT_COLUMNS.GROUP]:fieldData.group,
             [EXPORT_COLUMNS.REPEAT_GROUP]:repeatInfo.repeatGroup || "",
+            [EXPORT_COLUMNS.REPEAT_SECTION]:repeatInfo.repeatSection || "",
             [EXPORT_COLUMNS.REPEAT_INDEX]:repeatInfo.repeatIndex || "",
             [EXPORT_COLUMNS.FIELD]:fieldData.field,
             [EXPORT_COLUMNS.VALUE]:fieldData.value,
