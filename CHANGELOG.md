@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.9.22 - Fix Repeating Row Expantion
+
 ## v1.9.21 - Improved overlays
 
 ### Improved
@@ -21,6 +23,7 @@ All notable changes to this project will be documented in this file.
 
 - Detect repeat metadata for nested indexed fields in New form page.
 - Locate repeat controls for rows so imported workbooks can expand the correct number of rows.
+- Wait for repeat counts to update after adding rows and retry groups that become available after other groups expand.
 - Fill Quill rich-text editors with imported values while preserving the editor's internal state.
 
 ### Fixed

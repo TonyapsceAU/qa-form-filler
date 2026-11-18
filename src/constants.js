@@ -94,7 +94,7 @@ const DEBUG = {
     LABELS: false,
     HIGHLIGHT: false,
     KEYWORDS: false,
-    ValidationCheck: true
+    ValidationCheck: false
 };
 
 

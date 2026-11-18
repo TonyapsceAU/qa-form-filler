@@ -351,61 +351,108 @@ function findAddButton(repeatGroup, repeatSection = "", repeatList = "", fieldIn
 async function expandRepeatSections(importRows){
     console.groupCollapsed("[REPEAT] Expansion");
     const requiredRepeatCounts = getRepeatRequirements(importRows);
-    const currentRepeatCounts = getCurrentRepeatCounts();
-    for (const [repeatKey, requirement] of Object.entries(requiredRepeatCounts)){
-        const {repeatGroup, repeatSection, repeatList, fieldIndex, repeatIndex} = requirement;
-        const indexedField = repeatList
-            ? findRepeatField(repeatGroup, repeatSection, repeatList)
-            : Number.isInteger(fieldIndex)
-            ? getIndexedFields()[fieldIndex]
-            : null;
-        const indexedRepeatInfo = indexedField
-            ? getKeywordRepeatInfo(indexedField)
-            : null;
-        const indexedRepeatKey = indexedRepeatInfo?.repeatGroup
-            ? getRepeatGroupKey(
-                indexedRepeatInfo.repeatGroup,
-                indexedRepeatInfo.repeatSection,
-                indexedRepeatInfo.repeatList
-            )
-            : repeatKey;
-        const currentRepeatCount =
-            currentRepeatCounts[indexedRepeatKey] ??
-            currentRepeatCounts[repeatKey] ??
-            (!repeatSection ? currentRepeatCounts[repeatGroup] : undefined) ??
-            indexedRepeatInfo?.repeatIndex ??
-            0;
-        const missingRepeatCount = repeatIndex - currentRepeatCount;
-        console.log(repeatGroup,repeatSection,{
-            current:currentRepeatCount,
-            target:repeatIndex,
-            expandCount:missingRepeatCount
-        });
-        if (missingRepeatCount <= 0){
-            continue;
-        }
+    let pendingRequirements = Object.entries(requiredRepeatCounts);
+    while (pendingRequirements.length){
+        let expandedThisPass = false;
+        const deferredRequirements = [];
 
-        for (let repeatIndex = 0;repeatIndex < missingRepeatCount;repeatIndex++){
-            const addButton = findAddButton(
-                repeatGroup,
-                repeatSection,
-                repeatList,
-                fieldIndex
-            );
-            if (!addButton){
-                console.warn("[WARN] Cannot find add button",repeatGroup,repeatSection);
-                break;
+        for (const [repeatKey, requirement] of pendingRequirements){
+            const {repeatGroup, repeatSection, repeatList, fieldIndex, repeatIndex} = requirement;
+            let currentRepeatCount = getCurrentRepeatCount(repeatKey,requirement);
+            if (currentRepeatCount >= repeatIndex){
+                continue;
             }
-            // console.log("Before expand",repeatGroup,getCurrentRepeatCounts());
-            addButton.click();
-            await new Promise(resolve => setTimeout(resolve,100));
-            // console.log("After expand",repeatGroup,getCurrentRepeatCounts());
+
+            const initialCount = currentRepeatCount;
+            while (currentRepeatCount < repeatIndex){
+                const addButton = findAddButton(
+                    repeatGroup,
+                    repeatSection,
+                    repeatList,
+                    fieldIndex
+                );
+                if (!addButton){
+                    break;
+                }
+
+                addButton.click();
+                const nextCount = await waitForRepeatCountIncrease(
+                    repeatKey,
+                    currentRepeatCount,
+                    requirement
+                );
+                if (nextCount === null){
+                    console.warn("[WARN] Repeat count did not increase after clicking add",{
+                        repeatGroup,
+                        repeatSection,
+                        repeatList,
+                        current:currentRepeatCount,
+                        target:repeatIndex
+                    });
+                    break;
+                }
+                currentRepeatCount = nextCount;
+                expandedThisPass = true;
+            }
+
+            if (currentRepeatCount < repeatIndex){
+                deferredRequirements.push([repeatKey,requirement]);
+                console.warn("[WARN] Repeat group remains below required count",{
+                    repeatGroup,
+                    repeatSection,
+                    repeatList,
+                    current:currentRepeatCount,
+                    target:repeatIndex
+                });
+            }else{
+                console.log(`Expanded ${repeatGroup} by ${currentRepeatCount - initialCount}`);
+            }
         }
 
-        console.log(`Expanded ${repeatGroup} by ${missingRepeatCount}`);
+        if (!expandedThisPass){
+            break;
+        }
+        pendingRequirements = deferredRequirements;
     }
     console.log("[REPEAT] Expansion Complete",getCurrentRepeatCounts());
     console.groupEnd();
+}
+
+function getCurrentRepeatCount(repeatKey,requirement){
+    const {repeatGroup, repeatSection, repeatList, fieldIndex} = requirement;
+    const currentRepeatCounts = getCurrentRepeatCounts();
+    const indexedField = findRepeatField(
+        repeatGroup,
+        repeatSection,
+        repeatList
+    ) || (Number.isInteger(fieldIndex) ? getIndexedFields()[fieldIndex] : null);
+    const indexedRepeatInfo = indexedField
+        ? getKeywordRepeatInfo(indexedField)
+        : null;
+    const indexedRepeatKey = indexedRepeatInfo?.repeatGroup
+        ? getRepeatGroupKey(
+            indexedRepeatInfo.repeatGroup,
+            indexedRepeatInfo.repeatSection,
+            indexedRepeatInfo.repeatList
+        )
+        : repeatKey;
+    return currentRepeatCounts[indexedRepeatKey] ??
+        currentRepeatCounts[repeatKey] ??
+        (!repeatSection ? currentRepeatCounts[repeatGroup] : undefined) ??
+        indexedRepeatInfo?.repeatIndex ??
+        0;
+}
+
+async function waitForRepeatCountIncrease(repeatKey,currentCount,requirement,timeoutMs = 3000){
+    const startTime = Date.now();
+    while (Date.now() - startTime < timeoutMs){
+        await new Promise(resolve => setTimeout(resolve,100));
+        const updatedCount = getCurrentRepeatCount(repeatKey,requirement);
+        if (updatedCount > currentCount){
+            return updatedCount;
+        }
+    }
+    return null;
 }
 
 function findRemoveButton(repeatGroup, repeatSection = "", repeatList = "") {
