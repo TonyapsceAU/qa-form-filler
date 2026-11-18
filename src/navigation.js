@@ -1,5 +1,5 @@
 function getAllPages(navigationInfo){
-    console.group("[NAVIGATION]","getAllPages");
+    console.groupCollapsed("[NAVIGATION]","getAllPages");
     const pages = [];
     if(navigationInfo.type==="structured"){
         navigationInfo.navigation

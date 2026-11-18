@@ -1,6 +1,7 @@
 // 從匯出欄位資料或欄位 DOM 元素辨識重複群組、所屬區段與列序號。
 // 一般重複欄位先依 name 中的群組和零起算序號判斷；
-// 關鍵字欄位則讀取「Remove row N」標籤，或依相同子群組的列位置計算。
+// webform-row-list 依各自的 data-field-name 計算列序號，其他重複欄位則
+// 讀取「Remove row N」標籤，或依相同子群組的列位置計算。
 // 無法辨識或找不到對應欄位時，回傳空群組與空序號。
 function getKeywordRepeatInfo(fieldData){
     // console.log(fieldData);
@@ -12,6 +13,7 @@ function getKeywordRepeatInfo(fieldData){
     const fieldName = fieldData?.fieldName || fieldElement?.name || "";
     const match = fieldName.match(/\.([a-zA-Z0-9_]+)\.(\d+)_/);
     const repeatSection = fieldElement ? (getGroupLabel(fieldElement) || "") : "";
+    const repeatList = getRepeatListName(fieldElement);
     if (match){
         if (DEBUG.REPEAT){
             console.warn("[REPEAT] Pattern Matched",fieldName);
@@ -19,6 +21,7 @@ function getKeywordRepeatInfo(fieldData){
         return {
             repeatGroup: match[1],
             repeatSection,
+            repeatList,
             repeatIndex: Number(match[2]) + 1
         };
     }
@@ -26,10 +29,11 @@ function getKeywordRepeatInfo(fieldData){
     const keywordField = fieldElement ||
         getIndexedFields().find(element => element.name === fieldName);
     if (!keywordField){
-        return {repeatGroup: "",repeatSection: "",repeatIndex: ""};
+        return {repeatGroup: "",repeatSection: "",repeatList: "",repeatIndex: ""};
     }
     const keywordSection = getGroupLabel(keywordField) || "";
     const keywordGroup = getRepeatSubGroupLabel(keywordField);
+    const keywordList = getRepeatListName(keywordField);
 
     let keywordRow = keywordField.closest('div[style*="align-items: stretch"]');
     const hasInlineRepeatControl = row => row && (
@@ -44,7 +48,21 @@ function getKeywordRepeatInfo(fieldData){
         keywordRow = antRow;
     }
     if (!keywordRow){
-        return {repeatGroup: "",repeatSection: "",repeatIndex: ""};
+        return {repeatGroup: "",repeatSection: "",repeatList: keywordList,repeatIndex: ""};
+    }
+
+    if (keywordList && keywordRow.classList.contains("webform-row-list-row")){
+        const rowElements = [
+            ...keywordField.closest(".webform-row-list")
+                .querySelectorAll(".webform-row-list-row")
+        ];
+        const rowIndex = rowElements.indexOf(keywordRow);
+        return {
+            repeatGroup: keywordGroup,
+            repeatSection: keywordSection,
+            repeatList: keywordList,
+            repeatIndex: rowIndex >= 0 ? rowIndex + 1 : ""
+        };
     }
 
     const removeButton = keywordRow.querySelector('button[aria-label^="Remove row"]');
@@ -54,6 +72,7 @@ function getKeywordRepeatInfo(fieldData){
             return {
                 repeatGroup: keywordGroup || "keywords",
                 repeatSection: keywordSection,
+                repeatList: keywordList,
                 repeatIndex: Number(match[1])
             };
         }
@@ -65,7 +84,7 @@ function getKeywordRepeatInfo(fieldData){
             button.textContent.trim() === "X"
         );
     if (!closeButton){
-        return {repeatGroup: "",repeatSection: "",repeatIndex: ""};
+        return {repeatGroup: "",repeatSection: "",repeatList: keywordList,repeatIndex: ""};
     }
     const isAntRow = keywordRow.matches(".ant-row");
     const repeatGroupLabels = isAntRow
@@ -85,17 +104,31 @@ function getKeywordRepeatInfo(fieldData){
     return {
         repeatGroup: keywordGroup,
         repeatSection: keywordSection,
+        repeatList: keywordList,
         repeatIndex: repeatIndex || ""
     };
 }
 
-function getRepeatGroupKey(repeatGroup, repeatSection = ""){
+function getRepeatGroupKey(repeatGroup, repeatSection = "", repeatList = ""){
+    if (repeatList){
+        return JSON.stringify([
+            normalizeRepeatLabel(repeatSection),
+            normalizeRepeatLabel(repeatGroup),
+            normalizeRepeatLabel(repeatList)
+        ]);
+    }
     return repeatSection
         ? JSON.stringify([
             normalizeRepeatLabel(repeatSection),
             normalizeRepeatLabel(repeatGroup)
         ])
         : repeatGroup;
+}
+
+function getRepeatListName(fieldElement){
+    const repeatList = fieldElement?.closest(".webform-row-list");
+    const fieldContainer = repeatList?.closest("[data-field-name]");
+    return fieldContainer?.getAttribute("data-field-name") || "";
 }
 
 function normalizeRepeatLabel(label){
@@ -148,6 +181,7 @@ function findRepeatControl(fieldElement, controlType){
             return button;
         }
     }
+
     return null;
 }
 
@@ -159,7 +193,8 @@ function getRepeatRequirements(importRows){
             return;
         }
         const repeatSection = importRow.repeatSection || "";
-        const repeatKey = getRepeatGroupKey(repeatGroup, repeatSection);
+        const repeatList = importRow.repeatList || "";
+        const repeatKey = getRepeatGroupKey(repeatGroup, repeatSection, repeatList);
         const repeatIndex = Number(importRow.repeatIndex);
         if (!Number.isFinite(repeatIndex) || repeatIndex <= 0){
             return;
@@ -168,6 +203,7 @@ function getRepeatRequirements(importRows){
         repeatGroups[repeatKey] = {
             repeatGroup,
             repeatSection,
+            repeatList,
             fieldIndex: existing?.fieldIndex ??
                 getRepeatFieldIndex(importRow[EXPORT_COLUMNS.NO]),
             repeatIndex: Math.max(existing?.repeatIndex || 0, repeatIndex)
@@ -187,7 +223,8 @@ function getCurrentRepeatCounts(){
             }
             const repeatKey = getRepeatGroupKey(
                 repeatInfo.repeatGroup,
-                repeatInfo.repeatSection
+                repeatInfo.repeatSection,
+                repeatInfo.repeatList
             );
             repeatCounts[repeatKey] = Math.max(
                 repeatCounts[repeatKey] || 0,
@@ -205,28 +242,44 @@ function getRepeatFieldIndex(value){
         : null;
 }
 
-function findRepeatField(repeatGroup, repeatSection = "", fieldIndex = null){
+function findRepeatField(repeatGroup, repeatSection = "", repeatList = "", fieldIndex = null){
+    const matchesRepeatIdentity = fieldElement => {
+        const repeatInfo = getKeywordRepeatInfo(fieldElement);
+        return normalizeRepeatLabel(repeatInfo.repeatGroup) === normalizeRepeatLabel(repeatGroup) &&
+            (!repeatSection ||
+                normalizeRepeatLabel(repeatInfo.repeatSection) === normalizeRepeatLabel(repeatSection)) &&
+            (!repeatList ||
+                normalizeRepeatLabel(repeatInfo.repeatList) === normalizeRepeatLabel(repeatList));
+    };
+    const fields = getIndexedFields();
+
+    if (repeatList){
+        const matchingListField = fields.find(fieldElement =>
+            matchesRepeatIdentity(fieldElement) &&
+            Boolean(findRepeatControl(fieldElement, "add"))
+        );
+        if (matchingListField){
+            return matchingListField;
+        }
+    }
+
     const indexedField = Number.isInteger(fieldIndex)
-        ? getIndexedFields()[fieldIndex]
+        ? fields[fieldIndex]
         : null;
-    if (indexedField && findRepeatControl(indexedField, "add")){
+    if (indexedField &&
+        matchesRepeatIdentity(indexedField) &&
+        findRepeatControl(indexedField, "add")){
         return indexedField;
     }
 
-    const matchingFields = getIndexedFields()
-        .filter(fieldElement => {
-            const repeatInfo = getKeywordRepeatInfo(fieldElement);
-            return normalizeRepeatLabel(repeatInfo.repeatGroup) === normalizeRepeatLabel(repeatGroup) &&
-                (!repeatSection ||
-                    normalizeRepeatLabel(repeatInfo.repeatSection) === normalizeRepeatLabel(repeatSection));
-        });
+    const matchingFields = fields.filter(matchesRepeatIdentity);
     return matchingFields.find(fieldElement =>
         Boolean(findRepeatControl(fieldElement, "add"))
     ) || matchingFields[0] || null;
 }
 
-function findAddButton(repeatGroup, repeatSection = "", fieldIndex = null){
-    const fieldElement = findRepeatField(repeatGroup, repeatSection, fieldIndex);
+function findAddButton(repeatGroup, repeatSection = "", repeatList = "", fieldIndex = null){
+    const fieldElement = findRepeatField(repeatGroup, repeatSection, repeatList, fieldIndex);
     if (!fieldElement){
         console.warn("[WARN] Cannot match repeat field",repeatGroup,repeatSection);
         return null;
@@ -236,6 +289,7 @@ function findAddButton(repeatGroup, repeatSection = "", fieldIndex = null){
         console.warn("[WARN] Matched repeat field but cannot find add control",{
             repeatGroup,
             repeatSection,
+            repeatList,
             fieldName: fieldElement.name || "",
             fieldId: fieldElement.id || "",
             row: fieldElement.closest(".webform-row-list-row") || fieldElement.closest(".ant-row")
@@ -245,12 +299,14 @@ function findAddButton(repeatGroup, repeatSection = "", fieldIndex = null){
 }
 
 async function expandRepeatSections(importRows){
-    console.group("[REPEAT] Expansion");
+    console.groupCollapsed("[REPEAT] Expansion");
     const requiredRepeatCounts = getRepeatRequirements(importRows);
     const currentRepeatCounts = getCurrentRepeatCounts();
     for (const [repeatKey, requirement] of Object.entries(requiredRepeatCounts)){
-        const {repeatGroup, repeatSection, fieldIndex, repeatIndex} = requirement;
-        const indexedField = Number.isInteger(fieldIndex)
+        const {repeatGroup, repeatSection, repeatList, fieldIndex, repeatIndex} = requirement;
+        const indexedField = repeatList
+            ? findRepeatField(repeatGroup, repeatSection, repeatList)
+            : Number.isInteger(fieldIndex)
             ? getIndexedFields()[fieldIndex]
             : null;
         const indexedRepeatInfo = indexedField
@@ -259,7 +315,8 @@ async function expandRepeatSections(importRows){
         const indexedRepeatKey = indexedRepeatInfo?.repeatGroup
             ? getRepeatGroupKey(
                 indexedRepeatInfo.repeatGroup,
-                indexedRepeatInfo.repeatSection
+                indexedRepeatInfo.repeatSection,
+                indexedRepeatInfo.repeatList
             )
             : repeatKey;
         const currentRepeatCount =
@@ -279,7 +336,12 @@ async function expandRepeatSections(importRows){
         }
 
         for (let repeatIndex = 0;repeatIndex < missingRepeatCount;repeatIndex++){
-            const addButton = findAddButton(repeatGroup, repeatSection, fieldIndex);
+            const addButton = findAddButton(
+                repeatGroup,
+                repeatSection,
+                repeatList,
+                fieldIndex
+            );
             if (!addButton){
                 console.warn("[WARN] Cannot find add button",repeatGroup,repeatSection);
                 break;
@@ -296,18 +358,20 @@ async function expandRepeatSections(importRows){
     console.groupEnd();
 }
 
-function findRemoveButton(repeatGroup, repeatSection = "") {
+function findRemoveButton(repeatGroup, repeatSection = "", repeatList = "") {
     // 1. 取得該 repeatGroup 的所有欄位陣列
     const allFields = getIndexedFields().filter(fieldEl => {
         const repeatInfo = getKeywordRepeatInfo(fieldEl);
         return repeatInfo &&
             normalizeRepeatLabel(repeatInfo.repeatGroup) === normalizeRepeatLabel(repeatGroup) &&
             (!repeatSection ||
-                normalizeRepeatLabel(repeatInfo.repeatSection) === normalizeRepeatLabel(repeatSection));
+                normalizeRepeatLabel(repeatInfo.repeatSection) === normalizeRepeatLabel(repeatSection)) &&
+            (!repeatList ||
+                normalizeRepeatLabel(repeatInfo.repeatList) === normalizeRepeatLabel(repeatList));
     });
 
     // 確保主欄位也被納入
-    const primaryField = findRepeatField(repeatGroup, repeatSection);
+    const primaryField = findRepeatField(repeatGroup, repeatSection, repeatList);
     if (primaryField && !allFields.includes(primaryField)) {
         allFields.push(primaryField);
     }
@@ -330,7 +394,7 @@ function findRemoveButton(repeatGroup, repeatSection = "") {
     }
 
     // 4. 如果上面都沒找到，走全域備用尋找
-    if (repeatSection){
+    if (repeatSection || repeatList){
         return null;
     }
     return [...document.querySelectorAll("button")]
@@ -399,12 +463,12 @@ function findRemoveButton2(repeatGroup){
 }
 
 async function removeExtraRepeatSections(importRows){
-    console.group("[REPEAT] Cleanup");
+    console.groupCollapsed("[REPEAT] Cleanup");
     const requiredRepeatCounts = getRepeatRequirements(importRows);
     const currentRepeatCounts = getCurrentRepeatCounts();
     console.log("[REPEAT] Current Counts",currentRepeatCounts);
     for (const [repeatKey, requirement] of Object.entries(requiredRepeatCounts)){
-        const {repeatGroup, repeatSection, repeatIndex: requiredCount} = requirement;
+        const {repeatGroup, repeatSection, repeatList, repeatIndex: requiredCount} = requirement;
         const currentCount = currentRepeatCounts[repeatKey] || 0;
         const extraCount = currentCount - requiredCount;
         console.log(repeatGroup,repeatSection,{
@@ -417,7 +481,7 @@ async function removeExtraRepeatSections(importRows){
         }
         let removedCount = 0;
         for (let index = 0; index < extraCount; index++){
-            const removeButton = findRemoveButton(repeatGroup, repeatSection);
+            const removeButton = findRemoveButton(repeatGroup, repeatSection, repeatList);
             // console.log(removeButton)
             if (!removeButton){
                 console.warn("[WARN] Cannot find remove button",repeatGroup);

@@ -1,5 +1,5 @@
 function enableHighlightMode(){ 
-    console.group("[HIGHLIGHT] Enable");
+    console.groupCollapsed("[HIGHLIGHT] Enable");
     disableHighlightMode();
     const fieldElements = getIndexedFields();
     console.log("Fields Found:",fieldElements.length);
@@ -46,7 +46,7 @@ function enableHighlightMode(){
 }
 
 function disableHighlightMode(){
-    console.group("[HIGHLIGHT] Disable");
+    console.groupCollapsed("[HIGHLIGHT] Disable");
     // Remove markers
     document
         .querySelectorAll(".qa-highlight-marker")

@@ -1,5 +1,5 @@
 function collectFormData() {
-    console.group("[EXPORT] Collect Form Data");
+    console.groupCollapsed("[EXPORT] Collect Form Data");
     const formData = [];
     getIndexedFields()
         .forEach((fieldElement,index) => {
@@ -22,7 +22,7 @@ function collectFormData() {
 }
 
 async function exportAllToExcel(){
-    console.group("[EXPORT] Started");
+    console.groupCollapsed("[EXPORT] Started");
     const menuButton = findMenuButton();
     if(menuButton){//menu button only apper outside
         if(DEBUG.EXPORT){console.log(menuButton);}
@@ -92,7 +92,7 @@ function getSheetName(page, index){
 }
 
 function exportToExcel(){
-    console.group("[EXPORT] Started");
+    console.groupCollapsed("[EXPORT] Started");
     const formData = collectFormData();
     console.log("Fields Found:",formData.length);
     console.log("[EXPORT] Processing Repeat Sections");
@@ -105,7 +105,8 @@ function exportToExcel(){
         }
         const repeatKey = JSON.stringify([
             row[EXPORT_COLUMNS.REPEAT_SECTION] || "",
-            repeatGroup
+            repeatGroup,
+            row[EXPORT_COLUMNS.REPEAT_LIST] || ""
         ]);
         repeatSummary[repeatKey] = Math.max(repeatSummary[repeatKey] || 0,
             Number(row[EXPORT_COLUMNS.REPEAT_INDEX]));
@@ -119,7 +120,8 @@ function exportToExcel(){
         { width: 10 },   // section
         { width: 10 },   // Group
         { width: 10 },  // repeatGroup
-        { width: 20 },  // repeatSection
+        { width: 10 },  // repeatSection
+        { width: 10 }, // repeatList
         { width: 7 },  // repeatIndex
         { width: 10 },   // Field
         { width: 30 },   // Value
@@ -165,6 +167,7 @@ function createExportRows(formData){
             [EXPORT_COLUMNS.GROUP]:fieldData.group,
             [EXPORT_COLUMNS.REPEAT_GROUP]:repeatInfo.repeatGroup || "",
             [EXPORT_COLUMNS.REPEAT_SECTION]:repeatInfo.repeatSection || "",
+            [EXPORT_COLUMNS.REPEAT_LIST]:repeatInfo.repeatList || "",
             [EXPORT_COLUMNS.REPEAT_INDEX]:repeatInfo.repeatIndex || "",
             [EXPORT_COLUMNS.FIELD]:fieldData.field,
             [EXPORT_COLUMNS.VALUE]:fieldData.value,

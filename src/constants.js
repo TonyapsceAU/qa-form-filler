@@ -48,6 +48,7 @@ const EXPORT_COLUMNS = {
     GROUP: "Group",
     REPEAT_GROUP: "repeatGroup",
     REPEAT_SECTION: "repeatSection",
+    REPEAT_LIST: "repeatList",
     REPEAT_INDEX: "repeatIndex",
     FIELD: "Field",
     VALUE: "Value",
@@ -92,7 +93,8 @@ const DEBUG = {
     REPEAT: false,
     LABELS: false,
     HIGHLIGHT: false,
-    KEYWORDS: false
+    KEYWORDS: false,
+    ValidationCheck: true
 };
 
 

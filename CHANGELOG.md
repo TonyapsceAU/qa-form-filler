@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.9.19 - Improved Repeat Group Handling
+
+### Improved
+
+#### Repeat Sections
+
+- Distinguish repeat groups by section so groups with the same subgroup label are handled independently.
+- Identify separate repeat lists by their form field name, even when they share the same section and subgroup label.
+- Restart repeat indexes for each list so each repeated group is indexed independently.
+- Use repeat-list identity when locating fields and add/remove controls during import.
+- Ignore invalid, zero, and negative repeat indexes when determining how many rows to create.
+
+### Fixed
+
+- Prevent repeat-row counts and cleanup from combining separate lists with matching labels.
+- Improve repeat field matching when imported field indexes no longer point to the correct list.
+
 ## v1.9.18 - Improved Export and Repeat Field Handling
 
 ### Improved

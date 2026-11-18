@@ -3,7 +3,7 @@ async function importExcel(bufferArray){
 }
 
 async function fillAll(importRows,fileName){
-    console.group("[NAVIGATION]");
+    console.groupCollapsed("[NAVIGATION]");
     if(DEBUG.NAVIGATION){console.log("Step 1)Waiting for navigation");}
     await waitForMenuRender()
     if(DEBUG.NAVIGATION){console.log("Step 2)Navigation Info:",getNavigationInfo());}
@@ -18,7 +18,7 @@ async function fillAll(importRows,fileName){
         console.groupEnd();
 
         console.log("[IMPORT] Fill Imported Rows",importRows.length,fileName,importRows[0].importRows);
-        console.group("[IMPORT] Start");
+        console.groupCollapsed("[IMPORT] Start");
         const startTime = Date.now();
         showImportOverlay();
         await new Promise(resolve =>setTimeout(resolve,50));
@@ -42,24 +42,6 @@ async function fillAll(importRows,fileName){
             durationMs: Date.now() - startTime
         });
         alert(`Excel Import Complete (${importRows.length} import Rows)`);
-
-        // //Validation Check
-        // const report = validateImportStructure(importRows);
-        // const totalIssues =
-        //     report.nameMismatches.length +
-        //     report.typeMismatches.length +
-        //     report.missingFields.length +
-        //     (report.rowCountMismatch? 1: 0);
-
-        // console.log("[VALIDATION]",report);
-        // if (totalIssues){
-        //     console.warn("[VALIDATION]","Structure Mismatch");
-        //     console.table(report.nameMismatches.slice(0,10));
-        //     console.table(report.typeMismatches.slice(0,10));
-        //     // const fileName = localStorage.getItem("LoadedFile") ||"Unknown.xlsx";
-        //     showValidationError(fileName,report);
-        //     keepOverlayOpen = true;
-        // }
     }
     console.groupEnd();
     if (!keepOverlayOpen){
@@ -69,7 +51,7 @@ async function fillAll(importRows,fileName){
 
 async function fillPage(importRows,fileName){
     console.log("[IMPORT] Fill Imported Rows",importRows.length,fileName);
-    console.group("[IMPORT] Start");
+    console.groupCollapsed("[IMPORT] Start");
     const startTime = Date.now();
     let keepOverlayOpen = false;
     showImportOverlay();
@@ -87,21 +69,23 @@ async function fillPage(importRows,fileName){
         alert(`Excel Import Complete (${importRows.length} import Rows)`);
 
         //Validation Check
-        const report = validateImportStructure(importRows);
-        const totalIssues =
-            report.nameMismatches.length +
-            report.typeMismatches.length +
-            report.missingFields.length +
-            (report.rowCountMismatch? 1: 0);
+        if(DEBUG.ValidationCheck){
+            const report = validateImportStructure(importRows);
+            const totalIssues =
+                report.nameMismatches.length +
+                report.typeMismatches.length +
+                report.missingFields.length +
+                (report.rowCountMismatch? 1: 0);
 
-        console.log("[VALIDATION]",report);
-        if (totalIssues){
-            console.warn("[VALIDATION]","Structure Mismatch");
-            console.table(report.nameMismatches.slice(0,10));
-            console.table(report.typeMismatches.slice(0,10));
-            // const fileName = localStorage.getItem("LoadedFile") ||"Unknown.xlsx";
-            showValidationError(fileName,report);
-            keepOverlayOpen = true;
+            console.log("[VALIDATION]",report);
+            if (totalIssues){
+                console.warn("[VALIDATION]","Structure Mismatch");
+                console.table(report.nameMismatches.slice(0,10));
+                console.table(report.typeMismatches.slice(0,10));
+                // const fileName = localStorage.getItem("LoadedFile") ||"Unknown.xlsx";
+                showValidationError(fileName,report);
+                keepOverlayOpen = true;
+            }
         }
     }catch(error){
         console.error("[IMPORT] Failed",error);
@@ -115,9 +99,9 @@ async function fillPage(importRows,fileName){
 }
 
 async function fillImportedRows(importRows,fileName){
-    // console.group("[FILL] Imported Rows type",importRows);
+    // console.groupCollapsed("[FILL] Imported Rows type",importRows);
     // Synchronization
-    console.group("[REPEAT] Synchronization");
+    console.groupCollapsed("[REPEAT] Synchronization");
 
     // Synchronization - Expantion
     // console.log("[REPEAT] Before",getCurrentRepeatCounts());
@@ -126,6 +110,8 @@ async function fillImportedRows(importRows,fileName){
     await new Promise(resolve =>setTimeout(resolve,2000));
     // console.log("[REPEAT] After Expansion",getCurrentRepeatCounts());
 
+    // return;
+
     // Synchronization - Removeal
     updateImportProgress(0,1,"Removing Repeat Sections...");
     await removeExtraRepeatSections(importRows);
@@ -133,7 +119,7 @@ async function fillImportedRows(importRows,fileName){
     // console.log("[REPEAT] After Csleanup",getCurrentRepeatCounts());
     console.groupEnd();
 
-    return ;
+    // return ;
     
     updateImportProgress(0,importRows.length,"Preparing Field Import...");
     await fillAllVisibleFields(importRows);
@@ -147,7 +133,6 @@ async function fillImportedRows(importRows,fileName){
     const maxfillPasses = Math.max(0,importRows.length - initialFieldCount);
     console.log("[FILL] Planning",{importRows: importRows.length,fields: initialFieldCount,maxfillPasses});
     let passIndex=0;
-    // return ;
     while(passIndex<(Math.max(0,importRows.length - getIndexedFields().length))){//Expansion Passes + Stabilization + Sync 
         await fillAllVisibleFields(importRows);
         passIndex++
@@ -181,6 +166,7 @@ async function fillAllVisibleFields(importRows){
             }
 
             const value = importRow[EXPORT_COLUMNS.VALUE] ?? "";
+            console.log("[FILL] Filling Field",{rowIndex,fieldIndex,value,fieldElement});
             // File upload cannot be imported
             if (fieldElement.type === "file"){
                 console.groupCollapsed("[FILE UPLOAD]");
