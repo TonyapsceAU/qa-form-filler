@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.9.20 - SRFS P4 Repeating Row Support
+
+### Improved
+
+#### Repeat Sections
+
+- Detect repeat metadata for nested indexed fields in SRFS P4 Table 1(b).
+- Locate repeat controls for Table 1(b) rows so imported workbooks can expand the correct number of rows.
+- Fill Quill rich-text editors with imported values while preserving the editor's internal state.
+
+### Fixed
+
+- Correctly import values into SRFS P4 Table 1(b) rich-text fields after repeat rows are expanded.
+
 ## v1.9.19 - Improved Repeat Group Handling
 
 ### Improved
@@ -20,6 +34,8 @@ All notable changes to this project will be documented in this file.
 
 - Prevent repeat-row counts and cleanup from combining separate lists with matching labels.
 - Improve repeat field matching when imported field indexes no longer point to the correct list.
+- Detect repeat metadata and add/remove controls for nested indexed fields such as SRFS P4 Table 1(b).
+- Fill Quill rich-text editors using an editor input command so imported values update the editor state.
 
 ## v1.9.18 - Improved Export and Repeat Field Handling
 

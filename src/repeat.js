@@ -10,10 +10,22 @@ function getKeywordRepeatInfo(fieldData){
     }
     const fieldElement = fieldData?.fieldElement ||
         (fieldData?.nodeType === 1 ? fieldData : null);
-    const fieldName = fieldData?.fieldName || fieldElement?.name || "";
+    const fieldName = fieldData?.fieldName ||
+        fieldElement?.name ||
+        fieldElement?.closest("[data-field-name]")?.getAttribute("data-field-name") ||
+        "";
+    const indexedRepeatPath = getIndexedRepeatPathInfo(fieldName);
     const match = fieldName.match(/\.([a-zA-Z0-9_]+)\.(\d+)_/);
     const repeatSection = fieldElement ? (getGroupLabel(fieldElement) || "") : "";
     const repeatList = getRepeatListName(fieldElement);
+    if (indexedRepeatPath){
+        return {
+            repeatGroup: indexedRepeatPath.repeatGroup,
+            repeatSection: repeatSection || indexedRepeatPath.section,
+            repeatList: repeatList || indexedRepeatPath.list,
+            repeatIndex: indexedRepeatPath.repeatIndex
+        };
+    }
     if (match){
         if (DEBUG.REPEAT){
             console.warn("[REPEAT] Pattern Matched",fieldName);
@@ -131,6 +143,21 @@ function getRepeatListName(fieldElement){
     return fieldContainer?.getAttribute("data-field-name") || "";
 }
 
+function getIndexedRepeatPathInfo(fieldName){
+    const match = String(fieldName || "").match(
+        /^(.+)\.([a-zA-Z0-9_]+)\.(\d+)\.([a-zA-Z0-9_]+)(?:\.|$)/
+    );
+    if (!match){
+        return null;
+    }
+    return {
+        section: match[1],
+        repeatGroup: match[2],
+        list: `${match[1]}.${match[2]}`,
+        repeatIndex: Number(match[3]) + 1
+    };
+}
+
 function normalizeRepeatLabel(label){
     return String(label || "")
         .replace(/\s+\d+\s*\/\s*\d+\s*$/, "")
@@ -159,30 +186,53 @@ function findRepeatControl(fieldElement, controlType){
 
     for (const container of containers){
         const button = [...container.querySelectorAll("button")].find(buttonElement => {
-            const label = buttonElement.getAttribute("aria-label") || "";
-            const text = buttonElement.textContent.trim();
-            const hasPlus = Boolean(buttonElement.querySelector(
-                "span[aria-label='plus'], .anticon-plus"
-            ));
-            const hasRemove = Boolean(buttonElement.querySelector(
-                "span[aria-label='close'], .anticon-close"
-            ));
-            if (controlType === "add"){
-                return text === "+" || label.startsWith("Add row") || hasPlus;
-            }
-            return !hasPlus && (
-                text === "X" ||
-                label.includes("Remove") ||
-                hasRemove ||
-                buttonElement.classList.contains("ant-btn-dangerous")
-            );
+            return isRepeatControlButton(buttonElement, controlType);
         });
         if (button){
             return button;
         }
     }
 
+    const fieldContainer = fieldElement.closest("[data-field-name]");
+    const fieldName = fieldContainer?.getAttribute("data-field-name") || "";
+    if (getIndexedRepeatPathInfo(fieldName)){
+        let container = fieldContainer.parentElement;
+        while (container){
+            const controlRow = [...container.querySelectorAll(".ant-row")]
+                .find(row => {
+                    const buttons = [...row.querySelectorAll("button")];
+                    return buttons.some(button => isRepeatControlButton(button, "add")) &&
+                        buttons.some(button => isRepeatControlButton(button, "remove"));
+                });
+            if (controlRow){
+                return [...controlRow.querySelectorAll("button")]
+                    .find(button => isRepeatControlButton(button, controlType)) || null;
+            }
+            container = container.parentElement;
+        }
+    }
+
     return null;
+}
+
+function isRepeatControlButton(buttonElement, controlType){
+    const label = buttonElement.getAttribute("aria-label") || "";
+    const text = buttonElement.textContent.trim();
+    const hasPlus = Boolean(buttonElement.querySelector(
+        "span[aria-label='plus'], .anticon-plus"
+    ));
+    const hasRemove = Boolean(buttonElement.querySelector(
+        "span[aria-label='close'], .anticon-close"
+    ));
+    if (controlType === "add"){
+        return text === "+" || label.startsWith("Add row") || hasPlus;
+    }
+    return !hasPlus && (
+        text === "X" ||
+        label.includes("Remove") ||
+        hasRemove ||
+        buttonElement.classList.contains("ant-btn-dangerous")
+    );
 }
 
 function getRepeatRequirements(importRows){

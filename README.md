@@ -75,8 +75,10 @@ See [CHANGELOG.md](CHANGELOG.md).
 JRSN :
     endorese page : Qb
 JRSC : 
-    Cant correctly remove extrav rows for Qf & Qg, would not have proble is start fill with an blank form.
+    Cant correctly expand and remove extra rows for Qf & Qg
 
-SRFS: 
-    P3 : repeating rows
-    P4 : repeating rows
+
+## roadmap:
+overlay :
+    add ovelay when "navataing"
+    add ovely when "exporting"

@@ -4,6 +4,11 @@ async function importExcel(bufferArray){
 
 async function fillAll(importRows,fileName){
     console.groupCollapsed("[NAVIGATION]");
+    const menuButton = findMenuButton();
+    if(menuButton){//menu button only apper outside
+        if(DEBUG.EXPORT){console.log(menuButton);}
+        await clickMenuButton();//navigate to main manue
+    }
     if(DEBUG.NAVIGATION){console.log("Step 1)Waiting for navigation");}
     await waitForMenuRender()
     if(DEBUG.NAVIGATION){console.log("Step 2)Navigation Info:",getNavigationInfo());}
@@ -321,7 +326,11 @@ async function fillAllVisibleFields(importRows){
 
             // Content Editable
             if (fieldElement.getAttribute("contenteditable") === "true"){
-                fieldElement.innerText = value;
+                if (fieldElement.matches(".ql-editor")){
+                    setQuillEditorValue(fieldElement,value);
+                }else{
+                    fieldElement.innerText = value;
+                }
             }else if (fieldElement.tagName === "TEXTAREA"){           // Textarea
                 fieldElement.value = value;
             }else{                                          // Normal Input
@@ -352,6 +361,21 @@ async function fillAllVisibleFields(importRows){
         repeatCounts: getCurrentRepeatCounts()
     });
     console.groupEnd();
+}
+
+function setQuillEditorValue(fieldElement,value){
+    const text = String(value);
+    fieldElement.focus();
+    const range = document.createRange();
+    range.selectNodeContents(fieldElement);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    const command = text ? "insertText" : "delete";
+    if (!document.execCommand(command,false,text)){
+        fieldElement.innerText = text;
+    }
 }
 
 function isEditableField(fieldElement){
