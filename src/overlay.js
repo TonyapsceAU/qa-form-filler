@@ -1,5 +1,10 @@
 function showImportOverlay(){
+    showProgressOverlay("Importing Excel...");
+}
+
+function showProgressOverlay(statusText){
     if (document.getElementById(IMPORT_OVERLAY_ID)){
+        updateOperationProgress(0,1,statusText);
         return;
     }
 
@@ -14,9 +19,7 @@ function showImportOverlay(){
             font-weight:bold;
             box-shadow:0 4px 12px rgba(0,0,0,.3);
         ">
-            <div id="qa-import-status">
-                Importing Excel...
-            </div>
+            <div id="qa-import-status" aria-live="polite"></div>
 
             <div style="
                 width:100%;
@@ -59,6 +62,7 @@ function showImportOverlay(){
     `;
 
     document.body.appendChild(overlayElement);
+    updateOperationProgress(0,1,statusText);
 }
 
 function hideImportOverlay(){
@@ -68,6 +72,10 @@ function hideImportOverlay(){
 }
 
 function updateImportProgress(current,total,statusText = "Importing Excel..."){
+    updateOperationProgress(current,total,statusText);
+}
+
+function updateOperationProgress(current,total,statusText){
     const progressBar = document.getElementById("qa-import-progress");
     const progressText = document.getElementById("qa-import-progress-text");
     const statusElement = document.getElementById("qa-import-status");

@@ -60,7 +60,6 @@ async function waitForMenuRender(){
     return new Promise(resolve => {
         const interval = setInterval(() => {
             console.log("[NAVIGATION]","Waiting...");
-            clearInterval(interval);
             const navigationInfo = getNavigationInfo();
             let found = false;
             if (navigationInfo?.type ==="structured"){

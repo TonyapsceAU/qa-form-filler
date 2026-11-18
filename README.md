@@ -77,7 +77,6 @@ JRSN :
 JRSC : 
     Cant correctly expand and remove extra rows for Qf & Qg
 
-
 ## roadmap:
 overlay :
     add ovelay when "navataing"

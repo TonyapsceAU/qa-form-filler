@@ -13,11 +13,11 @@ chrome.runtime.onMessage.addListener(
                         sendResponse({success: true});
                         break;
                     case ACTIONS.EXPORT_ALL_EXCEL:
-                        exportAllToExcel();
+                        await exportAllToExcel();
                         sendResponse({success: true});
                         break;
                     case ACTIONS.EXPORT_CURRENT_EXCEL:
-                        exportToExcel();
+                        await exportToExcel();
                         sendResponse({success: true});
                         break;
                     case ACTIONS.FILL_ALL:

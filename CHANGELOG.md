@@ -4,14 +4,23 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
-## v1.9.20 - SRFS P4 Repeating Row Support
+## v1.9.21 - Improved overlays
+
+### Improved
+
+- Show progress overlays while navigating form pages and exporting workbooks.
+- Keep waiting for form navigation to render when it takes longer than the first polling interval.
+
+---
+
+## v1.9.20 - New Repeating Row Support
 
 ### Improved
 
 #### Repeat Sections
 
-- Detect repeat metadata for nested indexed fields in SRFS P4 Table 1(b).
-- Locate repeat controls for Table 1(b) rows so imported workbooks can expand the correct number of rows.
+- Detect repeat metadata for nested indexed fields in New form page.
+- Locate repeat controls for rows so imported workbooks can expand the correct number of rows.
 - Fill Quill rich-text editors with imported values while preserving the editor's internal state.
 
 ### Fixed

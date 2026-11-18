@@ -4,52 +4,66 @@ async function importExcel(bufferArray){
 
 async function fillAll(importRows,fileName){
     console.groupCollapsed("[NAVIGATION]");
-    const menuButton = findMenuButton();
-    if(menuButton){//menu button only apper outside
-        if(DEBUG.EXPORT){console.log(menuButton);}
-        await clickMenuButton();//navigate to main manue
-    }
-    if(DEBUG.NAVIGATION){console.log("Step 1)Waiting for navigation");}
-    await waitForMenuRender()
-    if(DEBUG.NAVIGATION){console.log("Step 2)Navigation Info:",getNavigationInfo());}
-    if(DEBUG.NAVIGATION){console.log("Step 3)scan form");}
-    const pages = getAllPages(getNavigationInfo());
-    console.log("Page Count:",pages.length);
-    if(DEBUG.NAVIGATION){console.log("Step 4)fill all");}
-    let keepOverlayOpen = false;
-    if(pages.length != 0){
-        await openPage(pages[0].title);
-        await waitForPageRender();
-        console.groupEnd();
+    showProgressOverlay("Navigating to form...");
+    try{
+        await new Promise(resolve => setTimeout(resolve,50));
+        const menuButton = findMenuButton();
+        if(menuButton){//menu button only apper outside
+            if(DEBUG.EXPORT){console.log(menuButton);}
+            updateOperationProgress(0,1,"Opening form navigation...");
+            await clickMenuButton();//navigate to main manue
+        }
+        if(DEBUG.NAVIGATION){console.log("Step 1)Waiting for navigation");}
+        await waitForMenuRender();
+        if(DEBUG.NAVIGATION){console.log("Step 2)Navigation Info:",getNavigationInfo());}
+        if(DEBUG.NAVIGATION){console.log("Step 3)scan form");}
+        const pages = getAllPages(getNavigationInfo());
+        console.log("Page Count:",pages.length);
+        if(DEBUG.NAVIGATION){console.log("Step 4)fill all");}
+        if(pages.length){
+            updateOperationProgress(0,pages.length,`Navigating to ${pages[0].title}...`);
+            const firstPageOpened = await openPage(pages[0].title);
+            if (!firstPageOpened){
+                throw new Error(`Unable to open page "${pages[0].title}" during import.`);
+            }
+            await waitForPageRender();
 
-        console.log("[IMPORT] Fill Imported Rows",importRows.length,fileName,importRows[0].importRows);
-        console.groupCollapsed("[IMPORT] Start");
-        const startTime = Date.now();
-        showImportOverlay();
-        await new Promise(resolve =>setTimeout(resolve,50));
-        for(let pageIndex = 0; pageIndex < pages.length; pageIndex++){
-            console.log("[NAVIGATION]","Filling Page With",importRows);
+            console.log("[IMPORT] Fill Imported Rows",importRows.length,fileName,importRows[0].importRows);
+            console.groupCollapsed("[IMPORT] Start");
+            const startTime = Date.now();
             try{
-                await fillImportedRows(importRows[pageIndex].importRows,fileName);
+                for(let pageIndex = 0; pageIndex < pages.length; pageIndex++){
+                    console.log("[NAVIGATION]","Filling Page With",importRows);
+                    updateOperationProgress(pageIndex,pages.length,`Filling page ${pageIndex + 1}/${pages.length}: ${pages[pageIndex].title}`);
+                    await fillImportedRows(importRows[pageIndex].importRows,fileName);
+                    updateOperationProgress(pageIndex + 1,pages.length,`Completed page ${pageIndex + 1}/${pages.length}: ${pages[pageIndex].title}`);
+                    if(pageIndex < pages.length - 1){
+                        updateOperationProgress(pageIndex + 1,pages.length,`Navigating to page ${pageIndex + 2}/${pages.length}: ${pages[pageIndex + 1].title}`);
+                        const nextPageOpened = await clickNextPage();
+                        if (!nextPageOpened){
+                            throw new Error(`Unable to continue from page "${pages[pageIndex].title}" during import.`);
+                        }
+                        await confirmPageChange();
+                        await waitForPageRender();
+                    }
+                }
             }catch(error){
                 console.error("[IMPORT] Failed",error);
                 throw error;
+            }finally{
+                console.groupEnd();
             }
-            await clickNextPage();
-            await confirmPageChange();
-            await waitForPageRender();
-        }        
-        await new Promise(resolve =>setTimeout(resolve,50));
-        console.log("[IMPORT] Complete",{
-            rows:importRows.length,
-            fields:getIndexedFields().length,
-            repeatCounts:getCurrentRepeatCounts(),
-            durationMs: Date.now() - startTime
-        });
-        alert(`Excel Import Complete (${importRows.length} import Rows)`);
-    }
-    console.groupEnd();
-    if (!keepOverlayOpen){
+            await new Promise(resolve =>setTimeout(resolve,50));
+            console.log("[IMPORT] Complete",{
+                rows:importRows.length,
+                fields:getIndexedFields().length,
+                repeatCounts:getCurrentRepeatCounts(),
+                durationMs: Date.now() - startTime
+            });
+            alert(`Excel Import Complete (${importRows.length} import Rows)`);
+        }
+    }finally{
+        console.groupEnd();
         hideImportOverlay();
     }
 }
