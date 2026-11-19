@@ -324,24 +324,7 @@ async function fillAllVisibleFields(importRows){
 
             // Searchable Select
             if (fieldElement.id?.startsWith("rc_select_")){
-                // console.log("[SELECT]",fieldElement.id,value);
-                const select = fieldElement.closest(".ant-select")|| 
-                    document.querySelector(`#${fieldElement.id}`)?.closest(".ant-select");
-                if (!select){
-                // console.warn("[SELECT]","Select Not Found");
-                continue;
-                }
-                const selector =select.querySelector(".ant-select-selector");
-                selector?.dispatchEvent(new MouseEvent("mousedown",{bubbles:true}));
-                await new Promise(resolve =>setTimeout(resolve,500));
-                const option =[...document.querySelectorAll(".ant-select-item-option")]
-                    .find(option =>option.textContent.trim().includes(String(value).trim()));
-                // console.log("[SELECT]",value,option);
-                if (option){
-                    option.click();
-                }else{
-                    console.warn("[SELECT]","Option Not Found:",value);
-                }
+                await fillSearchableAntSelect(fieldElement,value);
                 continue;
             }
 
@@ -384,6 +367,94 @@ async function fillAllVisibleFields(importRows){
         repeatCounts: getCurrentRepeatCounts()
     });
     console.groupEnd();
+}
+
+async function fillSearchableAntSelect(fieldElement,value){
+    const select = fieldElement.closest(".ant-select");
+    const selector = select?.querySelector(".ant-select-selector");
+    const targetValue = String(value).trim();
+    if (!select || !selector || !targetValue){
+        return;
+    }
+
+    selector.dispatchEvent(new MouseEvent("mousedown",{bubbles:true}));
+    fieldElement.focus();
+    if (!fieldElement.readOnly){
+        setNativeValue(fieldElement,targetValue);
+        fieldElement.dispatchEvent(new Event("input",{bubbles:true}));
+    }
+
+    const getDropdown = () => {
+        const listId = fieldElement.getAttribute("aria-controls");
+        const controlledDropdown = listId
+            ? document.getElementById(listId)?.closest(".ant-select-dropdown")
+            : null;
+        return controlledDropdown ||
+            [...document.querySelectorAll(".ant-select-dropdown")]
+                .find(dropdown =>
+                    !dropdown.classList.contains("ant-select-dropdown-hidden") &&
+                    dropdown.getAttribute("aria-hidden") !== "true"
+                );
+    };
+
+    const normalizedTarget = targetValue.toLocaleLowerCase();
+    let dropdown;
+    let option;
+    for (let attempt = 0; attempt < 20; attempt++){
+        dropdown = getDropdown();
+        const options = [...(dropdown?.querySelectorAll(".ant-select-item-option") || [])];
+        option = options.find(candidate =>
+            candidate.textContent.trim().toLocaleLowerCase() === normalizedTarget
+        ) || options.find(candidate =>
+            candidate.textContent.trim().toLocaleLowerCase().includes(normalizedTarget)
+        );
+        if (option){
+            break;
+        }
+        await new Promise(resolve => setTimeout(resolve,100));
+    }
+
+    if (!option){
+        console.warn("[SELECT] Option Not Found:",targetValue);
+        return;
+    }
+
+    option.scrollIntoView?.({block:"nearest"});
+    option.dispatchEvent(new MouseEvent("mousedown",{bubbles:true}));
+    option.dispatchEvent(new MouseEvent("mouseup",{bubbles:true}));
+    option.dispatchEvent(new MouseEvent("click",{bubbles:true}));
+
+    const isCommitted = () => {
+        const selectedItem = [...select.querySelectorAll(".ant-select-selection-item")]
+            .some(item =>
+                (item.getAttribute("title") || item.textContent).trim().toLocaleLowerCase() ===
+                normalizedTarget
+            );
+        const activeDropdown = getDropdown();
+        const dropdownClosed = !activeDropdown ||
+            activeDropdown.classList.contains("ant-select-dropdown-hidden") ||
+            activeDropdown.getAttribute("aria-hidden") === "true" ||
+            fieldElement.getAttribute("aria-expanded") === "false";
+        return selectedItem || dropdownClosed;
+    };
+
+    for (let attempt = 0; attempt < 10 && !isCommitted(); attempt++){
+        await new Promise(resolve => setTimeout(resolve,100));
+    }
+    if (!isCommitted()){
+        fieldElement.dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",bubbles:true}));
+        fieldElement.dispatchEvent(new KeyboardEvent("keyup",{key:"Enter",bubbles:true}));
+        for (let attempt = 0; attempt < 10 && !isCommitted(); attempt++){
+            await new Promise(resolve => setTimeout(resolve,100));
+        }
+    }
+    if (!isCommitted()){
+        console.warn("[SELECT] Option did not commit:",targetValue);
+        return;
+    }
+
+    fieldElement.blur();
+    await new Promise(resolve => setTimeout(resolve,150));
 }
 
 function getImportedRepeatFieldPositions(importRows){

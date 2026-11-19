@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v2.0.0 - Commit searchable select options
+
+### Fixed
+
+- Select each searchable autocomplete option from its own dropdown and wait for the selection to commit before filling the next field.
+
 ## v1.9.23 - Fix Repeating Row f & g filling
 
 ### FIXED

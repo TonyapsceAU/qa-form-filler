@@ -75,9 +75,6 @@ See [CHANGELOG.md](CHANGELOG.md).
 JRSN :
     endorese page : Qb
 
-JRSC : 
-    Cant correctly fill "title" and "nature" for Qf & Qg
-
 JRSN & JRSC :     
     appilcation : coi - University / Department / Unit : different repeategroup and missing repeatindex
 
