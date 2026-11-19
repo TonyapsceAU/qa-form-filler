@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v2.0.1 - Show repeat operation progress
+
+### Improved
+
+- Report row-by-row progress and the active repeat group while expanding or removing repeated rows.
+- Wait for repeat counts to update after row removal so progress reflects completed changes.
+
 ## v2.0.0 - Commit searchable select options
 
 ### Fixed

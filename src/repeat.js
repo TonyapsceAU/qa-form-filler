@@ -348,7 +348,22 @@ function findAddButton(repeatGroup, repeatSection = "", repeatList = "", fieldIn
 async function expandRepeatSections(importRows){
     console.groupCollapsed("[REPEAT] Expansion");
     const requiredRepeatCounts = getRepeatRequirements(importRows);
+    const requiredEntries = Object.entries(requiredRepeatCounts);
+    const initialCounts = new Map(requiredEntries.map(([repeatKey,requirement]) => [
+        repeatKey,
+        getCurrentRepeatCount(repeatKey,requirement)
+    ]));
+    const totalRows = requiredEntries.reduce((total,[repeatKey,requirement]) =>
+        total + Math.max(0,requirement.repeatIndex - initialCounts.get(repeatKey)),
+    0);
+    const progressTotal = Math.max(totalRows,1);
+    let completedRows = 0;
     let pendingRequirements = Object.entries(requiredRepeatCounts);
+    updateImportProgress(
+        0,
+        progressTotal,
+        totalRows ? `Expanding repeat sections (0/${totalRows} rows)...` : "No repeat rows need expansion."
+    );
     while (pendingRequirements.length){
         let expandedThisPass = false;
         const deferredRequirements = [];
@@ -356,6 +371,12 @@ async function expandRepeatSections(importRows){
         for (const [repeatKey, requirement] of pendingRequirements){
             const {repeatGroup, repeatSection, repeatList, fieldIndex, repeatIndex} = requirement;
             let currentRepeatCount = getCurrentRepeatCount(repeatKey,requirement);
+            const label = repeatGroup || repeatList || repeatSection || "repeat group";
+            updateImportProgress(
+                completedRows,
+                progressTotal,
+                `Expanding ${label}: ${currentRepeatCount}/${repeatIndex} rows`
+            );
             if (currentRepeatCount >= repeatIndex){
                 continue;
             }
@@ -372,6 +393,11 @@ async function expandRepeatSections(importRows){
                     break;
                 }
 
+                updateImportProgress(
+                    completedRows,
+                    progressTotal,
+                    `Expanding ${label}: ${currentRepeatCount}/${repeatIndex} rows`
+                );
                 addButton.click();
                 const nextCount = await waitForRepeatCountIncrease(
                     repeatKey,
@@ -388,8 +414,17 @@ async function expandRepeatSections(importRows){
                     });
                     break;
                 }
+                completedRows = Math.min(
+                    totalRows,
+                    completedRows + nextCount - currentRepeatCount
+                );
                 currentRepeatCount = nextCount;
                 expandedThisPass = true;
+                updateImportProgress(
+                    completedRows,
+                    progressTotal,
+                    `Expanded ${label}: ${currentRepeatCount}/${repeatIndex} rows`
+                );
             }
 
             if (currentRepeatCount < repeatIndex){
@@ -411,6 +446,19 @@ async function expandRepeatSections(importRows){
         }
         pendingRequirements = deferredRequirements;
     }
+    const remainingRows = requiredEntries.reduce((total,[repeatKey,requirement]) =>
+        total + Math.max(
+            0,
+            requirement.repeatIndex - getCurrentRepeatCount(repeatKey,requirement)
+        ),
+    0);
+    updateImportProgress(
+        completedRows || (totalRows === 0 ? 1 : 0),
+        progressTotal,
+        remainingRows
+            ? `Expansion stopped: ${remainingRows} row(s) still needed.`
+            : "Repeat section expansion complete."
+    );
     console.log("[REPEAT] Expansion Complete",getCurrentRepeatCounts());
     console.groupEnd();
 }
@@ -569,14 +617,26 @@ function findRemoveButton2(repeatGroup){
 async function removeExtraRepeatSections(importRows){
     console.groupCollapsed("[REPEAT] Cleanup");
     const requiredRepeatCounts = getRepeatRequirements(importRows);
-    const currentRepeatCounts = getCurrentRepeatCounts();
-    console.log("[REPEAT] Current Counts",currentRepeatCounts);
+    const requiredEntries = Object.entries(requiredRepeatCounts);
+    const totalRows = requiredEntries.reduce((total,[repeatKey,requirement]) =>
+        total + Math.max(
+            0,
+            getCurrentRepeatCount(repeatKey,requirement) - requirement.repeatIndex
+        ),
+    0);
+    const progressTotal = Math.max(totalRows,1);
+    let removedRows = 0;
+    updateImportProgress(
+        0,
+        progressTotal,
+        totalRows ? `Removing extra repeat rows (0/${totalRows})...` : "No extra repeat rows to remove."
+    );
+    console.log("[REPEAT] Current Counts",getCurrentRepeatCounts());
     for (const [repeatKey, requirement] of Object.entries(requiredRepeatCounts)){
         const {repeatGroup, repeatSection, repeatList, repeatIndex: requiredCount} = requirement;
-        const currentCount = repeatList
-            ? getCurrentRepeatCount(repeatKey,requirement)
-            : currentRepeatCounts[repeatKey] || 0;
+        const currentCount = getCurrentRepeatCount(repeatKey,requirement);
         const extraCount = currentCount - requiredCount;
+        const label = repeatGroup || repeatList || repeatSection || "repeat group";
         console.log(repeatGroup,repeatSection,{
             current:currentCount,
             required:requiredCount,
@@ -587,6 +647,15 @@ async function removeExtraRepeatSections(importRows){
         }
         let removedCount = 0;
         for (let index = 0; index < extraCount; index++){
+            const beforeCount = getCurrentRepeatCount(repeatKey,requirement);
+            if (beforeCount <= requiredCount){
+                break;
+            }
+            updateImportProgress(
+                removedRows,
+                progressTotal,
+                `Removing ${label}: ${beforeCount - requiredCount} extra row(s) left`
+            );
             const removeButton = findRemoveButton(repeatGroup, repeatSection, repeatList);
             // console.log(removeButton)
             if (!removeButton){
@@ -594,13 +663,58 @@ async function removeExtraRepeatSections(importRows){
                 break;
             }
             removeButton.click();
-            removedCount++;
+            const nextCount = await waitForRepeatCountDecrease(
+                repeatKey,
+                beforeCount,
+                requirement
+            );
+            if (nextCount === null){
+                console.warn("[WARN] Repeat count did not decrease after clicking remove",{
+                    repeatGroup,
+                    repeatSection,
+                    repeatList,
+                    current:beforeCount,
+                    required:requiredCount
+                });
+                break;
+            }
+            removedCount += beforeCount - nextCount;
+            removedRows = Math.min(totalRows,removedRows + beforeCount - nextCount);
+            updateImportProgress(
+                removedRows,
+                progressTotal,
+                `Removed ${label}: ${Math.max(0,nextCount - requiredCount)} extra row(s) left`
+            );
             // console.log("remove extra");
-            await new Promise(resolve =>setTimeout(resolve, 50));
         }
 
-        console.log(`Removed ${extraCount} from ${repeatGroup}`);
+        console.log(`Removed ${removedCount} from ${repeatGroup}`);
     }
+    const remainingRows = requiredEntries.reduce((total,[repeatKey,requirement]) =>
+        total + Math.max(
+            0,
+            getCurrentRepeatCount(repeatKey,requirement) - requirement.repeatIndex
+        ),
+    0);
+    updateImportProgress(
+        removedRows || (totalRows === 0 ? 1 : 0),
+        progressTotal,
+        remainingRows
+            ? `Removal stopped: ${remainingRows} extra row(s) remain.`
+            : "Extra repeat row removal complete."
+    );
     console.log("[REPEAT] Cleanup Complete",getCurrentRepeatCounts());
     console.groupEnd();
+}
+
+async function waitForRepeatCountDecrease(repeatKey,currentCount,requirement,timeoutMs = 3000){
+    const startTime = Date.now();
+    while (Date.now() - startTime < timeoutMs){
+        await new Promise(resolve => setTimeout(resolve,100));
+        const updatedCount = getCurrentRepeatCount(repeatKey,requirement);
+        if (updatedCount < currentCount){
+            return updatedCount;
+        }
+    }
+    return null;
 }

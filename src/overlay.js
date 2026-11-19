@@ -82,10 +82,17 @@ function updateOperationProgress(current,total,statusText){
     if (!progressBar ||!progressText ||!statusElement){
         return;
     }
-    const safeTotal = Math.max(total, 1);
-    const percentage = Math.min(100,Math.round((current / safeTotal) * 100));
+    const parsedTotal = Number(total);
+    const parsedCurrent = Number(current);
+    const safeTotal = Number.isFinite(parsedTotal) && parsedTotal > 0
+        ? parsedTotal
+        : 1;
+    const safeCurrent = Number.isFinite(parsedCurrent)
+        ? Math.min(safeTotal,Math.max(0,parsedCurrent))
+        : 0;
+    const percentage = Math.round((safeCurrent / safeTotal) * 100);
     progressBar.style.width = `${percentage}%`;
-    progressText.textContent = `${percentage}% (${current}/${total})`;
+    progressText.textContent = `${percentage}% (${safeCurrent}/${safeTotal})`;
     statusElement.textContent = statusText;
 }
 

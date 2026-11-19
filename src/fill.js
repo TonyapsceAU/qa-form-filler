@@ -124,7 +124,6 @@ async function fillImportedRows(importRows,fileName){
 
     // Synchronization - Expantion
     // console.log("[REPEAT] Before",getCurrentRepeatCounts());
-    updateImportProgress(0,1,"Expanding Repeat Sections...");
     await expandRepeatSections(importRows);
     await new Promise(resolve =>setTimeout(resolve,2000));
     // console.log("[REPEAT] After Expansion",getCurrentRepeatCounts());
@@ -132,7 +131,6 @@ async function fillImportedRows(importRows,fileName){
     // return;
 
     // Synchronization - Removeal
-    updateImportProgress(0,1,"Removing Repeat Sections...");
     await removeExtraRepeatSections(importRows);
     await new Promise(resolve =>setTimeout(resolve,1000));
     // console.log("[REPEAT] After Csleanup",getCurrentRepeatCounts());

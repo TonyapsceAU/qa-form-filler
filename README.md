@@ -75,12 +75,9 @@ See [CHANGELOG.md](CHANGELOG.md).
 JRSN :
     endorese page : Qb
 
-JRSN & JRSC :     
-    appilcation : coi - University / Department / Unit : different repeategroup and missing repeatindex
-
 ## roadmap:
-    when upload and file name repeat
-        pop warning messag
-        if continue replace with new data
-    list of test case and support files are colepsable/scrollable
-    better overlay for extention and removal
+    1. when upload and file name repeat
+        1-1. pop warning messag
+        1-2. if continue replace with new data
+    2. list of test case and support files are colepsable/scrollable
+    3. tell user to refresh page when no connection
