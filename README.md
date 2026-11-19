@@ -80,4 +80,3 @@ JRSN :
         1-1. pop warning messag
         1-2. if continue replace with new data
     2. list of test case and support files are colepsable/scrollable
-    3. tell user to refresh page when no connection

@@ -10,7 +10,6 @@ document.addEventListener(
         const fillAllBtn = document.getElementById(ELEMENT_IDS.FILL_ALL_BUTTON);
         const fillCurBtn = document.getElementById(ELEMENT_IDS.FILL_CURRENT_BUTTON);
 
-        const resultContainer = document.getElementById(ELEMENT_IDS.RESULT_CONTAINER);
         const importFileInput = document.getElementById(ELEMENT_IDS.IMPORT_FILE_INPUT);
         const loadedFile = localStorage.getItem("loadedFile");
 
@@ -26,13 +25,9 @@ document.addEventListener(
         scanBtn.addEventListener(
             "click",
             async () => {
-                try {
-                    const [tab] = await getCurrentTab();
-                    const scanResults = await chrome.tabs.sendMessage(tab.id,{action: ACTIONS.SCAN_FORM});
-                    renderScanResults(scanResults,tab.id);
-                }catch(error){
-                    resultContainer.textContent = "Scan Failed:\n" + error.message;
-                    console.error(error);
+                const result = await sendMessageToTab({action: ACTIONS.SCAN_FORM});
+                if (result){
+                    renderScanResults(result.response,result.tab.id);
                 }
             }
         );
@@ -42,44 +37,28 @@ document.addEventListener(
         highlightModeBtn.addEventListener(
             "click",
             async () => {
-                const [tab] = await getCurrentTab();
-                await chrome.tabs.sendMessage(
-                    tab.id,
-                    {action: ACTIONS.HIGHLIGHT_FORM}
-                );
+                await sendMessageToTab({action: ACTIONS.HIGHLIGHT_FORM});
             }
         );
 
         clearHighlightBtn.addEventListener(
             "click",
             async () => {
-                const [tab] = await getCurrentTab();
-                await chrome.tabs.sendMessage(
-                    tab.id,
-                    {action: ACTIONS.CLEAR_HIGHLIGHT}
-                );
+                await sendMessageToTab({action: ACTIONS.CLEAR_HIGHLIGHT});
             }
         );
 
         exportAllBtn.addEventListener(
             "click",
             async () => {
-                const [tab] = await getCurrentTab();
-                await chrome.tabs.sendMessage(
-                    tab.id,
-                    {action: ACTIONS.EXPORT_ALL_EXCEL}
-                );
+                await sendMessageToTab({action: ACTIONS.EXPORT_ALL_EXCEL});
             }
         );
 
         exportCurretnBtn.addEventListener(
             "click",
             async () => {
-                const [tab] = await getCurrentTab();
-                await chrome.tabs.sendMessage(
-                    tab.id,
-                    {action: ACTIONS.EXPORT_CURRENT_EXCEL}
-                );
+                await sendMessageToTab({action: ACTIONS.EXPORT_CURRENT_EXCEL});
             }
         );
 
@@ -141,15 +120,11 @@ document.addEventListener(
                     alert("Please load an Excel file first.");
                     return;
                 }
-                const [tab] = await getCurrentTab();
-                await chrome.tabs.sendMessage(
-                    tab.id,
-                    {
-                        action: ACTIONS.Fill_CURRENT_PAGE,
-                        importRows: loadedImportRows,
-                        fileName: loadedFileName
-                    }
-                );
+                await sendMessageToTab({
+                    action: ACTIONS.Fill_CURRENT_PAGE,
+                    importRows: loadedImportRows,
+                    fileName: loadedFileName
+                });
 
             }
         );
@@ -161,15 +136,11 @@ document.addEventListener(
                     alert("Please load an Excel file first.");
                     return;
                 }
-                const [tab] = await getCurrentTab();
-                await chrome.tabs.sendMessage(
-                    tab.id,
-                    {
-                        action: ACTIONS.FILL_ALL,
-                        importRows: loadedImportRows,
-                        fileName: loadedFileName
-                    }
-                );
+                await sendMessageToTab({
+                    action: ACTIONS.FILL_ALL,
+                    importRows: loadedImportRows,
+                    fileName: loadedFileName
+                });
 
             }
         );
@@ -180,6 +151,37 @@ document.addEventListener(
 
 async function getCurrentTab(){
     return await chrome.tabs.query({active: true,currentWindow: true});
+}
+
+async function sendMessageToTab(message,tabId){
+    try{
+        let targetTabId = tabId;
+        if (targetTabId === undefined){
+            const [tab] = await getCurrentTab();
+            targetTabId = tab?.id;
+        }
+        if (targetTabId === undefined){
+            throw new Error("No active browser tab was found.");
+        }
+
+        const response = await chrome.tabs.sendMessage(targetTabId,message);
+        if (response?.success === false){
+            throw new Error(response.error || "The page could not complete the requested action.");
+        }
+        return {
+            tab: {id: targetTabId},
+            response
+        };
+    }catch(error){
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error("[POPUP] Action failed",{action: message.action,error});
+        if (/could not establish connection|receiving end does not exist/i.test(errorMessage)){
+            alert("The extension cannot connect to this page.\n\nRefresh the page, then reopen the extension and try again.");
+        }else{
+            alert(`The extension action failed:\n${errorMessage}`);
+        }
+        return null;
+    }
 }
 
 async function renderImportInfo(message){
@@ -227,11 +229,10 @@ function renderScanResults(scanResults,tabId){
             "click",
             async () => {
                 console.log("Highlight clicked",fieldInfo);
-                try{
-                    await chrome.tabs.sendMessage(tabId,{action: ACTIONS.HIGHLIGHT_FORM,fieldInfo: fieldInfo});
-                }catch (error){
-                    console.error(error);
-                }
+                await sendMessageToTab(
+                    {action: ACTIONS.HIGHLIGHT_FORM,fieldInfo},
+                    tabId
+                );
             }
         );
         resultRow.appendChild(highlightButton);

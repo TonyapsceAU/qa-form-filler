@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v2.0.2 - Handle disconnected page actions
+
+### Fixed
+
+- Show a refresh-page prompt when popup actions cannot reach the page content script, instead of leaving an unhandled connection error.
+
 ## v2.0.1 - Show repeat operation progress
 
 ### Improved
