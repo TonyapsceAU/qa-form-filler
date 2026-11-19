@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v1.9.23 - Fix Repeating Row f & g filling
+
+### FIXED
+
+- File Upload Bridge asynchronous, and filling continues before React finishes re-rendering.
+
+### Fixed
+
+- Map repeated-list fields by their position within the requested row so unnamed textareas such as Title and Nature fill correctly on every row.
+
 ## v1.9.22 - Fix Repeating Row Expantion
 
 ### Fixed

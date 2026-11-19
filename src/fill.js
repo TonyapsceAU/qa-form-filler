@@ -194,6 +194,7 @@ async function fillAllVisibleFields(importRows){
             console.log("[FILL] Filling Field",{rowIndex,fieldIndex,value,fieldElement});
             // File upload cannot be imported
             if (fieldElement.type === "file"){
+                // continue;
                 console.groupCollapsed("[FILE UPLOAD]");
                 const fileName = String(value).trim();
                 console.log("Excel Value:",fileName);
@@ -352,9 +353,11 @@ async function fillAllVisibleFields(importRows){
                     fieldElement.innerText = value;
                 }
             }else if (fieldElement.tagName === "TEXTAREA"){           // Textarea
-                fieldElement.value = value;
+                // fieldElement.value = value;
+                setNativeValue(fieldElement,value);
             }else{                                          // Normal Input
-                fieldElement.value = value;
+                // fieldElement.value = value;
+                setNativeValue(fieldElement,value);
             }
             fieldElement.dispatchEvent(new Event("input",{ bubbles:true }));
             fieldElement.dispatchEvent(new Event("change",{ bubbles:true }));
@@ -425,6 +428,18 @@ function findImportedFieldElement(importRow,fieldElements,repeatFieldPosition){
         return null;
     }
 
+    // if (Number.isInteger(repeatFieldPosition)){
+    //     console.log("[FILL] Searching Repeat Field",{repeatList,repeatIndex,repeatFieldPosition});
+    //     const rowField = findRepeatListFieldElement(
+    //         repeatList,
+    //         repeatIndex,
+    //         repeatFieldPosition
+    //     );
+    //     if (rowField){
+    //         return rowField;
+    //     }
+    // }
+
     let candidates = fieldElements.filter(fieldElement => {
         const repeatInfo = getKeywordRepeatInfo(fieldElement);
         return normalizeRepeatLabel(repeatInfo.repeatList) === normalizeRepeatLabel(repeatList) &&
@@ -472,6 +487,18 @@ function findImportedFieldElement(importRow,fieldElements,repeatFieldPosition){
         (candidates.length === 1 ? candidates[0] : null);
 }
 
+function findRepeatListFieldElement(repeatListName,repeatIndex,fieldPosition){
+    const repeatList = [...document.querySelectorAll(".webform-row-list")]
+        .find(listElement => {
+            const fieldContainer = listElement.closest("[data-field-name]");
+            return normalizeRepeatLabel(
+                fieldContainer?.getAttribute("data-field-name")
+            ) === normalizeRepeatLabel(repeatListName);
+        });
+    const row = repeatList?.querySelectorAll(".webform-row-list-row")[repeatIndex - 1];
+    return row?.querySelectorAll('input, textarea, select, [contenteditable="true"]')[fieldPosition] || null;
+}
+
 function setQuillEditorValue(fieldElement,value){
     const text = String(value);
     fieldElement.focus();
@@ -505,4 +532,10 @@ function isEditableField(fieldElement){
     }
 
     return true;
+}
+
+function setNativeValue(fieldElement,value){
+    const prototype = fieldElement.tagName === "TEXTAREA"? HTMLTextAreaElement.prototype: HTMLInputElement.prototype;
+    Object.getOwnPropertyDescriptor(prototype,"value")
+        .set.call(fieldElement,value);
 }

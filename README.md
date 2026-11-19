@@ -76,7 +76,7 @@ JRSN :
     endorese page : Qb
 
 JRSC : 
-    Cant correctly expand and remove extra rows for Qf & Qg
+    Cant correctly fill "title" and "nature" for Qf & Qg
 
 JRSN & JRSC :     
     appilcation : coi - University / Department / Unit : different repeategroup and missing repeatindex
@@ -86,3 +86,4 @@ JRSN & JRSC :
         pop warning messag
         if continue replace with new data
     list of test case and support files are colepsable/scrollable
+    better overlay for extention and removal

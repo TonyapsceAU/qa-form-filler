@@ -38,8 +38,18 @@ window.addEventListener("message",
             });
 
             console.log("[QA Bridge] Upload Triggered");
+            window.postMessage({
+                type:"QA_UPLOAD_COMPLETE",
+                inputIndex:event.data.inputIndex,
+                success:true
+            },"*");
         }catch(error){
-            console.error("[QA Bridge]",error);
+            window.postMessage({
+                type:"QA_UPLOAD_COMPLETE",
+                inputIndex:event.data.inputIndex,
+                success:false,
+                error:error.message
+            },"*");
         }
     });
 

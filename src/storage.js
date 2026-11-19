@@ -165,15 +165,39 @@ async function uploadFile(fileInput,file){
     ];
     const inputIndex = allInputs.indexOf(fileInput);
     const buffer = await file.arrayBuffer();
-    window.postMessage({
-        type:"QA_UPLOAD_FILE",
-        inputIndex,
-        fileName:file.name,
-        fileType:file.type,
-        fileBytes:[
-            ...new Uint8Array(buffer)
-        ]
-    },"*");
+    // window.postMessage({
+    //     type:"QA_UPLOAD_FILE",
+    //     inputIndex,
+    //     fileName:file.name,
+    //     fileType:file.type,
+    //     fileBytes:[
+    //         ...new Uint8Array(buffer)
+    //     ]
+    // },"*");
+    return new Promise(resolve => {
+        const handler = event => {
+            if (
+                event.source !== window ||
+                event.data?.type !== "QA_UPLOAD_COMPLETE" ||
+                event.data?.inputIndex !== inputIndex
+            ){
+                return;
+            }
+            window.removeEventListener("message",handler);
+            resolve(event.data.success);
+        };
+        window.addEventListener("message",handler);
+        window.postMessage({
+            type:"QA_UPLOAD_FILE",
+            inputIndex,
+            fileName:file.name,
+            fileType:file.type,
+            fileBytes:[
+                ...new Uint8Array(buffer)
+            ]
+        },"*");
+
+    });
 }
 
 async function renderSupportFileList(){
