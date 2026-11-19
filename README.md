@@ -74,7 +74,15 @@ See [CHANGELOG.md](CHANGELOG.md).
 ## Known Bug:
 JRSN :
     endorese page : Qb
+
 JRSC : 
     Cant correctly expand and remove extra rows for Qf & Qg
 
+JRSN & JRSC :     
+    appilcation : coi - University / Department / Unit : different repeategroup and missing repeatindex
+
 ## roadmap:
+    when upload and file name repeat
+        pop warning messag
+        if continue replace with new data
+    list of test case and support files are colepsable/scrollable

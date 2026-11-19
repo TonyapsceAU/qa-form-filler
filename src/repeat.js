@@ -123,11 +123,7 @@ function getKeywordRepeatInfo(fieldData){
 
 function getRepeatGroupKey(repeatGroup, repeatSection = "", repeatList = ""){
     if (repeatList){
-        return JSON.stringify([
-            normalizeRepeatLabel(repeatSection),
-            normalizeRepeatLabel(repeatGroup),
-            normalizeRepeatLabel(repeatList)
-        ]);
+        return JSON.stringify([normalizeRepeatLabel(repeatList)]);
     }
     return repeatSection
         ? JSON.stringify([
@@ -295,11 +291,12 @@ function getRepeatFieldIndex(value){
 function findRepeatField(repeatGroup, repeatSection = "", repeatList = "", fieldIndex = null){
     const matchesRepeatIdentity = fieldElement => {
         const repeatInfo = getKeywordRepeatInfo(fieldElement);
+        if (repeatList){
+            return normalizeRepeatLabel(repeatInfo.repeatList) === normalizeRepeatLabel(repeatList);
+        }
         return normalizeRepeatLabel(repeatInfo.repeatGroup) === normalizeRepeatLabel(repeatGroup) &&
             (!repeatSection ||
-                normalizeRepeatLabel(repeatInfo.repeatSection) === normalizeRepeatLabel(repeatSection)) &&
-            (!repeatList ||
-                normalizeRepeatLabel(repeatInfo.repeatList) === normalizeRepeatLabel(repeatList));
+                normalizeRepeatLabel(repeatInfo.repeatSection) === normalizeRepeatLabel(repeatSection));
     };
     const fields = getIndexedFields();
 
@@ -420,6 +417,15 @@ async function expandRepeatSections(importRows){
 
 function getCurrentRepeatCount(repeatKey,requirement){
     const {repeatGroup, repeatSection, repeatList, fieldIndex} = requirement;
+    if (repeatList){
+        return getIndexedFields().reduce((count,fieldElement) => {
+            const repeatInfo = getKeywordRepeatInfo(fieldElement);
+            return normalizeRepeatLabel(repeatInfo.repeatList) === normalizeRepeatLabel(repeatList)
+                ? Math.max(count,Number(repeatInfo.repeatIndex) || 0)
+                : count;
+        },0);
+    }
+
     const currentRepeatCounts = getCurrentRepeatCounts();
     const indexedField = findRepeatField(
         repeatGroup,
@@ -459,12 +465,13 @@ function findRemoveButton(repeatGroup, repeatSection = "", repeatList = "") {
     // 1. 取得該 repeatGroup 的所有欄位陣列
     const allFields = getIndexedFields().filter(fieldEl => {
         const repeatInfo = getKeywordRepeatInfo(fieldEl);
+        if (repeatList){
+            return normalizeRepeatLabel(repeatInfo.repeatList) === normalizeRepeatLabel(repeatList);
+        }
         return repeatInfo &&
             normalizeRepeatLabel(repeatInfo.repeatGroup) === normalizeRepeatLabel(repeatGroup) &&
             (!repeatSection ||
-                normalizeRepeatLabel(repeatInfo.repeatSection) === normalizeRepeatLabel(repeatSection)) &&
-            (!repeatList ||
-                normalizeRepeatLabel(repeatInfo.repeatList) === normalizeRepeatLabel(repeatList));
+                normalizeRepeatLabel(repeatInfo.repeatSection) === normalizeRepeatLabel(repeatSection));
     });
 
     // 確保主欄位也被納入
@@ -566,7 +573,9 @@ async function removeExtraRepeatSections(importRows){
     console.log("[REPEAT] Current Counts",currentRepeatCounts);
     for (const [repeatKey, requirement] of Object.entries(requiredRepeatCounts)){
         const {repeatGroup, repeatSection, repeatList, repeatIndex: requiredCount} = requirement;
-        const currentCount = currentRepeatCounts[repeatKey] || 0;
+        const currentCount = repeatList
+            ? getCurrentRepeatCount(repeatKey,requirement)
+            : currentRepeatCounts[repeatKey] || 0;
         const extraCount = currentCount - requiredCount;
         console.log(repeatGroup,repeatSection,{
             current:currentCount,

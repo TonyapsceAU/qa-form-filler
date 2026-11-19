@@ -6,6 +6,11 @@ All notable changes to this project will be documented in this file.
 
 ## v1.9.22 - Fix Repeating Row Expantion
 
+### Fixed
+
+- Identify JRSC repeated groups by their stable list path rather than changing character-count labels.
+- Resolve repeated-row values by repeat group, row index, and field order after rows expand.
+
 ## v1.9.21 - Improved overlays
 
 ### Improved

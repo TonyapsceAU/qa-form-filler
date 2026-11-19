@@ -165,6 +165,7 @@ async function fillImportedRows(importRows,fileName){
 async function fillAllVisibleFields(importRows){
     console.groupCollapsed("[FILL]");
     console.log("Repeat Counts:",getCurrentRepeatCounts());
+    const repeatFieldPositions = getImportedRepeatFieldPositions(importRows);
     for(let rowIndex = 0; rowIndex < importRows.length; rowIndex++){
         try{
             const fieldElements = getIndexedFields();
@@ -174,7 +175,12 @@ async function fillAllVisibleFields(importRows){
             if (Number.isNaN(fieldIndex)){
                 continue;
             }
-            const fieldElement = fieldElements[fieldIndex];
+            const fieldElement = findImportedFieldElement(
+                importRow,
+                fieldElements,
+                repeatFieldPositions.get(importRow)
+            ) ||
+                fieldElements[fieldIndex];
             if (!fieldElement){
                 console.warn("[FILL] Hidden Field",{rowIndex,fieldIndex});
                 break;
@@ -375,6 +381,95 @@ async function fillAllVisibleFields(importRows){
         repeatCounts: getCurrentRepeatCounts()
     });
     console.groupEnd();
+}
+
+function getImportedRepeatFieldPositions(importRows){
+    const groupedRows = new Map();
+    importRows.forEach(importRow => {
+        const key = getImportedRepeatFieldKey(importRow);
+        if (!key){
+            return;
+        }
+        if (!groupedRows.has(key)){
+            groupedRows.set(key,[]);
+        }
+        groupedRows.get(key).push(importRow);
+    });
+
+    const positions = new Map();
+    groupedRows.forEach(rows => {
+        rows.sort((a,b) =>
+            Number(a[EXPORT_COLUMNS.NO]) - Number(b[EXPORT_COLUMNS.NO])
+        );
+        rows.forEach((importRow,index) => positions.set(importRow,index));
+    });
+    return positions;
+}
+
+function getImportedRepeatFieldKey(importRow){
+    const repeatList = importRow[EXPORT_COLUMNS.REPEAT_LIST];
+    const repeatIndex = Number(importRow[EXPORT_COLUMNS.REPEAT_INDEX]);
+    if (!repeatList || !Number.isFinite(repeatIndex) || repeatIndex <= 0){
+        return "";
+    }
+    return JSON.stringify([
+        normalizeRepeatLabel(repeatList),
+        repeatIndex
+    ]);
+}
+
+function findImportedFieldElement(importRow,fieldElements,repeatFieldPosition){
+    const repeatList = importRow[EXPORT_COLUMNS.REPEAT_LIST];
+    const repeatIndex = Number(importRow[EXPORT_COLUMNS.REPEAT_INDEX]);
+    if (!repeatList || !Number.isFinite(repeatIndex) || repeatIndex <= 0){
+        return null;
+    }
+
+    let candidates = fieldElements.filter(fieldElement => {
+        const repeatInfo = getKeywordRepeatInfo(fieldElement);
+        return normalizeRepeatLabel(repeatInfo.repeatList) === normalizeRepeatLabel(repeatList) &&
+            Number(repeatInfo.repeatIndex) === repeatIndex;
+    });
+    if (!candidates.length){
+        return null;
+    }
+
+    const fieldId = importRow[EXPORT_COLUMNS.FIELD_ID];
+    if (fieldId){
+        const matchingId = candidates.filter(fieldElement => fieldElement.id === fieldId);
+        if (matchingId.length === 1){
+            return matchingId[0];
+        }
+    }
+
+    const fieldName = importRow[EXPORT_COLUMNS.FIELD_NAME];
+    if (fieldName){
+        const matchingName = candidates.filter(fieldElement => fieldElement.name === fieldName);
+        if (matchingName.length === 1){
+            return matchingName[0];
+        }
+    }
+
+    const fieldLabel = normalizeRepeatLabel(importRow[EXPORT_COLUMNS.FIELD]);
+    if (fieldLabel){
+        const matchingLabel = candidates.filter(fieldElement =>
+            normalizeRepeatLabel(getFieldLabel(fieldElement)) === fieldLabel
+        );
+        if (matchingLabel.length === 1){
+            return matchingLabel[0];
+        }
+        if (matchingLabel.length > 1){
+            candidates = matchingLabel;
+        }
+    }
+
+    if (Number.isInteger(repeatFieldPosition) && candidates[repeatFieldPosition]){
+        return candidates[repeatFieldPosition];
+    }
+
+    const fieldIndex = Number(importRow[EXPORT_COLUMNS.NO]);
+    return candidates.find(fieldElement => fieldElements[fieldIndex] === fieldElement) ||
+        (candidates.length === 1 ? candidates[0] : null);
 }
 
 function setQuillEditorValue(fieldElement,value){
