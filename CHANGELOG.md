@@ -4,9 +4,16 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v2.0.3 - Confirm duplicate file replacement
+
+### Improved
+
+- Ask before replacing an existing test case or support file with the same filename.
+- Preserve the existing file when replacement is declined, and account for replaced support-file storage when checking available space.
+
 ## v2.0.2 - Handle disconnected page actions
 
-### Fixed
+### Improved
 
 - Show a refresh-page prompt when popup actions cannot reach the page content script, instead of leaving an unhandled connection error.
 

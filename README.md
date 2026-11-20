@@ -75,8 +75,5 @@ See [CHANGELOG.md](CHANGELOG.md).
 JRSN :
     endorese page : Qb
 
-## roadmap:
-    1. when upload and file name repeat
-        1-1. pop warning messag
-        1-2. if continue replace with new data
-    2. list of test case and support files are colepsable/scrollable
+## road map
+    reduce error/warning 

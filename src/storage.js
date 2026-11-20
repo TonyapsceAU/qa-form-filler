@@ -40,7 +40,6 @@ async function renderTestCaseList(){
 
 function createTestCaseRow(testCase){
     const row = document.createElement("div");
-    // row.style.marginBottom = "4px";
     row.className = "listRow";
     row.innerHTML = `
         <div class="listRowContent">
@@ -116,21 +115,25 @@ async function saveSupportFile(file){
     const buffer = await file.arrayBuffer();
     const bytesUsed = await chrome.storage.local.getBytesInUse();
     const remaining = (10 * 1024 * 1024) - bytesUsed;
-    if (buffer.byteLength > remaining){
-        alert("Not enough storage space.\n\n" +"Please remove unused support files.");
-        return false;
-    }
     console.log("[SUPPORT FILE] Importing:",file.name,`(${Math.round(file.size / 1024)} KB)`);
     const result = await chrome.storage.local.get(STORAGE_KEYS.SUPPORT_FILES);
     const supportFiles = result[STORAGE_KEYS.SUPPORT_FILES] || {};
+    const existingSupportFilesSize = new Blob([JSON.stringify(supportFiles)]).size;
     supportFiles[file.name] = {
         name: file.name,
         type: file.type,
         size: file.size,
         importedAt: new Date().toISOString(),
-        buffer: Array.from(new Uint8Array(await file.arrayBuffer()))
+        buffer: Array.from(new Uint8Array(buffer))
     };
-    
+
+    const replacementSize = new Blob([JSON.stringify(supportFiles)]).size -
+        existingSupportFilesSize;
+    if (replacementSize > remaining){
+        alert("Not enough storage space.\n\n" +"Please remove unused support files.");
+        return false;
+    }
+
     await chrome.storage.local.set({[STORAGE_KEYS.SUPPORT_FILES]:supportFiles});
     console.log("[SUPPORT FILE] Imported:",file.name);
     return true;
@@ -165,15 +168,6 @@ async function uploadFile(fileInput,file){
     ];
     const inputIndex = allInputs.indexOf(fileInput);
     const buffer = await file.arrayBuffer();
-    // window.postMessage({
-    //     type:"QA_UPLOAD_FILE",
-    //     inputIndex,
-    //     fileName:file.name,
-    //     fileType:file.type,
-    //     fileBytes:[
-    //         ...new Uint8Array(buffer)
-    //     ]
-    // },"*");
     return new Promise(resolve => {
         const handler = event => {
             if (

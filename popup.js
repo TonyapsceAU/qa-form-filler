@@ -74,9 +74,17 @@ document.addEventListener(
                 for (const file of files){
                     if (file.size >MAX_FILE_SIZE_MB * 1024 * 1024){
                         alert(`"${file.name}" is too large.\n\n` +`Maximum supported size: ${MAX_FILE_SIZE_MB} MB`);
+                        e.target.value = "";
                         return;
                     }
                     if (file.name.endsWith(".xlsx") ||file.name.endsWith(".xls")){
+                        const existingTestCases = await getTestCases();
+                        if (
+                            existingTestCases[file.name] &&
+                            !confirm(`A test case named "${file.name}" already exists.\n\nReplace it with this file?`)
+                        ){
+                            continue;
+                        }
                         const buffer = await file.arrayBuffer();
                         const workbook = XLSX.read(buffer);
                         loadedImportRows = workbook.SheetNames.map(
@@ -88,28 +96,37 @@ document.addEventListener(
                         await saveTestCase(loadedFileName,loadedImportRows);
                         importedTestCases++;
                     }else{
-                        console.log("saveSupportFile");
+                        const existingSupportFiles = await getSupportFiles();
+                        if (
+                            existingSupportFiles[file.name] &&
+                            !confirm(`A support file named "${file.name}" already exists.\n\nReplace it with this file?`)
+                        ){
+                            continue;
+                        }
                         const imported = await saveSupportFile(file);
                         if (imported){
                             importedSupportFiles++;
                         }
                     }
                 }
-                localStorage.setItem("loadedFile",loadedFileName);
+                if (importedTestCases){
+                    localStorage.setItem("loadedFile",loadedFileName);
+                }
                 
                 // await debugStorage();
                 await renderTestCaseList();
                 await renderSupportFileList();
-                await renderImportInfo(`
-                    <div class="infoBox">
-                        📁 Imported Test Cases: <b>${importedTestCases}</b>
-                        <br>
-                        📄 Support Files: <b>${importedSupportFiles}</b>
-                        <br>
-                        Last Loaded:
-                        <b>${loadedFileName}</b>
-                    </div>
-                `);
+                if (importedTestCases || importedSupportFiles){
+                    await renderImportInfo(`
+                        <div class="infoBox">
+                            📁 Imported Test Cases: <b>${importedTestCases}</b>
+                            <br>
+                            📄 Support Files: <b>${importedSupportFiles}</b>
+                            ${importedTestCases ? `<br>Last Loaded:<b>${loadedFileName}</b>` : ""}
+                        </div>
+                    `);
+                }
+                e.target.value = "";
             }
         );
 
