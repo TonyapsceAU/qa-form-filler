@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v2.0.4 - Commit Ant Select fields by role
+
+### Fixed
+
+- Detect searchable Ant Select inputs by their class and combobox role, including form-specific input IDs.
+- Wait until the selected item displays the requested value before filling the next field.
+
 ## v2.0.3 - Confirm duplicate file replacement
 
 ### Improved

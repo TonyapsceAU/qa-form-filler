@@ -69,12 +69,6 @@ If storage becomes full:
 - Delete unused Support Files.
 - Re-import required files.
 
-### Updating Test Cases
-
-If the Excel file has changed:
-
-1. Delete the existing Test Case.
-2. Import the updated Excel file again.
 
 ### Support Files
 

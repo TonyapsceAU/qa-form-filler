@@ -251,11 +251,12 @@ async function fillAllVisibleFields(importRows){
                 continue;
             }
 
-            // Readonly Ant Select 處理邏輯（支援虛擬列表自動滾動尋找）
-            const isReadonlyAntSelect = 
+            const isSearchableAntSelect =
                 fieldElement.classList.contains("ant-select-selection-search-input") &&
-                fieldElement.getAttribute("role") === "combobox" &&
-                fieldElement.readOnly;
+                fieldElement.getAttribute("role") === "combobox";
+
+            // Readonly Ant Select 處理邏輯（支援虛擬列表自動滾動尋找）
+            const isReadonlyAntSelect = isSearchableAntSelect && fieldElement.readOnly;
 
             if (isReadonlyAntSelect) {
                 const selectContainer = fieldElement.closest(".ant-select");
@@ -321,7 +322,7 @@ async function fillAllVisibleFields(importRows){
             }
 
             // Searchable Select
-            if (fieldElement.id?.startsWith("rc_select_")){
+            if (isSearchableAntSelect){
                 await fillSearchableAntSelect(fieldElement,value);
                 continue;
             }
@@ -423,17 +424,11 @@ async function fillSearchableAntSelect(fieldElement,value){
     option.dispatchEvent(new MouseEvent("click",{bubbles:true}));
 
     const isCommitted = () => {
-        const selectedItem = [...select.querySelectorAll(".ant-select-selection-item")]
+        return [...select.querySelectorAll(".ant-select-selection-item")]
             .some(item =>
                 (item.getAttribute("title") || item.textContent).trim().toLocaleLowerCase() ===
                 normalizedTarget
             );
-        const activeDropdown = getDropdown();
-        const dropdownClosed = !activeDropdown ||
-            activeDropdown.classList.contains("ant-select-dropdown-hidden") ||
-            activeDropdown.getAttribute("aria-hidden") === "true" ||
-            fieldElement.getAttribute("aria-expanded") === "false";
-        return selectedItem || dropdownClosed;
     };
 
     for (let attempt = 0; attempt < 10 && !isCommitted(); attempt++){
