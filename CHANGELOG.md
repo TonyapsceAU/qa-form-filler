@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v2.0.5 - Export custom-upload filenames
+
+### Fixed
+
+- Read uploaded filenames from custom file-upload widgets when their native file input no longer contains the selected file.
+
 ## v2.0.4 - Commit Ant Select fields by role
 
 ### Fixed

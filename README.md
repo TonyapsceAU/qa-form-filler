@@ -72,8 +72,6 @@ Chrome extension for exporting APWMS forms, managing Excel-based test cases, sup
 See [CHANGELOG.md](CHANGELOG.md).
 
 ## Known Bug:
-JRSN :
-    endorese page : Qb
 
 ## road map
-    reduce error/warning 
+    reduce warning 

@@ -52,8 +52,22 @@ function getFieldValue(fieldElement){
         return fieldElement.innerText.trim();
     }
     if (fieldElement.type === "file"){
-        return [...(fieldElement.files || [])]
+        const selectedFiles = [...(fieldElement.files || [])]
             .map(file => file.name)
+            .join("\n");
+        if (selectedFiles){
+            return selectedFiles;
+        }
+
+        const uploadContainer = fieldElement.closest(".single-file-upload-container");
+        return [...(uploadContainer?.querySelectorAll(
+            ".single-file-upload-file-name, .ant-upload-list-item-name"
+        ) || [])]
+            .map(fileNameElement =>
+                fileNameElement.getAttribute("title")?.trim() ||
+                fileNameElement.textContent?.trim()
+            )
+            .filter(Boolean)
             .join("\n");
     }
     if (fieldElement.tagName === "SELECT"){
