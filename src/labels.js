@@ -10,12 +10,12 @@ function getGroupLabel(fieldElement){
     const groupElement  = fieldElement.closest(".webform-main-question");
     if (!groupElement) {
         return "";
-        const labels = [...document.querySelectorAll('div[style*="margin-bottom: 4px"] strong')]
-            .map(element =>element.innerText?.trim())
-            .filter(text =>/^\d+\./.test(text));
-        console.log(fieldElement);
-        console.log("[LABEL]","New Form Groups:",labels);
-        return labels[0].indexOf(fieldElement) || "";
+        // const labels = [...document.querySelectorAll('div[style*="margin-bottom: 4px"] strong')]
+        //     .map(element =>element.innerText?.trim())
+        //     .filter(text =>/^\d+\./.test(text));
+        // console.log(fieldElement);
+        // console.log("[LABEL]","New Form Groups:",labels);
+        // return labels[0].indexOf(fieldElement) || "";
     }else{
         const labelCandidates = Array
             .from(groupElement.querySelectorAll("*"))

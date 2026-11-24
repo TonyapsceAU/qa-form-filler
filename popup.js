@@ -191,7 +191,7 @@ async function sendMessageToTab(message,tabId){
         };
     }catch(error){
         const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error("[POPUP] Action failed",{action: message.action,error});
+        console.log("[POPUP] Action failed",{action: message.action,error});
         if (/could not establish connection|receiving end does not exist/i.test(errorMessage)){
             alert("The extension cannot connect to this page.\n\nRefresh the page, then reopen the extension and try again.");
         }else{

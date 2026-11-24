@@ -1,4 +1,4 @@
-console.log("QA Form Filler Loaded");
+console.log("[Init] QA Form Filler Loaded");
 injectPageBridge();
 chrome.runtime.onMessage.addListener(
     (request,_sender,sendResponse) => {
@@ -56,5 +56,5 @@ function injectPageBridge(){
     script.src = chrome.runtime.getURL("src/pageBridge.js");
     document.documentElement.appendChild(script);
     script.remove();
-    console.log("[QA] Page Bridge Injected");
+    console.log("[Init] Page Bridge Injected");
 }

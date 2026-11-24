@@ -147,12 +147,14 @@ async function clickMenuButton(){
 }
 
 async function confirmPageChange(){
+    //conferm change
     const saveButton = [...document.querySelectorAll("button")]
         .find(button => button.textContent.trim() === "Save and continue");
     if (!saveButton){
         return;
     }
     saveButton.click();
+    //conferm save
     const startTime = Date.now();
     while(Date.now() - startTime < 10000){
         const okButton = [...document.querySelectorAll("button")]

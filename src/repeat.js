@@ -4,10 +4,10 @@
 // 讀取「Remove row N」標籤，或依相同子群組的列位置計算。
 // 無法辨識或找不到對應欄位時，回傳空群組與空序號。
 function getKeywordRepeatInfo(fieldData){
-    // console.log(fieldData);
-    if(fieldData.questionNo==160){
-        console.log("Found field with questionNo 160");
-    }
+    if(DEBUG.REPEAT){console.log(fieldData);}
+    // if(fieldData.questionNo==160){
+    //     console.log("Found field with questionNo 160");
+    // }
     const fieldElement = fieldData?.fieldElement ||
         (fieldData?.nodeType === 1 ? fieldData : null);
     const fieldName = fieldData?.fieldName ||
@@ -38,8 +38,7 @@ function getKeywordRepeatInfo(fieldData){
         };
     }
 
-    const keywordField = fieldElement ||
-        getIndexedFields().find(element => element.name === fieldName);
+    const keywordField = fieldElement || getIndexedFields().find(element => element.name === fieldName);
     if (!keywordField){
         return {repeatGroup: "",repeatSection: "",repeatList: "",repeatIndex: ""};
     }
@@ -277,7 +276,7 @@ function getCurrentRepeatCounts(){
                 repeatInfo.repeatIndex
             );
         });
-    // console.log("[REPEAT] Current Counts",repeatCounts);
+    if(DEBUG.REPEAT){console.log("[REPEAT] Current Counts",repeatCounts);}
     return repeatCounts;
 }
 
@@ -592,7 +591,7 @@ function findRemoveButton2(repeatGroup){
         }
         
         const containerElement = fieldElement.closest("div[style*='margin-bottom']") || fieldElement.closest(".ant-col")?.parentElement;
-        // console.log("containerElement",containerElement);
+        if(DEBUG.REPEAT){console.log("containerElement",containerElement);}
         if (!containerElement){
             const fallbackContainer = fieldElement.closest("div[style*='display: flex']") || fieldElement.parentElement;
             if (!fallbackContainer) return null;
@@ -657,7 +656,7 @@ async function removeExtraRepeatSections(importRows){
                 `Removing ${label}: ${beforeCount - requiredCount} extra row(s) left`
             );
             const removeButton = findRemoveButton(repeatGroup, repeatSection, repeatList);
-            // console.log(removeButton)
+            if(DEBUG.REPEAT){console.log("removeButton",removeButton);}
             if (!removeButton){
                 console.warn("[WARN] Cannot find remove button",repeatGroup);
                 break;
@@ -685,7 +684,6 @@ async function removeExtraRepeatSections(importRows){
                 progressTotal,
                 `Removed ${label}: ${Math.max(0,nextCount - requiredCount)} extra row(s) left`
             );
-            // console.log("remove extra");
         }
 
         console.log(`Removed ${removedCount} from ${repeatGroup}`);

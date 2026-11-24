@@ -1,5 +1,5 @@
 (function(){
-console.log("[QA Bridge] Loaded");
+console.log("[Init Bridge] Loaded");
 window.addEventListener("message",
     async event => {
         if (event.source !== window ||event.data?.type !== "QA_UPLOAD_FILE"){
@@ -7,7 +7,7 @@ window.addEventListener("message",
         }
 
         try{
-            console.log("[QA Bridge] Upload Request",event.data);
+            console.log("[Init Bridge] Upload Request",event.data);
             const file = new File(
                 [new Uint8Array(event.data.fileBytes)],
                 event.data.fileName,
@@ -15,15 +15,15 @@ window.addEventListener("message",
             );
             const inputs = [...document.querySelectorAll('input[type="file"]')];
             const input =inputs[event.data.inputIndex];
-            console.log("[QA Bridge] Input Index:",event.data.inputIndex);
-            console.log("[QA Bridge] Input:",input);
+            console.log("[Init Bridge] Input Index:",event.data.inputIndex);
+            console.log("[Init Bridge] Input:",input);
             if (!input){
                 throw new Error("File input not found.");
             }
 
             const reactKey =Object.keys(input).find(key =>key.includes("__reactProps"));
 
-            console.log("[QA Bridge] React Key:",reactKey);
+            console.log("[Init Bridge] React Key:",reactKey);
 
             if (!reactKey){
                 throw new Error("React props not found.");
@@ -37,7 +37,7 @@ window.addEventListener("message",
                 currentTarget: input
             });
 
-            console.log("[QA Bridge] Upload Triggered");
+            console.log("[Init Bridge] Upload Triggered");
             window.postMessage({
                 type:"QA_UPLOAD_COMPLETE",
                 inputIndex:event.data.inputIndex,

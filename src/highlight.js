@@ -34,7 +34,6 @@ function enableHighlightMode(){
         marker.style.fontWeight = "bold";
         marker.className = "qa-highlight-marker";
         fieldElement.parentNode?.insertBefore(marker,fieldElement);
-        // marker.textContent = `[${index}] ${fieldElement.tagName}, ${label}`;
         marker.textContent = `[${index}]`;
         fieldElement.setAttribute(
             "placeholder",

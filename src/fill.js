@@ -6,7 +6,7 @@ async function fillAll(importRows,fileName){
     console.groupCollapsed("[NAVIGATION]");
     showProgressOverlay("Navigating to form...");
     try{
-        await new Promise(resolve => setTimeout(resolve,50));
+        // await new Promise(resolve => setTimeout(resolve,50));
         const menuButton = findMenuButton();
         if(menuButton){//menu button only apper outside
             if(DEBUG.EXPORT){console.log(menuButton);}
@@ -77,7 +77,6 @@ async function fillPage(importRows,fileName){
     await new Promise(resolve =>setTimeout(resolve,50));
     try{
         await fillImportedRows(importRows[0].importRows,fileName);
-                
         await new Promise(resolve =>setTimeout(resolve,50));
         console.log("[IMPORT] Complete",{
             rows:importRows.length,
@@ -89,7 +88,7 @@ async function fillPage(importRows,fileName){
 
         //Validation Check
         if(DEBUG.ValidationCheck){
-            const report = validateImportStructure(importRows);
+            const report = validateImportStructure(importRows[0].importRows);
             const totalIssues =
                 report.nameMismatches.length +
                 report.typeMismatches.length +
@@ -118,24 +117,21 @@ async function fillPage(importRows,fileName){
 }
 
 async function fillImportedRows(importRows,fileName){
-    // console.groupCollapsed("[FILL] Imported Rows type",importRows);
     // Synchronization
     console.groupCollapsed("[REPEAT] Synchronization");
 
     // Synchronization - Expantion
-    // console.log("[REPEAT] Before",getCurrentRepeatCounts());
+    if(DEBUG.REPEAT){console.log("[REPEAT] Before",getCurrentRepeatCounts());}
     await expandRepeatSections(importRows);
     await new Promise(resolve =>setTimeout(resolve,2000));
-    // console.log("[REPEAT] After Expansion",getCurrentRepeatCounts());
-
+    if(DEBUG.REPEAT){console.log("[REPEAT] After Expansion",getCurrentRepeatCounts());}
     // return;
 
     // Synchronization - Removeal
     await removeExtraRepeatSections(importRows);
     await new Promise(resolve =>setTimeout(resolve,1000));
-    // console.log("[REPEAT] After Csleanup",getCurrentRepeatCounts());
+    if(DEBUG.REPEAT){console.log("[REPEAT] After Csleanup",getCurrentRepeatCounts());}
     console.groupEnd();
-
     // return ;
     
     updateImportProgress(0,importRows.length,"Preparing Field Import...");
@@ -144,19 +140,19 @@ async function fillImportedRows(importRows,fileName){
         fields: getIndexedFields().length,repeatCounts:getCurrentRepeatCounts()
     });
 
-    return ;
-
-    const initialFieldCount = getIndexedFields().length;
-    const maxfillPasses = Math.max(0,importRows.length - initialFieldCount);
-    console.log("[FILL] Planning",{importRows: importRows.length,fields: initialFieldCount,maxfillPasses});
-    let passIndex=0;
-    while(passIndex<(Math.max(0,importRows.length - getIndexedFields().length))){//Expansion Passes + Stabilization + Sync 
-        await fillAllVisibleFields(importRows);
-        passIndex++
-        console.log(`[FILL] Pass ${passIndex}`,{
-            fields:getIndexedFields().length,
-            remaining:Math.max(0,importRows.length - getIndexedFields().length)
-        });
+    if(MultiPass){
+        const initialFieldCount = getIndexedFields().length;
+        const maxfillPasses = Math.max(0,importRows.length - initialFieldCount);
+        console.log("[FILL] Planning",{importRows: importRows.length,fields: initialFieldCount,maxfillPasses});
+        let passIndex=0;
+        while(passIndex<(Math.max(0,importRows.length - getIndexedFields().length))){//Expansion Passes + Stabilization + Sync 
+            await fillAllVisibleFields(importRows);
+            passIndex++
+            console.log(`[FILL] Pass ${passIndex}`,{
+                fields:getIndexedFields().length,
+                remaining:Math.max(0,importRows.length - getIndexedFields().length)
+            });
+        }
     }
 }
 
@@ -177,8 +173,7 @@ async function fillAllVisibleFields(importRows){
                 importRow,
                 fieldElements,
                 repeatFieldPositions.get(importRow)
-            ) ||
-                fieldElements[fieldIndex];
+            ) || fieldElements[fieldIndex];
             if (!fieldElement){
                 console.warn("[FILL] Hidden Field",{rowIndex,fieldIndex});
                 break;
@@ -215,8 +210,7 @@ async function fillAllVisibleFields(importRows){
                 }catch(error){
                     console.error("Upload failed:",error);
                 }
-                console.log("files length",fieldElement.files.length);
-                console.log(fieldElement.files[0]);        
+                console.log("files length",fieldElement.files.length);       
                 console.groupEnd();
                 continue;
             }

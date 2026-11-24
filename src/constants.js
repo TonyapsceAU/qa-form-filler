@@ -96,6 +96,7 @@ const DEBUG = {
     KEYWORDS: false,
     ValidationCheck: false
 };
+const MultiPass = false;
 
 
 // Runtime State
