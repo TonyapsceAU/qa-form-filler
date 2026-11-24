@@ -60,7 +60,7 @@ async function fillAll(importRows,fileName){
                 repeatCounts:getCurrentRepeatCounts(),
                 durationMs: Date.now() - startTime
             });
-            alert(`Excel Import Complete (${importRows.length} import Rows)`);
+            alert(`Excel Import Complete (${importRows.length} import Page)`);
         }
     }finally{
         console.groupEnd();
