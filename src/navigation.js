@@ -1,6 +1,7 @@
 function getAllPages(navigationInfo){
     console.groupCollapsed("[NAVIGATION]","getAllPages");
     const pages = [];
+    if(DEBUG.NAVIGATION){console.log("navigationInfo:",navigationInfo);}
     if(navigationInfo.type==="structured"){
         navigationInfo.navigation
             .querySelectorAll("button")
@@ -23,14 +24,16 @@ function getAllPages(navigationInfo){
         });
     }else if (navigationInfo.type === "section"){
         const container = document.querySelectorAll('div[style*="justify-content: space-between"]');
+        if(DEBUG.NAVIGATION){console.log("container:",container);}
         container.forEach(item => {
-            const partElement = [...item.querySelectorAll("*")].find(element =>/^Part\s+/i.test(element.textContent.trim()));
+            const titleElement = item.firstElementChild?.querySelector("div");
             const button = item.querySelector("button");
-            if (!partElement ||!button){
+            const part = titleElement?.textContent.trim();
+            if (!part || !button){
                 return;
             }
             pages.push({
-                part: partElement.textContent.trim(),
+                part,
                 title: button.textContent.trim(),
                 button
             });

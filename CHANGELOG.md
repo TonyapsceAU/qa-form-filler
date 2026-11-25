@@ -4,8 +4,13 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
-## v2.0.6 - Clean
+## v2.0.7 - Include Annex section pages
 
+### Fixed
+
+- Detect section menu entries by their displayed heading instead of requiring a "Part" prefix, so Annex pages are included in navigation.
+
+## v2.0.6 - Clean
 
 ## v2.0.5 - Export custom-upload filenames
 
