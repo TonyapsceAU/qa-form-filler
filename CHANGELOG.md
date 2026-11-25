@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## v2.0.6 - Clean
+
+
 ## v2.0.5 - Export custom-upload filenames
 
 ### Fixed
